@@ -1,0 +1,88 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Tests\TestCase;
+
+class {{ class }} extends TestCase
+{
+    /**
+     * @test
+     */
+    public function user_can_get_all()
+    {
+        $this->actingAsAdmin();
+
+        $response = $this->get('api/', $this->apiHeaders());
+
+        $this->getResponse($response);
+    }
+
+    /**
+     * @test
+     */
+    public function user_can_get()
+    {
+        $this->actingAsAdmin();
+
+        $data = [
+
+        ];
+
+        $response = $this->post('api/', $data, $this->apiHeaders());
+
+        $this->getResponse($response);
+    }
+
+
+    /**
+     * @test
+     */
+    public function user_can_create()
+    {
+        $this->actingAsAdmin();
+
+        $data = [
+
+        ];
+
+        $response = $this->post('api/', $data, $this->apiHeaders());
+
+        $this->getResponse($response, 201);
+    }
+
+    /**
+     * @test
+     */
+    public function user_can_update()
+    {
+        $this->actingAsAdmin();
+
+        $data = [
+
+        ];
+
+        $response = $this->put('api/', $data, $this->apiHeaders());
+
+        $this->getResponse($response, 201);
+    }
+
+
+    /**
+     * @test
+     */
+    public function user_can_delete()
+    {
+        $this->actingAsAdmin();
+
+        $data = [
+
+        ];
+
+        $response = $this->delete('api/', $data, $this->apiHeaders());
+
+        $this->getResponse($response);
+    }
+}

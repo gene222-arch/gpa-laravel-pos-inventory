@@ -1,0 +1,102 @@
+<?php
+
+namespace {{ namespace }};
+
+use {{ rootNamespace }}Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Traits\ApiResponser;
+
+class {{ class }} extends Controller
+{
+    use ApiResponser;
+    protected $model;
+
+    public function __construct(Model $model)
+    {
+        $this->model = $model;
+    }
+
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $this->authorize('viewAny', $this->model);
+
+        return (!true)
+            ? $this->serverError()
+            : $this->success('Success');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $this->authorize('create', $this->model);
+
+        return (!true)
+            ? $this->serverError()
+            : $this->success([],
+                'Success',
+                201);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $this->authorize('view', $this->model);
+
+        return (!true)
+            ? $this->serverError()
+            : $this->success([],
+                'Success',
+                201);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        $this->authorize('update', $this->model);
+
+        return (!true)
+            ? $this->serverError()
+            : $this->success([],
+                'Success',
+                201);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $this->authorize('delete', $this->model);
+
+        return (!true)
+            ? $this->serverError()
+            : $this->success([],
+                'Success',
+                200);
+    }
+}
