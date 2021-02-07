@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Traits\ApiResponser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 
@@ -19,10 +21,16 @@ class ForgotPasswordController extends Controller
     |
     */
 
-    use SendsPasswordResetEmails;
+    use SendsPasswordResetEmails, ApiResponser;
 
-    protected function guard()
+    protected function sendResetResponse(Request $request, $response)
     {
-        return Auth::guard('api');
+        return $this->success([],
+        trans($response));
+    }
+
+    protected function sendResetFailedResponse(Request $request, $response)
+    {
+        return $this->error(trans($response), 422);
     }
 }

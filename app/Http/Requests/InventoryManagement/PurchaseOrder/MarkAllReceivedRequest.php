@@ -15,8 +15,7 @@ class MarkAllReceivedRequest extends BaseRequest
     public function rules()
     {
         return [
-            'purchase_order_id' => ['required', 'integer', 'exists:purchase_order,id'],
-            'product_ids.*' => ['required', 'integer', 'exists:products,id']
+            'purchase_order_id' => ['required', 'integer', 'exists:purchase_order,id']
         ];
     }
 }

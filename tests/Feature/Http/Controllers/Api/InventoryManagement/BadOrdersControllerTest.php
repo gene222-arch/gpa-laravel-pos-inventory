@@ -40,7 +40,7 @@ class BadOrdersControllerTest extends TestCase
 
 
     /**
-     * * test
+     * @test
      */
     public function user_can_create_bad_orders()
     {
@@ -59,7 +59,7 @@ class BadOrdersControllerTest extends TestCase
                     'amount' => 2000.00
                 ],
                 [
-                    'purchase_order_details_id' => 6,
+                    'purchase_order_details_id' => 2,
                     'product_id' => 20,
                     'defect' => 'Damaged',
                     'quantity' => 10,
@@ -72,11 +72,14 @@ class BadOrdersControllerTest extends TestCase
 
         $response = $this->post('api/bad-orders', $data, $this->apiHeaders());
 
+        dd(json_decode($response->getContent()));
+
         $this->getResponse($response, 201);
     }
 
+
     /**
-     * @test
+     * test
      */
     public function user_can_update_bad_orders()
     {

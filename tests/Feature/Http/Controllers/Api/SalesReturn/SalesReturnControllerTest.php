@@ -26,7 +26,7 @@ class SalesReturnControllerTest extends TestCase
         $this->actingAsAdmin();
 
         $data = [
-
+            'sales_return_id' => 1
         ];
 
         $response = $this->post('api/sales-return', $data, $this->apiHeaders());
@@ -36,32 +36,26 @@ class SalesReturnControllerTest extends TestCase
 
 
     /**
-     * test
+     * @test
      */
     public function user_can_create_sales_return()
     {
         $this->actingAsAdmin();
 
         $data = [
-            'invoice_id' => 1,
-            'salesReturnDetails' => [
+            'pos_id' => 1,
+            'posSalesReturnDetails' => [
                 [
-                    'invoice_details_id' => 1,
+                    'pos_details_id' => 1,
                     'product_id' => 19,
                     'defect' => 'Slightly Damaged',
-                    'quantity' => 5,
-                    'price' => 200.00,
-                    'amount' => 10.00,
+                    'quantity' => 22,
+                    'price' => 20.00,
                     'unit_of_measurement' => 'pcs',
-                ],
-                [
-                    'invoice_details_id' => 2,
-                    'product_id' => 20,
-                    'defect' => 'Slightly Damaged',
-                    'quantity' => 5,
-                    'price' => 200.00,
-                    'amount' => 10.00,
-                    'unit_of_measurement' => 'pcs',
+                    'sub_total' => 330.00,
+                    'discount' => 10.00,
+                    'tax' => 39.60,
+                    'total' => 369.60
                 ],
             ]
         ];
@@ -81,26 +75,32 @@ class SalesReturnControllerTest extends TestCase
         $this->actingAsAdmin();
 
         $data = [
-            'sales_return_id' => 1,
-            'invoice_id' => 1,
-            'salesReturnDetails' => [
+            'pos_sales_return_id' => 1,
+            'pos_id' => 1,
+            'posSalesReturnDetails' => [
                 [
-                    'invoice_details_id' => 1,
+                    'pos_details_id' => 1,
                     'product_id' => 19,
                     'defect' => 'Slightly Damaged',
                     'quantity' => 5,
                     'price' => 200.00,
-                    'amount' => 10.00,
                     'unit_of_measurement' => 'pcs',
+                    'sub_total' => 1,
+                    'discount' => 10.00,
+                    'tax' => 2.00,
+                    'total' => 20.00
                 ],
                 [
-                    'invoice_details_id' => 1,
+                    'pos_details_id' => 1,
                     'product_id' => 20,
                     'defect' => 'Slightly Damaged',
                     'quantity' => 5,
                     'price' => 200.00,
-                    'amount' => 10.00,
                     'unit_of_measurement' => 'pcs',
+                    'sub_total' => 1,
+                    'discount' => 10.00,
+                    'tax' => 2.00,
+                    'total' => 20.00
                 ],
             ]
         ];
@@ -128,14 +128,14 @@ class SalesReturnControllerTest extends TestCase
     }
 
     /**
-     * @test
+     * test
      */
     public function user_can_remove_sales_return()
     {
         $this->actingAsAdmin();
 
         $data = [
-            'sales_return_ids' => [1]
+            'pos_sales_return_ids' => [1]
         ];
 
         $response = $this->delete('api/sales-return', $data, $this->apiHeaders());
@@ -154,7 +154,7 @@ class SalesReturnControllerTest extends TestCase
         $this->actingAsAdmin();
 
         $data = [
-            'sales_return_id' => 1,
+            'pos_sales_return_id' => 1,
             'product_ids' => [
                 19,
                 20

@@ -11,21 +11,26 @@ class SalesReturn extends Model
     use HasFactory, SalesReturnServices;
 
 
-    protected $guarded = [];
+    protected $fillable = [
+        'pos_id',
+    ];
 
-    public function salesReturnDetails()
+    public function posSalesReturnDetails()
     {
-        return $this->belongsToMany(\App\Models\Invoice::class,
+        return $this->belongsToMany(\App\Models\Pos::class,
             'sales_return_details',
             'sales_return_id',
-            'invoice_details_id')
+            'pos_details_id')
             ->withPivot([
                 'product_id',
                 'defect',
                 'quantity',
                 'price',
-                'amount',
                 'unit_of_measurement',
+                'sub_total',
+                'discount',
+                'tax',
+                'total'
             ])
             ->withTimestamps();
     }
@@ -39,7 +44,7 @@ class SalesReturn extends Model
     public function uniqueKeys(): array
     {
         return [
-            'invoice_details_id',
+            'pos_details_id',
             'product_id'
         ];
     }
@@ -53,13 +58,16 @@ class SalesReturn extends Model
     public function massAssignableKeys(): array
     {
         return [
-            'invoice_details_id',
+            'pos_details_id',
             'product_id',
             'defect',
             'quantity',
             'price',
-            'amount',
             'unit_of_measurement',
+            'sub_total',
+            'discount',
+            'tax',
+            'total',
         ];
     }
 

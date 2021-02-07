@@ -15,10 +15,13 @@ class ProcessPaymentRequest extends BaseRequest
     {
         return [
             'customer_id' => ['required', 'integer', 'exists:customers,id'],
+            'customer_email' => ['nullable', 'email'],
+            'customer_name' => ['nullable', 'string'],
             'payment_method' => ['required', 'string', 'in:cash,credit,invoice'],
-            'cash' => ['nullable', 'integer'],
+            'should_mail' => ['required', 'boolean'],
+            'cash' => ['nullable', 'numeric'],
             'shipping_fee' => ['nullable', 'integer'],
-            'numberOfDays' => ['nullable', 'integer']
+            'number_of_days' => ['nullable', 'integer'],
         ];
     }
 }

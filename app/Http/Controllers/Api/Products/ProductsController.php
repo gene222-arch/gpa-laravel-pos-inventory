@@ -37,7 +37,7 @@ class ProductsController extends Controller
     {
         $this->authorize('view', $this->product);
 
-        return $this->success($this->product->loadStocks(),
+        return $this->success($this->product->loadProductsWithStocks(),
             'Fetched Successfully',
             200
         );

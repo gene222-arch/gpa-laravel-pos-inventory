@@ -2,31 +2,36 @@
 
 namespace App\Traits\InventoryManagement\Stocks;
 
+use App\Models\User;
 use App\Models\Stock;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use Illuminate\Support\Facades\DB;
+use App\Jobs\QueueLowStockNotification;
 use App\Traits\InventoryManagement\Stocks\StocksHelper;
-use App\Traits\InventoryManagement\StockReceived\StockReceivedServices;
-use App\Traits\InventoryManagement\StockReceived\StockReceivedDetailsServices;
+use App\Traits\PDF\PDFGeneratorServices;
 
 trait StockServices
 {
 
-    use StocksHelper;
+    use StocksHelper, PDFGeneratorServices;
 
 
     /**
      * Undocumented function
      *
      * @param integer $productId
-     * @return integer
+     * @return mixed
      */
-    public function getRemainingStockOf(int $productId): int
+    public function getRemainingStockOf(int $productId): mixed
     {
-        return Stock::where('product_id', '=', $productId)
+        $remainingStock = Stock::where('product_id', '=', $productId)
                         ->first()
                         ->in_stock;
+
+        return (!$remainingStock)
+            ? throw new \Exception("Product does not exist")
+            : $remainingStock;
     }
 
 
@@ -143,10 +148,7 @@ trait StockServices
             'stock_out' => DB::raw('stocks.stock_out + values(bad_order_stock)')
         ];
 
-        return \boolval(DB::table('stocks')
-                                ->upsert($data,
-                                $uniqueBy,
-                                $update));
+        return \boolval(DB::table('stocks')->upsert($data, $uniqueBy, $update));
     }
 
 
@@ -191,7 +193,7 @@ trait StockServices
     /**
      * Update multiple records of ['in_stock', 'stock_out'] fields from stocks table
      *
-     * @param array $stockDetails
+     * @param Collection $stockDetails
      * @return boolean
      */
     public function stockOutMany($stockDetails): bool
@@ -216,11 +218,13 @@ trait StockServices
             'stock_out' => DB::raw('stocks.stock_out + values(stock_out)')
         ];
 
-        return \boolval(DB::table('stocks')
-                                ->upsert($data,
-                                $uniqueBy,
-                                $update)
-        );
+        $result = \boolval(DB::table('stocks')->upsert($data, $uniqueBy, $update));
+
+        $productIds = \prepareGetKeyInMultiArray('product_id', $stockDetails);
+
+        $this->mailOnLowStock($productIds);
+
+        return $result;
     }
 
 
@@ -319,5 +323,34 @@ trait StockServices
                                 ])
         );
     }
+
+
+
+    /**
+     * Undocumented function
+     *
+     * @param array $productId
+     * @return void
+     */
+    public function mailOnLowStock(array $productIds)
+    {
+        $products = Product::with('stock')->whereHas('stock', fn ($q) => $q->whereIn('product_id', $productIds))->get();
+
+        $products = $products->filter(fn ($p) => $p->stock->minimum_reorder_level >= $p->stock->in_stock);
+
+        if ($products)
+        {
+            $fileName = 'low-stock-' . now()->toDateString() . '-' . time() . '.pdf';
+
+            $this->generateLowStockPDF($products, $fileName);
+
+            dispatch(new QueueLowStockNotification(
+                    User::find(auth()->user()->id),
+                    $fileName
+            ))
+            ->delay(now()->addSeconds(10));
+        }
+    }
+
 
 }

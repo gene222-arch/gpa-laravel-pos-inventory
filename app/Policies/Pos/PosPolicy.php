@@ -70,6 +70,34 @@ class PosPolicy
     }
 
 
+
+    /**
+     * Determine whether the user can assign a discount.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Pos  $pos
+     * @return mixed
+     */
+    public function assignDiscount(User $user, Pos $pos)
+    {
+        return $user->hasPermissionTo('assign_discount_in_customers_order_in_pos', 'api');
+    }
+
+
+
+    /**
+     * Determine whether the user can assign a discount.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Pos  $pos
+     * @return mixed
+     */
+    public function removeDiscount(User $user, Pos $pos)
+    {
+        return $user->hasPermissionTo('remove_discount_in_customers_order_in_pos', 'api');
+    }
+
+
     /**
      * Determine whether the user can delete the model.
      *

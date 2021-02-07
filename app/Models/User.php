@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\LowStockNotification;
+use App\Notifications\PasswordResetNotification;
 use App\Traits\Admin\AdminServices;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -17,6 +19,8 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasApiTokens, HasRoles, SoftDeletes;
 
     use AdminServices;
+
+    protected $guard_name = 'api';
 
     /**
      * The attributes that are mass assignable.
@@ -52,16 +56,6 @@ class User extends Authenticatable
     ];
 
 
-    public $user;
-
-    /**
-     * Undocumented function
-     */
-    public function __construct()
-    {
-        $this->user = $this;
-    }
-
     /**
      * Create token
      *
@@ -72,14 +66,18 @@ class User extends Authenticatable
         return $this->createToken('Personal Access Token')->accessToken;
     }
 
-    public function isAdmin()
+
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
     {
-        return $this->hasRole('admin');
+        $this->notify(new PasswordResetNotification($token));
     }
 
-    public function isAdminOrManager()
-    {
-        return $this->hasAnyRole(['admin', 'manager']);
-    }
 
 }

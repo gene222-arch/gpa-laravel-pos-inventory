@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Pos;
 
+use App\Models\Stock;
 use App\Http\Requests\BaseRequest;
 
 class StoreRequest extends BaseRequest

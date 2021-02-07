@@ -13,7 +13,7 @@ class PosControllerTest extends TestCase
      */
     public function user_can_get_all_orders_in_pos()
     {
-        $this->actingAsAdmin();
+
 
         $response = $this->get('api/pos/order-lists', $this->apiHeaders());
 
@@ -26,51 +26,50 @@ class PosControllerTest extends TestCase
     /**
      * test
      */
-    public function user_can_get_customer_pos_details()
+    public function user_can_get_customer_cart_details()
     {
-        $this->actingAsAdmin();
-
         $data = [
             'customer_id' => 1
         ];
 
-        $response = $this->post('api/pos/cart', $data, $this->apiHeaders());
+        $response = $this->post('api/pos/cart-details', $data, $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
         $this->getResponse($response);
     }
 
+
     /**
      * test
      */
     public function user_can_get_customer_amount_to_pay()
     {
-        $this->actingAsAdmin();
-
         $data = [
             'customer_id' => 1
         ];
 
         $response = $this->post('api/pos/to-pay', $data, $this->apiHeaders());
 
+        dd(json_decode($response->getContent()));
+
         $this->getResponse($response);
     }
 
 
     /**
-     * @test
+     * test
      */
-    public function user_can_create_customer_orders_in_pos()
+    public function user_can_add_to_cart_in_customers_orders_in_pos()
     {
-        $this->actingAsAdmin();
-
         $data = [
             'customer_id' => 2,
-            'product_id' => 27
+            'product_id' => 23
         ];
 
         $response = $this->post('api/pos/add-to-cart', $data, $this->apiHeaders());
+
+        dd(json_decode($response->getContent()));
 
         $this->getResponse($response, 201);
     }
@@ -80,15 +79,15 @@ class PosControllerTest extends TestCase
      */
     public function user_can_update_customer_orders_quantities_in_pos()
     {
-        $this->actingAsAdmin();
-
         $data = [
-            'customer_id' => 1,
-            'product_id' => 20,
-            'quantity' => 10,
+            'customer_id' => 2,
+            'product_id' => 23,
+            'quantity' => 1000,
         ];
 
         $response = $this->put('api/pos/item-qty', $data, $this->apiHeaders());
+
+        dd(json_decode($response->getContent()));
 
         $this->getResponse($response, 201);
     }
@@ -99,33 +98,102 @@ class PosControllerTest extends TestCase
      */
     public function user_can_increment_customer_orders_quantity()
     {
-        $this->actingAsAdmin();
+
 
         $data = [
             'customer_id' => 1,
-            'product_id' => 20,
+            'product_id' => 19,
         ];
 
         $response = $this->put('api/pos/increase-item-qty', $data, $this->apiHeaders());
 
-        dd(json_decode($response->getContent()));
-
         $this->getResponse($response, 201);
     }
+
 
     /**
      * test
      */
     public function user_can_decrement_customer_orders_quantity()
     {
-        $this->actingAsAdmin();
-
         $data = [
             'customer_id' => 1,
-            'product_id' => 20,
+            'product_id' => 19,
         ];
 
         $response = $this->put('api/pos/decrease-item-qty', $data, $this->apiHeaders());
+
+        dd(json_decode($response->getContent()));
+
+        $this->getResponse($response, 201);
+    }
+
+
+    /**
+     * test
+     */
+    public function user_can_assign_a_discount_to_customers_order()
+    {
+        $data = [
+            'customer_id' => 1,
+            'product_id' => 19,
+            'discount_id' => 1
+        ];
+
+        $response = $this->put('api/pos/discount', $data, $this->apiHeaders());
+
+        $this->getResponse($response, 201);
+    }
+
+
+    /**
+     * test
+     */
+    public function user_can_assign_a_discount_to_all_customers_order()
+    {
+
+
+        $data = [
+            'customer_id' => 1,
+            'discount_id' => 1
+        ];
+
+        $response = $this->put('api/pos/discount-all', $data, $this->apiHeaders());
+
+        dd(json_decode($response->getContent()));
+
+        $this->getResponse($response, 201);
+    }
+
+
+    /**
+     * test
+     */
+    public function user_can_remove_a_discount_to_customers_order()
+    {
+        $data = [
+            'customer_id' => 1,
+            'product_id' => 19,
+        ];
+
+        $response = $this->delete('api/pos/discount', $data, $this->apiHeaders());
+
+        dd(json_decode($response->getContent()));
+
+        $this->getResponse($response, 200);
+    }
+
+
+    /**
+     * test
+     */
+    public function user_can_remove_a_discount_to_all_customers_order()
+    {
+        $data = [
+            'customer_id' => 3
+        ];
+
+        $response = $this->delete('api/pos/discount-all', $data, $this->apiHeaders());
 
         $this->getResponse($response, 201);
     }
@@ -136,11 +204,9 @@ class PosControllerTest extends TestCase
      */
     public function user_can_remove_customer_ordered_items_in_pos()
     {
-        $this->actingAsAdmin();
-
         $data = [
             'customer_id' => 1,
-            'product_id' => 20
+            'product_id' => 19
         ];
 
         $response = $this->delete('api/pos/item', $data, $this->apiHeaders());
@@ -150,19 +216,19 @@ class PosControllerTest extends TestCase
 
 
     /**
-     * test
+     * @test
      */
     public function user_can_process_customer_payment()
     {
-        $this->actingAsAdmin();
-
         $data = [
-            'customer_id' => 1,
-            'payment_method' => 'invoice',
-            'numberOfDays' => 10,
+            'customer_id' => 2,
+            'payment_method' => 'credit',
+            'should_mail' => true
         ];
 
         $response = $this->post('api/pos/process-payment', $data, $this->apiHeaders());
+
+        dd(json_decode($response->getContent()));
 
         $this->getResponse($response, 201);
     }
@@ -173,13 +239,13 @@ class PosControllerTest extends TestCase
      */
     public function user_can_cancel_customer_orders_in_pos()
     {
-        $this->actingAsAdmin();
-
         $data = [
-            'customer_id' => 2,
+            'customer_id' => 1,
         ];
 
         $response = $this->delete('api/pos/cancel-orders', $data, $this->apiHeaders());
+
+        dd(json_decode($response->getContent()));
 
         $this->getResponse($response);
     }

@@ -16,11 +16,12 @@ class PurchaseOrder extends Model
     protected $table = 'purchase_order';
 
     protected $fillable = [
+        'ordered_by',
         'supplier_id',
         'status',
         'total_ordered_quantity',
         'total_remaining_ordered_quantity',
-        'purchase_order_data',
+        'purchase_order_date',
         'expected_delivery_date'
     ];
 

@@ -19,7 +19,7 @@ class BaseRequest extends FormRequest
      */
     public function authorize()
     {
-        return auth('api')->check();
+        return auth('api')->check() === true;
     }
 
     protected function failedValidation(Validator $validator)

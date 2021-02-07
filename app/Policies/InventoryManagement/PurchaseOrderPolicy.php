@@ -111,4 +111,17 @@ class PurchaseOrderPolicy
         return $user->hasPermissionTo('delete_purchase_order_per_product', 'api');
     }
 
+
+    /**
+     * Undocumented function
+     *
+     * @param User $user
+     * @param PurchaseOrder $purchaseOrder
+     * @return mixed
+     */
+    public function mailSupplier(User $user, PurchaseOrder $purchaseOrder)
+    {
+        return $user->hasPermissionTo('mail_supplier_on_purchase_order', 'api');
+    }
+
 }

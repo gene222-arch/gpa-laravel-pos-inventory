@@ -10,7 +10,11 @@ class Pos extends Model
 {
     use HasFactory, PosServices;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'cashier',
+        'customer_id',
+        'status'
+    ];
 
     protected $table = 'pos';
 
@@ -27,7 +31,10 @@ class Pos extends Model
                         'quantity',
                         'price',
                         'unit_of_measurement',
-                        'amount'
+                        'sub_total',
+                        'discount',
+                        'tax',
+                        'total'
                     ])
                     ->withTimestamps();
     }
@@ -36,6 +43,6 @@ class Pos extends Model
 
     public function posPayment()
     {
-        return $this->hasOne(\App\Models\PosPayment::class, 'pos_id');;
+        return $this->hasOne(\App\Models\PosPayment::class, 'pos_id');
     }
 }

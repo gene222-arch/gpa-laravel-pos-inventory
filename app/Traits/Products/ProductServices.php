@@ -10,6 +10,38 @@ trait ProductServices
 {
 
     /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function loadProductsWithStocks(): array
+    {
+        return DB::table('products')
+            ->join('stocks', 'stocks.product_id', '=', 'products.id')
+            ->selectRaw('
+                products.id as id,
+                stocks.supplier_id as supplier_id,
+                products.sku,
+                products.barcode,
+                products.name,
+                products.category,
+                products.sold_by,
+                products.price,
+                products.cost,
+                stocks.in_stock,
+                stocks.bad_order_stock,
+                stocks.stock_in,
+                stocks.stock_out,
+                stocks.minimum_reorder_level,
+                stocks.incoming,
+                stocks.default_purchase_costs
+            ')
+            ->get()
+            ->toArray();
+    }
+
+
+    /**
      * Eager load stocks
      *
      * @return Collection

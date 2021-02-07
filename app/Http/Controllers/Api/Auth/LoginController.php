@@ -85,7 +85,10 @@ class LoginController extends Controller
      */
     public function logout()
     {
-        $this->guard()->user()->token()->revoke();
+        $this->guard()
+            ->user()
+            ->token()
+            ->revoke();
 
         return $this->success('User Logged Out', '', 200);
     }

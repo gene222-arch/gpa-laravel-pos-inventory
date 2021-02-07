@@ -13,25 +13,51 @@ trait SalesReturnServices
     /**
      * Undocumented function
      *
-     * @param array $salesReturnDetails
-     * @return boolean
+     * @return array
      */
-    public function createRequestForm(int $invoiceId, array $salesReturnDetails): bool
+    public function loadSalesReturns(): array
+    {
+        DB::statement('SET sql_mode = "" ');
+
+        return DB::table('sales_returns')
+            ->join('pos', 'pos.id', '=', 'sales_returns.pos_id')
+            ->join('sales_return_details', 'sales_return_details.sales_return_id', '=', 'sales_returns.id')
+            ->join('customers', 'customers.id', '=', 'pos.customer_id')
+            ->selectRaw('
+                sales_returns.id as id,
+                customers.name as customer_name,
+                SUM(sales_return_details.total) as sales_return,
+                SUM(sales_return_details.quantity) as no_of_items,
+                sales_returns.created_at as returned_at
+            ')
+            ->groupBy('id')
+            ->get()
+            ->toArray();
+    }
+
+
+    /**
+     * Undocumented function
+     *
+     * @param array $salesReturnDetails
+     * @return mixed
+     */
+    public function createRequestForm(int $posId, array $salesReturnDetails): mixed
     {
         try {
-            DB::transaction(function () use($invoiceId, $salesReturnDetails)
+            DB::transaction(function () use($posId, $salesReturnDetails)
             {
                 # create `sales_return`
-                $salesReturn = $this->createSalesReturn($invoiceId);
+                $salesReturn = $this->createSalesReturnWithPos($posId);
 
                 # create `sales_return_details`
-                $salesReturn->salesReturnDetails()->attach($salesReturnDetails);
+                $salesReturn->posSalesReturnDetails()->attach($salesReturnDetails);
 
                 #update stocks
                 (new Stock())->updateBadOrderQtyOf($salesReturnDetails);
             });
         } catch (\Throwable $th) {
-            return false;
+            return $th->getMessage();
         }
         return true;
     }
@@ -40,13 +66,13 @@ trait SalesReturnServices
     /**
      * Undocumented function
      *
-     * @param integer $invoiceId
+     * @param integer $posId
      * @return \App\Models\SalesReturn
      */
-    private function createSalesReturn(int $invoiceId): SalesReturn
+    private function createSalesReturnWithPos(int $posId): SalesReturn
     {
         return SalesReturn::create([
-            'invoice_id' => $invoiceId
+            'pos_id' => $posId
         ]);
     }
 
@@ -55,20 +81,20 @@ trait SalesReturnServices
      * Undocumented function
      *
      * @param array $salesReturnDetails
-     * @return boolean
+     * @return mixed
      */
-    public function updateRequestForm(int $salesReturnId, int $invoiceId, array $salesReturnDetails): bool
+    public function updateRequestForm(int $posSalesReturnId, int $posId, array $salesReturnDetails): mixed
     {
         try {
-            DB::transaction(function () use($salesReturnId, $invoiceId, $salesReturnDetails)
+            DB::transaction(function () use($posSalesReturnId, $posId, $salesReturnDetails)
             {
                 # update `sales_return`
-                $this->updateSalesReturn($salesReturnId, $invoiceId);
+                $this->updateSalesReturn($posSalesReturnId, $posId);
 
                 # update `sales_return_details`
                 $salesReturnDetails = $this->updateSalesReturnDetails(
-                    $salesReturnId,
-                    $invoiceId,
+                    $posSalesReturnId,
+                    $posId,
                     $salesReturnDetails
                 );
 
@@ -76,8 +102,9 @@ trait SalesReturnServices
                 (new Stock())->updateBadOrderQtyOf($salesReturnDetails);
             });
         } catch (\Throwable $th) {
-            return false;
+            return $th->getMessage();
         }
+
         return true;
     }
 
@@ -86,15 +113,15 @@ trait SalesReturnServices
     /**
      * Undocumented function
      *
-     * @param integer $salesReturnId
-     * @param integer $invoiceId
+     * @param integer $posSalesReturnId
+     * @param integer $posId
      * @return boolean
      */
-    public function updateSalesReturn(int $salesReturnId, int $invoiceId): bool
+    public function updateSalesReturn(int $posSalesReturnId, int $posId): bool
     {
-        return \boolval(SalesReturn::where('id', '=', $salesReturnId)
+        return \boolval(SalesReturn::where('id', '=', $posSalesReturnId)
                                         ->update([
-                                            'invoice_id' => $invoiceId
+                                            'pos_id' => $posId
                                         ])
         );
     }
@@ -103,18 +130,18 @@ trait SalesReturnServices
     /**
      * Undocumented function
      *
-     * @param integer $salesReturnId
-     * @param integer $invoiceId
+     * @param integer $posSalesReturnId
+     * @param integer $posId
      * @param array $salesReturnDetails
      * @return mixed
      */
-    public function updateSalesReturnDetails(int $salesReturnId, int $invoiceId, array $salesReturnDetails)
+    public function updateSalesReturnDetails(int $posSalesReturnId, int $posId, array $salesReturnDetails)
     {
         $salesReturn = new SalesReturn();
 
         $salesReturnDetails = preparePrepend([
-            'sales_return_id' => $salesReturnId,
-            'invoice_details_id' => $invoiceId
+            'sales_return_id' => $posSalesReturnId,
+            'pos_details_id' => $posId
         ], $salesReturnDetails);
 
         $uniqueBy = $salesReturn->uniqueKeys();
@@ -136,26 +163,26 @@ trait SalesReturnServices
     /**
      * Undocumented function
      *
-     * @param array $salesReturnIds
+     * @param array $posSalesReturnIds
      * @return boolean
      */
-    public function deleteMany(array $salesReturnIds): bool
+    public function deleteMany(array $posSalesReturnIds): bool
     {
-        return \boolval(SalesReturn::whereIn('id', $salesReturnIds)->delete());
+        return \boolval(SalesReturn::whereIn('id', $posSalesReturnIds)->delete());
     }
 
 
     /**
      * Undocumented function
      *
-     * @param integer $salesReturnId
+     * @param integer $posSalesReturnId
      * @param array $productIds
      * @return boolean
      */
-    public function removeItems(int $salesReturnId, array $productIds): bool
+    public function removeItems(int $posSalesReturnId, array $productIds): bool
     {
-        return \boolval(SalesReturn::find($salesReturnId)
-                                            ->salesReturnDetails()
+        return \boolval(SalesReturn::find($posSalesReturnId)
+                                            ->posSalesReturnDetails()
                                             ->wherePivotIn('product_id', $productIds)
                                             ->detach()
         );

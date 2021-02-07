@@ -13,9 +13,9 @@ class PurchaseOrdersControllerTest extends TestCase
     /**
      * * test
      */
-    public function user_can_get_purchase_order()
+    public function user_can_get_purchase_orders()
     {
-        $this->actingAsAdmin();
+
 
         $response = $this->get('api/purchase-order', $this->apiHeaders());
 
@@ -31,7 +31,7 @@ class PurchaseOrdersControllerTest extends TestCase
      */
     public function user_can_get_purchase_order_detail()
     {
-        $this->actingAsAdmin();
+
 
         $data = [
             'purchase_order_id' => 4
@@ -51,7 +51,7 @@ class PurchaseOrdersControllerTest extends TestCase
      */
     public function user_can_purchase_order()
     {
-        $this->actingAsAdmin();
+
 
         $data = [
             'supplier_id' => 3,
@@ -75,6 +75,8 @@ class PurchaseOrdersControllerTest extends TestCase
 
         $response = $this->post('api/purchase-order', $data, $this->apiHeaders());
 
+        dd(json_decode($response->getContent()));
+
         $this->getResponse($response, 201);
     }
 
@@ -85,7 +87,7 @@ class PurchaseOrdersControllerTest extends TestCase
      */
     public function user_can_upsert_purchase_order()
     {
-        $this->actingAsAdmin();
+
 
         $data = [
             'purchase_order_id' => 8,
@@ -116,11 +118,50 @@ class PurchaseOrdersControllerTest extends TestCase
 
 
     /**
+     * @test
+     */
+    public function user_can_mail_supplier()
+    {
+        $data = [
+            'purchase_order_id' => 1,
+            'supplier_id' => 3,
+            'subject' => 'Subject',
+            'note' => 'Note'
+        ];
+
+        $response = $this->post('api/purchase-order/mail-supplier', $data,
+        $this->apiHeaders());
+
+        $this->getResponse($response);
+    }
+
+
+    /**
+     * test
+     */
+    public function user_can_mark_all_purchased_order_as_received()
+    {
+        $data = [
+            'purchase_order_id' => 1,
+            'product_ids' => [
+                19,
+                20
+            ]
+        ];
+
+        $response = $this->put('api/purchase-order/mark-all-as-received', $data,
+        $this->apiHeaders());
+
+        $this->getResponse($response, 201);
+    }
+
+
+    /**
      * test
      */
     public function user_can_receive_purchase_order()
     {
-        $this->actingAsAdmin();
+
 
         $data = [
             'supplier_id' => 3,
@@ -144,36 +185,13 @@ class PurchaseOrdersControllerTest extends TestCase
     }
 
 
-    /**
-     * test
-     */
-    public function user_can_mark_all_purchased_order_as_received()
-    {
-        $this->actingAsAdmin();
-
-        $data = [
-            'purchase_order_id' => 10,
-            'product_ids' => [
-                19,
-                20
-            ]
-        ];
-
-        $response = $this->put('api/purchase-order/mark-all-as-received', $data,
-        $this->apiHeaders());
-
-        dd(json_decode($response->getContent()));
-
-        $this->getResponse($response, 201);
-    }
-
 
     /**
      * test
      */
     public function user_can_delete_purchase_order()
     {
-        $this->actingAsAdmin();
+
 
         $data = [
             'purchase_order_id' => [6],
@@ -190,7 +208,7 @@ class PurchaseOrdersControllerTest extends TestCase
      */
     public function user_can_delete_purchase_order_details_product()
     {
-        $this->actingAsAdmin();
+
 
         $data = [
             'purchase_order_id' => 5,

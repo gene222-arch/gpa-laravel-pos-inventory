@@ -34,7 +34,7 @@ class BadOrdersController extends Controller
     {
         $this->authorize('viewAny', $this->badOrder);
 
-        return $this->success($this->badOrder->all(),
+        return $this->success($this->badOrder->loadBadOrdersWithDetails(),
         ''
         );
     }
@@ -72,8 +72,8 @@ class BadOrdersController extends Controller
             $request->badOrderDetails
         );
 
-        return (!$isRequestFormCreated)
-            ? $this->serverError()
+        return ($isRequestFormCreated !== true)
+            ? $this->error($isRequestFormCreated)
             : $this->success([],
             '',
             201

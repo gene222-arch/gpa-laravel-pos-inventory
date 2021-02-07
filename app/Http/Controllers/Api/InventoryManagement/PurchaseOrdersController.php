@@ -15,11 +15,12 @@ use App\Http\Requests\InventoryManagement\PurchaseOrder\DeleteRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\UpsertRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\ReceiveRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\DeleteProductsRequest;
+use App\Http\Requests\InventoryManagement\PurchaseOrder\MailRequest;
+use App\Http\Requests\InventoryManagement\PurchaseOrder\MailSupplierRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\MarkAllReceivedRequest;
 
 class PurchaseOrdersController extends Controller
 {
-
     use ApiResponser;
 
     private $purchaseOrder;
@@ -46,7 +47,7 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('viewAny', $this->purchaseOrder);
 
-        return $this->success($this->purchaseOrder->all(),
+        return $this->success($this->purchaseOrder->loadPurchaseOrders(),
         'Purchase orders fetched successfully');
     }
 
@@ -62,7 +63,8 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('view', $this->purchaseOrder);
 
-        $purchaseOrder = $this->purchaseOrder->find($request->purchase_order_id);
+        $purchaseOrder = $this->purchaseOrder
+            ->findPurchaseOrderDetails($request->purchase_order_id);
 
         return $this->success($purchaseOrder,
         'Purchase Order fetched successfully');
@@ -129,6 +131,29 @@ class PurchaseOrdersController extends Controller
         );
     }
 
+
+    /**
+     * Undocumented function
+     *
+     * @param MailSupplierRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendMailToSupplier(MailSupplierRequest $request)
+    {
+        $this->authorize('mailSupplier', $this->purchaseOrder);
+
+        $fileName = 'PO-' . now()->toDateString() . '-' . time() . '.pdf';
+
+        $this->purchaseOrder->toMailSupplier(
+            $request->purchase_order_id,
+            $request->supplier_id,
+            $request->subject,
+            $request->note,
+            $fileName
+        );
+
+        return $this->success([], 'Success');
+    }
 
 
     /**

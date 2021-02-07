@@ -2,15 +2,72 @@
 
 namespace App\Traits\InventoryManagement\PurchaseOrder;
 
+use App\Jobs\QueuePurchaseOrderNotification;
 use App\Models\Stock;
 use App\Models\PurchaseOrder;
 use App\Models\ReceivedStock;
+use App\Models\Supplier;
+use App\Traits\PDF\PDFGeneratorServices;
 use Illuminate\Support\Facades\DB;
 
 trait PurchaseOrderServices
 {
+    use PurchaseOrderDetailsServices, PurchaseOrderHelpers, PDFGeneratorServices;
 
-    use PurchaseOrderDetailsServices, PurchaseOrderHelpers;
+
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function loadPurchaseOrders(): array
+    {
+        DB::statement('SET sql_mode = "" ');
+
+        return DB::table('purchase_order')
+            ->selectRaw("
+                CONCAT('PO', purchase_order.id) as id,
+                DATE_FORMAT(purchase_order.purchase_order_date, '%M %d %Y') as purchase_date,
+                suppliers.name as supplier,
+                purchase_order.status,
+                purchase_order.total_received_quantity as received,
+                purchase_order.expected_delivery_date as expected_on,
+                SUM(purchase_order_details.amount) as total
+            ")
+            ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
+            ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
+            ->groupBy('id')
+            ->get()
+            ->toArray();
+    }
+
+
+    /**
+     * Undocumented function
+     *
+     * @param integer $purchaseOrderId
+     * @return Illuminate\Support\Collection
+     */
+    public function loadPurchaseOrderDetails(int $purchaseOrderId)
+    {
+        DB::statement('SET sql_mode = "" ');
+
+        return DB::table('purchase_order')
+            ->selectRaw("
+                products.name,
+                purchase_order_details.remaining_ordered_quantity,
+                purchase_order_details.purchase_cost,
+                purchase_order_details.amount
+            ")
+            ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
+            ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
+            ->join('products', 'products.id', '=', 'purchase_order_details.product_id')
+            ->where('purchase_order_id', '=', $purchaseOrderId)
+            ->groupBy('purchase_order_details.id')
+            ->get();
+    }
+
+
 
     /**
      * * Get record from `purchase_order_details`  via ['purchase_order_id']
@@ -44,6 +101,7 @@ trait PurchaseOrderServices
                 );
 
                 $poData = [
+                    'ordered_by' => auth()->user()->name,
                     'supplier_id' => $supplierId,
                     'total_ordered_quantity' => $totalOrderedQuantity,
                     'total_remaining_ordered_quantity' => $totalOrderedQuantity,
@@ -180,45 +238,26 @@ trait PurchaseOrderServices
 
 
     /**
-     * Receive quantity/ties of product/s
+     * Undocumented function
      *
-     * @param integer $supplierId
      * @param integer $purchaseOrderId
-     * @param array $purchaseOrderDetails
-     * @return boolean
+     * @param integer $supplierId
+     * @param string $subject
+     * @param string $note
+     * @param string $fileName
+     * @return void
      */
-    public function toReceive(int $supplierId, int $purchaseOrderId, array $purchaseOrderDetails): bool
+    public function toMailSupplier(int $purchaseOrderId, int $supplierId, string $subject, string $note, string $fileName)
     {
-        try {
-            DB::transaction(function () use($supplierId, $purchaseOrderId, $purchaseOrderDetails)
-            {
+        $this->generatePurchaseOrderPDF($purchaseOrderId, $fileName);
 
-                # Update purchase order details
-                $this->createPurchaseOrderDetails($purchaseOrderId,
-                    $purchaseOrderDetails
-                );
-
-                # insert new `received_stocks`
-                $stockReceived = (new ReceivedStock())->receiveStocks($purchaseOrderId,
-                    $supplierId
-                );
-
-                # attach `stock_received_details`
-                $stockReceived->receiveStockDetails()->attach($purchaseOrderDetails);
-
-                (new Stock())->stockIn($purchaseOrderDetails);
-
-                # Update purchase order table
-                $this->updatePurchaseOrder($purchaseOrderId);
-            });
-
-        } catch (\Throwable $th) {
-            return false;
-        }
-
-        return true;
+        dispatch(new QueuePurchaseOrderNotification(
+            Supplier::find($supplierId),
+            $subject,
+            $note,
+            $fileName
+        ));
     }
-
 
 
     /**
@@ -252,6 +291,46 @@ trait PurchaseOrderServices
 
 
                 # Update purchase order
+                $this->updatePurchaseOrder($purchaseOrderId);
+            });
+
+        } catch (\Throwable $th) {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /**
+     * Receive quantity/ties of product/s
+     *
+     * @param integer $supplierId
+     * @param integer $purchaseOrderId
+     * @param array $purchaseOrderDetails
+     * @return boolean
+     */
+    public function toReceive(int $supplierId, int $purchaseOrderId, array $purchaseOrderDetails): bool
+    {
+        try {
+            DB::transaction(function () use($supplierId, $purchaseOrderId, $purchaseOrderDetails)
+            {
+                # Update purchase order details
+                $this->createPurchaseOrderDetails($purchaseOrderId,
+                    $purchaseOrderDetails
+                );
+
+                # insert new `received_stocks`
+                $stockReceived = (new ReceivedStock())->receiveStocks($purchaseOrderId,
+                    $supplierId
+                );
+
+                # attach `stock_received_details`
+                $stockReceived->receiveStockDetails()->attach($purchaseOrderDetails);
+
+                (new Stock())->stockIn($purchaseOrderDetails);
+
+                # Update purchase order table
                 $this->updatePurchaseOrder($purchaseOrderId);
             });
 

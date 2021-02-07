@@ -10,7 +10,7 @@ use App\Http\Requests\SalesReturn\StoreRequest;
 use App\Http\Requests\SalesReturn\UpdateRequest;
 use App\Models\SalesReturn;
 use App\Traits\ApiResponser;
-use Illuminate\Http\Request;
+
 
 class SalesReturnController extends Controller
 {
@@ -33,9 +33,7 @@ class SalesReturnController extends Controller
     {
         $this->authorize('viewAny', $this->salesReturn);
 
-        return (!true)
-            ? $this->serverError()
-            : $this->success('Success');
+        return $this->success($this->salesReturn->loadSalesReturns());
     }
 
     /**
@@ -48,13 +46,13 @@ class SalesReturnController extends Controller
     {
         $this->authorize('create', $this->salesReturn);
 
-        $isSalesReturnCreated = $this->salesReturn->createRequestForm(
-            $request->invoice_id,
-            $request->salesReturnDetails
+        $result = $this->salesReturn->createRequestForm(
+            $request->pos_id,
+            $request->posSalesReturnDetails
         );
 
-        return (!$isSalesReturnCreated)
-                ? $this->serverError()
+        return ($result !== true)
+                ? $this->error($result)
                 : $this->success([],
                     'Success',
                     201);
@@ -88,14 +86,14 @@ class SalesReturnController extends Controller
     {
         $this->authorize('update', $this->salesReturn);
 
-        $isSalesReturnUpdated = $this->salesReturn->updateRequestForm(
-            $request->sales_return_id,
-            $request->invoice_id,
-            $request->salesReturnDetails
+        $result = $this->salesReturn->updateRequestForm(
+            $request->pos_sales_return_id,
+            $request->pos_id,
+            $request->posSalesReturnDetails
         );
 
-        return (!$isSalesReturnUpdated)
-                ? $this->serverError()
+        return ($result !== true)
+                ? $this->error($result)
                 : $this->success([],
                     'Success',
                     201);
@@ -111,9 +109,9 @@ class SalesReturnController extends Controller
     {
         $this->authorize('delete', $this->salesReturn);
 
-        $isSalesReturnDeleted = $this->salesReturn->deleteMany($request->validated());
+        $result = $this->salesReturn->deleteMany($request->validated());
 
-        return (!$isSalesReturnDeleted)
+        return (!$result)
                 ? $this->serverError()
                 : $this->success([],
                     'Success',
@@ -131,12 +129,12 @@ class SalesReturnController extends Controller
     {
         $this->authorize('removeItems', $this->salesReturn);
 
-        $isItemsRemoved = $this->salesReturn->removeItems(
-            $request->sales_return_id,
+        $result = $this->salesReturn->removeItems(
+            $request->pos_sales_return_id,
             $request->product_ids
         );
 
-        return (!$isItemsRemoved)
+        return (!$result)
                 ? $this->serverError()
                 : $this->success([],
                     'Success',

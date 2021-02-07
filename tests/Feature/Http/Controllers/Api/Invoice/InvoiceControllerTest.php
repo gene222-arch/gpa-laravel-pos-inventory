@@ -53,8 +53,6 @@ class InvoiceControllerTest extends TestCase
 
         $response = $this->put('api/invoices', $data, $this->apiHeaders());
 
-        dd(json_decode($response->getContent()));
-
         $this->getResponse($response);
     }
 

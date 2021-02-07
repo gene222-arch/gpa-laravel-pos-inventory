@@ -14,7 +14,7 @@ class ShowRequest extends BaseRequest
     public function rules()
     {
         return [
-            'sales_return_id' => ['required', 'integer', 'exists:sales_return,id'],
+            'sales_return_id' => ['required', 'integer', 'exists:sales_returns,id'],
         ];
     }
 }

@@ -31,7 +31,7 @@ class InvoiceController extends Controller
     {
         $this->authorize('viewAny', $this->invoice);
 
-        return $this->success($this->invoice->all(),
+        return $this->success($this->invoice->loadInvoiceWithDetails(),
         'Success');
     }
 
@@ -46,7 +46,7 @@ class InvoiceController extends Controller
     {
         $this->authorize('view', $this->invoice);
 
-        $invoiceDetails = $this->invoice->loadInvoiceWithDetails($request->invoice_id);
+        $invoiceDetails = $this->invoice->showInvoiceWithDetails($request->invoice_id);
 
         return $this->success($invoiceDetails,
         'Success');

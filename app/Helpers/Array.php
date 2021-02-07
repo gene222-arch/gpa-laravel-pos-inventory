@@ -105,3 +105,20 @@
 
 
 
+    if ( !function_exists('prepareGetKeyInMultiArray'))
+    {
+        function prepareGetKeyInMultiArray(string $key, $array)
+        {
+            $data = [];
+
+            foreach ($array as $value)
+            {
+                array_push($data, $value[$key]);
+            }
+
+            return $data;
+        }
+    }
+
+
+

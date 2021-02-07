@@ -14,9 +14,9 @@ class StoreRequest extends BaseRequest
     public function rules()
     {
         return [
-            'purchase_order_id' => ['required', 'integer', 'exists:purchase_order,id'],
-            'badOrderDetails.*.purchase_order_details_id' => ['required', 'integer', 'distinct', 'exists:purchase_order_details,id'],
-            'badOrderDetails.*.product_id' => ['required', 'integer', 'distinct', 'exists:products,id'],
+            'purchase_order_id' => ['required', 'integer', 'exists:purchase_order,id', 'unique:bad_orders,purchase_order_id'],
+            'badOrderDetails.*.purchase_order_details_id' => ['required', 'integer', 'distinct', 'exists:purchase_order_details,id', 'unique:bad_order_details,purchase_order_details_id'],
+            'badOrderDetails.*.product_id' => ['required', 'integer', 'distinct', 'exists:products,id', 'unique:bad_order_details,product_id'],
             'badOrderDetails.*.defect' => ['required', 'string'],
             'badOrderDetails.*.quantity' => ['required', 'integer'],
             'badOrderDetails.*.price' => ['required', 'integer', 'min:1'],

@@ -14,7 +14,7 @@ class RemoveItemsRequest extends BaseRequest
     public function rules()
     {
         return [
-            'sales_return_id' => ['required', 'integer', 'exists:sales_returns,id'],
+            'pos_sales_return_id' => ['required', 'integer', 'exists:sales_returns,id'],
             'product_ids.*' => ['required', 'integer', 'distinct', 'exists:products,id'],
         ];
     }

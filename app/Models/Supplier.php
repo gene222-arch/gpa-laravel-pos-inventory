@@ -5,10 +5,11 @@ namespace App\Models;
 use App\Traits\InventoryManagement\SupplierServices;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
 
 class Supplier extends Model
 {
-    use HasFactory, SupplierServices;
+    use HasFactory, Notifiable, SupplierServices;
 
     protected $guarded = [];
 
@@ -36,5 +37,6 @@ class Supplier extends Model
     {
         return $this->belongsToMany(\App\Models\PurchaseOrder::class, 'received_stocks');
     }
+
 
 }

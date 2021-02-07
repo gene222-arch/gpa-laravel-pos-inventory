@@ -33,7 +33,7 @@ class CustomersController extends Controller
     {
         $this->authorize('viewAny', $this->customer);
 
-        return $this->success($this->customer->all(),
+        return $this->success($this->customer->loadCustomers(),
         'Success');
     }
 

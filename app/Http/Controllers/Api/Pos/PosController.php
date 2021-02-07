@@ -10,9 +10,13 @@ use App\Http\Requests\Pos\StoreRequest;
 use App\Http\Requests\Pos\UpdateRequest;
 use App\Http\Requests\Pos\RemoveItemRequest;
 use App\Http\Requests\Pos\CancelOrdersRequest;
+use App\Http\Requests\Pos\AssignDiscountRequest;
 use App\Http\Requests\Pos\ProcessPaymentRequest;
+use App\Http\Requests\Pos\RemoveDiscountRequest;
 use App\Http\Requests\Pos\DecrementItemQtyRequest;
 use App\Http\Requests\Pos\IncrementItemQtyRequest;
+use App\Http\Requests\Pos\AssignDiscountToAllRequest;
+use App\Http\Requests\Pos\RemoveDiscountToAllRequest;
 
 class PosController extends Controller
 {
@@ -46,26 +50,6 @@ class PosController extends Controller
 
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show(ShowRequest $request)
-    {
-        $this->authorize('view', $this->pos);
-
-        $customerPosDetails = $this->pos->findCustomerPosDetails($request->customer_id);
-
-        return (!$customerPosDetails)
-                ? $this->serverError()
-                : $this->success($customerPosDetails,
-                'Success');
-    }
-
-
-
-    /**
      * Undocumented function
      *
      * @param ShowRequest $request
@@ -76,8 +60,6 @@ class PosController extends Controller
         $this->authorize('view', $this->pos);
 
         $amountToPay = $this->pos->getCustomerAmountToPay($request->customer_id);
-
-        return $amountToPay;
 
         return (!$amountToPay)
                 ? $this->serverError()
@@ -91,6 +73,25 @@ class PosController extends Controller
     /**
      * Undocumented function
      *
+     * @param ShowRequest $request
+     * @return \Illuminate\Http\Response
+     */
+   public function showCartDetails(ShowRequest $request)
+   {
+       $this->authorize('view', $this->pos);
+
+       $result = $this->pos->getCustomerCartDetails($request->customer_id);
+
+       return (!$result)
+               ? $this->serverError()
+               : $this->success($result,
+               'Success');
+   }
+
+
+    /**
+     * Undocumented function
+     *
      * @param ProcessPaymentRequest $request
      * @return \Illuminate\Http\Response
      */
@@ -98,18 +99,21 @@ class PosController extends Controller
     {
         $this->authorize('processPayment', $this->pos);
 
-        $isPaymentProcessed = $this->pos->processPayment(
+        $result = $this->pos->processPayment(
             $request->customer_id,
             $request->payment_method,
             $request->cash,
-            $request->shipping_fee,
-            $request->numberOfDays
+            $request->should_mail,
+            $request->number_of_days,
+            $request->customer_email,
+            $request->customer_name
         );
 
-        return (!$isPaymentProcessed)
-                ? $this->error('Cannot Process a payment, customer has yet to order')
+        return ($result !== true)
+                ? $this->error($result)
                 : $this->success([],
-                'Success');
+                'Success',
+                201);
     }
 
 
@@ -123,14 +127,14 @@ class PosController extends Controller
     {
         $this->authorize('create', $this->pos);
 
-        $isOrderAddedToCart = $this->pos->addToCart(
+        $result = $this->pos->addToCart(
             $request->customer_id,
             $request->product_id,
             $request->product_barcode
         );
 
-        return (!$isOrderAddedToCart)
-            ? $this->serverError()
+        return ($result !== true)
+            ? $this->error($result)
             : $this->success([],
                 'Success',
                 201);
@@ -147,14 +151,14 @@ class PosController extends Controller
     {
         $this->authorize('update', $this->pos);
 
-        $isOrderQtyUpdated = $this->pos->updateOrderQty(
+        $result = $this->pos->updateOrderQty(
             $request->customer_id,
             $request->product_id,
             $request->quantity
         );
 
-        return (!$isOrderQtyUpdated)
-            ? $this->serverError()
+        return ($result !== true)
+            ? $this->error($result)
             : $this->success([],
                 'Success',
                 201);
@@ -172,13 +176,13 @@ class PosController extends Controller
     {
         $this->authorize('update', $this->pos);
 
-        $isOrderQtyUpdated = $this->pos->incrementItemQuantity(
+        $result = $this->pos->incrementItemQuantity(
             $request->customer_id,
             $request->product_id
         );
 
-        return (!$isOrderQtyUpdated)
-            ? $this->error('Reached maximum stock level')
+        return ($result !== true)
+            ? $this->error($result)
             : $this->success([],
                 'Success',
                 201);
@@ -195,13 +199,83 @@ class PosController extends Controller
     {
         $this->authorize('update', $this->pos);
 
-        $isOrderQtyUpdated = $this->pos->decrementItemQuantity(
+        $result = $this->pos->decrementItemQuantity(
             $request->customer_id,
             $request->product_id
         );
 
-        return (!$isOrderQtyUpdated)
-            ? $this->error('Order quantity must be at least 1')
+        return ($result !== true)
+            ? $this->error($result)
+            : $this->success([],
+                'Success',
+                201);
+    }
+
+
+    /**
+     * Undocumented function
+     *
+     * @param IncrementItemQtyRequest $request
+     * @return \Illuminate\Http\Response
+     */
+    public function assignDiscount(AssignDiscountRequest $request)
+    {
+        $this->authorize('assignDiscount', $this->pos);
+
+        $result = $this->pos->assignDiscountTo(
+            $request->customer_id,
+            $request->product_id,
+            $request->discount_id
+        );
+
+        return ($result !== true)
+            ? $this->error($result)
+            : $this->success([],
+                'Success',
+                201);
+    }
+
+
+
+    /**
+     * Undocumented function
+     *
+     * @param IncrementItemQtyRequest $request
+     * @return \Illuminate\Http\Response
+     */
+    public function assignDiscountToAll(AssignDiscountToAllRequest $request)
+    {
+        $this->authorize('assignDiscount', $this->pos);
+
+        $result = $this->pos->assignDiscountToAll(
+            $request->customer_id,
+            $request->discount_id
+        );
+
+        return ($result !== true)
+            ? $this->error($result)
+            : $this->success([],
+                'Success',
+                201);
+    }
+
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function cancelOrders(CancelOrdersRequest $request)
+    {
+        $this->authorize('cancelOrders', $this->pos);
+
+        $result = $this->pos->cancelOrders(
+            $request->customer_id,
+        );
+
+        return ($result !== true)
+            ? $this->error($result)
             : $this->success([],
                 'Success',
                 201);
@@ -215,19 +289,42 @@ class PosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function cancelOrders(CancelOrdersRequest $request)
+    public function removeDiscount(RemoveDiscountRequest $request)
     {
-        $this->authorize('cancelOrders', $this->pos);
+        $this->authorize('removeDiscount', $this->pos);
 
-        $isOrderCancelled = $this->pos->cancelOrders(
+        $result = $this->pos->removeDiscountTo(
             $request->customer_id,
+            $request->product_id
         );
 
-        return (!$isOrderCancelled)
-            ? $this->error('Cannot Process a cancellation of order, customer has yet to order')
+        return ($result !== true)
+            ? $this->error($result)
             : $this->success([],
                 'Success',
-                200);
+        );
+    }
+
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function removeDiscountToAll(RemoveDiscountToAllRequest $request)
+    {
+        $this->authorize('removeDiscount', $this->pos);
+
+        $result = $this->pos->removeDiscountToAll(
+            $request->customer_id
+        );
+
+        return ($result !== true)
+            ? $this->error($result)
+            : $this->success([],
+                'Success',
+                201);
     }
 
 
@@ -241,15 +338,14 @@ class PosController extends Controller
     {
         $this->authorize('removeItems', $this->pos);
 
-        $isOrderedItemRemoved = $this->pos->removeItem(
+        $result = $this->pos->removeItem(
             $request->customer_id,
             $request->product_id
         );
 
-        return (!$isOrderedItemRemoved)
-            ? $this->error('The customer has yet to order')
+        return ($result !== true)
+            ? $this->error($result)
             : $this->success([],
-                'Success',
-                200);
+                'Success');
     }
 }

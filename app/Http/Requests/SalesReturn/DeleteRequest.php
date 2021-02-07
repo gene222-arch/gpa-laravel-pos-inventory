@@ -14,7 +14,7 @@ class DeleteRequest extends BaseRequest
     public function rules()
     {
         return [
-            'sales_return_ids.*' => ['required', 'integer', 'distinct', 'exists:sales_returns,id'],
+            'pos_sales_return_ids.*' => ['required', 'integer', 'distinct', 'exists:sales_returns,id'],
         ];
     }
 }

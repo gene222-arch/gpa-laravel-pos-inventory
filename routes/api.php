@@ -1,23 +1,35 @@
 <?php
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Pos\PosController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Admin\AdminController;
+use App\Http\Controllers\Api\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\Auth\RegisterController;
+use App\Http\Controllers\Api\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\Users\CashierController;
 use App\Http\Controllers\Api\Invoice\InvoiceController;
 use App\Http\Controllers\Api\Products\ProductsController;
 use App\Http\Controllers\Api\Customer\CustomersController;
-use App\Http\Controllers\Api\Exports\ExportInvoiceController;
-use App\Http\Controllers\Api\Exports\ExportPaymentController;
+use App\Http\Controllers\Api\Employee\EmployeesController;
+use App\Http\Controllers\Api\ExportControllers\ExportBadOrdersController;
+use App\Http\Controllers\Api\ExportControllers\ExportCustomersController;
 use App\Http\Controllers\Api\Products\CategoriesController;
+use App\Http\Controllers\Api\SalesReturn\SalesReturnController;
 use App\Http\Controllers\Api\InventoryManagement\BadOrdersController;
 use App\Http\Controllers\Api\InventoryManagement\SuppliersController;
+use App\Http\Controllers\Api\ExportControllers\ExportInvoiceController;
+use App\Http\Controllers\Api\ExportControllers\ExportLowStockController;
+use App\Http\Controllers\Api\ExportControllers\ExportPaymentsController;
+use App\Http\Controllers\Api\ExportControllers\ExportProductsController;
+use App\Http\Controllers\Api\ExportControllers\ExportPurchaseOrdersController;
+use App\Http\Controllers\Api\ExportControllers\ExportSalesReturnController;
+use App\Http\Controllers\Api\Imports\ImportProductsController;
 use App\Http\Controllers\Api\InventoryManagement\PurchaseOrdersController;
-use App\Http\Controllers\Api\Pos\PosController;
-use App\Http\Controllers\Api\SalesReturn\SalesReturnController;
-use Illuminate\Support\Facades\App;
+use App\Http\Controllers\Api\Products\DiscountsController;
+use App\Http\Controllers\Api\Reports\ReportsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,21 +42,23 @@ use Illuminate\Support\Facades\App;
 |
 */
 
-
+/**
+ * Authentication
+ */
 Route::group(['middleware' => 'api'], function ()
 {
-    /**
-     * Authentication
-     */
     Route::post('/register', [ RegisterController::class, 'register' ]);
     Route::post('/login', [ LoginController::class, 'login' ]);
+    Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
+    Route::post('/password/reset', [ResetPasswordController::class, 'reset']);
+
 
     Route::group(['middleware' => 'auth:api'], function ()
     {
         Route::post('/logout', [ LoginController::class, 'logout' ]);
     });
-
 });
+
 
 
 /**
@@ -79,19 +93,6 @@ Route::group([
 ], function()
 {
     Route::get('/auth', [AdminController::class, 'admin']);
- });
-
-
- /**
-  * * Category Controller
-  */
-
-Route::group(['prefix' => 'category'], function ()
-{
-    Route::get('/', [CategoriesController::class, 'index']);
-    Route::post('/', [CategoriesController::class, 'store']);
-    Route::put('/', [CategoriesController::class, 'update']);
-    Route::delete('/', [CategoriesController::class, 'destroy']);
 });
 
 
@@ -105,6 +106,32 @@ Route::group(['prefix' => 'product'], function ()
     Route::post('/', [ProductsController::class, 'store']);
     Route::put('/', [ProductsController::class, 'update']);
     Route::delete('/', [ProductsController::class, 'destroy']);
+});
+
+
+ /**
+  * Categories
+  */
+
+Route::group(['prefix' => 'category'], function ()
+{
+    Route::get('/', [CategoriesController::class, 'index']);
+    Route::post('/', [CategoriesController::class, 'store']);
+    Route::put('/', [CategoriesController::class, 'update']);
+    Route::delete('/', [CategoriesController::class, 'destroy']);
+});
+
+
+/**
+ * Discounts
+ */
+Route::group(['prefix' => 'discount'], function ()
+{
+    Route::get('/', [DiscountsController::class, 'index']);
+    Route::post('/detail', [DiscountsController::class, 'show']);
+    Route::post('/', [DiscountsController::class, 'store']);
+    Route::put('/', [DiscountsController::class, 'update']);
+    Route::delete('/', [DiscountsController::class, 'destroy']);
 });
 
 
@@ -135,6 +162,7 @@ Route::group(['prefix' => 'purchase-order'], function ()
     Route::put('/mark-all-as-received', [PurchaseOrdersController::class, 'markAllPurchasedOrderAsReceived']);
     Route::delete('/', [PurchaseOrdersController::class, 'destroy']);
     Route::delete('/products', [PurchaseOrdersController::class, 'deleteProducts']);
+    Route::post('/mail-supplier', [PurchaseOrdersController::class, 'sendMailToSupplier']);
 });
 
 
@@ -142,6 +170,7 @@ Route::group(['prefix' => 'purchase-order'], function ()
  * Bad Order
  *
  * Todo: Update Method
+ * Todo: Add Low Stock Notification
  */
 
 Route::group(['prefix' => 'bad-orders'], function ()
@@ -171,21 +200,38 @@ Route::group(['prefix' => 'customers'], function ()
 
 
 /**
- *
+ * Employeees
+ */
+Route::group(['prefix' => 'employees'], function ()
+{
+    Route::get('/', [EmployeesController::class, 'index']);
+    Route::get('/access_rights', [EmployeesController::class, 'employeeAccessRights']);
+    Route::post('/detail', [EmployeesController::class, 'show']);
+    Route::post('/', [EmployeesController::class, 'store']);
+    Route::put('/', [EmployeesController::class, 'update']);
+    Route::delete('/', [EmployeesController::class, 'destroy']);
+});
+
+
+/**
  * Pos
  */
 
 Route::group(['prefix' => 'pos'], function ()
 {
     Route::get('/order-lists', [PosController::class, 'index']);
-    Route::post('/cart', [PosController::class, 'show']);
+    Route::post('/cart-details', [PosController::class, 'showCartDetails']);
     Route::post('/add-to-cart', [PosController::class, 'store']);
     Route::post('/to-pay', [PosController::class, 'showAmountToPay']);
     Route::post('/process-payment', [PosController::class, 'processPayment']);
     Route::post('/invoice', [PosController::class, 'invoice']);
+    Route::put('/discount', [PosController::class, 'assignDiscount']);
+    Route::put('/discount-all', [PosController::class, 'assignDiscountToAll']);
     Route::put('/increase-item-qty', [PosController::class, 'incrementQuantity']);
     Route::put('/decrease-item-qty', [PosController::class, 'decrementQuantity']);
     Route::put('/item-qty', [PosController::class, 'update']);
+    Route::delete('/discount', [PosController::class, 'removeDiscount']);
+    Route::delete('/discount-all', [PosController::class, 'removeDiscountToAll']);
     Route::delete('/item', [PosController::class, 'removeItems']);
     Route::delete('/cancel-orders', [PosController::class, 'cancelOrders']);
 });
@@ -206,10 +252,8 @@ Route::group(['prefix' => 'invoices'], function ()
 
 
 /**
- *
- * Todo: Update Method
- *
  * Sales Return
+ * Todo: Update Method
  */
 
 Route::group(['prefix' => 'sales-return'], function ()
@@ -224,36 +268,94 @@ Route::group(['prefix' => 'sales-return'], function ()
 
 
 /**
- * PDF
- * Todo: export
+ * Export or Import
  */
-Route::group(['prefix' => 'pdf-export'], function ()
+Route::group(['middleware' => ['role:admin|manager']], function ()
 {
-    Route::get('/invoice', [ExportInvoiceController::class, 'export']);
-    Route::get('/pos-payment', [ExportPaymentController::class, 'export']);
+    /**
+     * PDF Export
+     */
+    Route::group(['prefix' => 'pdf-export'], function ()
+    {
+        Route::get('/invoices', [ExportInvoiceController::class, 'toPDF']);
+        Route::get('/purchase-order', [ExportPurchaseOrdersController::class, 'toPDF']);
+        Route::get('/pos-payment', [ExportPaymentsController::class, 'toPDF']);
+    });
+
+
+    /**
+     * Excel Export
+     */
+    Route::group(['prefix' => 'excel-export'], function ()
+    {
+        Route::get('/invoices', [ExportInvoiceController::class, 'toExcel']);
+        Route::get('/payments', [ExportPaymentsController::class, 'toExcel']);
+        Route::get('/customers', [ExportCustomersController::class, 'toExcel']);
+        Route::get('/products', [ExportProductsController::class, 'toExcel']);
+        Route::get('/bad-orders', [ExportBadOrdersController::class, 'toExcel']);
+        Route::get('/sales-returns', [ExportSalesReturnController::class, 'toExcel']);
+    });
+
+
+    /**
+     * CSV Export
+     */
+    Route::group(['prefix' => 'csv-export'], function ()
+    {
+        Route::get('/invoices', [ExportInvoiceController::class, 'toCSV']);
+        Route::get('/payments', [ExportPaymentsController::class, 'toCSV']);
+        Route::get('/customers', [ExportCustomersController::class, 'toCSV']);
+        Route::get('/products', [ExportProductsController::class, 'toCSV']);
+        Route::get('/bad-orders', [ExportBadOrdersController::class, 'toCSV']);
+        Route::get('/sales-returns', [ExportSalesReturnController::class, 'toCSV']);
+    });
+
+
+    /**
+     * Excel/CSV Import
+     */
+    Route::get('import/products', [ImportProductsController::class, 'import']);
+
 });
+
 
 
 /**
- * Excel
- * Todo: export
+ * Summary Reports
  */
-Route::group(['prefix' => 'excel-export'], function ()
+Route::group([
+    'prefix' => 'report',
+    'middleware' => 'role:admin|manager'
+], function ()
 {
-    Route::get('/invoice', [ExportInvoiceController::class, 'export']);
-    Route::get('/pos-payment', [ExportPaymentController::class, 'export']);
+    /**
+     * General
+     */
+    Route::get('/general', [ReportsController::class, 'generalAnalytics']);
+
+    /**
+     * Item
+     */
+    Route::group(['prefix' => 'sales-by-item'], function ()
+    {
+        Route::post('/top-5', [ReportsController::class, 'getTopFiveSalesByItem']);
+        Route::post('/reports', [ReportsController::class, 'getSalesByItemReports']);
+    });
+
+    /**
+     * Category
+     */
+    Route::post('/sales-by-category', [ReportsController::class, 'getSalesByCategory']);
+
+    /**
+     * Payment Type
+     */
+    Route::post('/sales-by-payment-type', [ReportsController::class, 'getSalesByPaymentType']);
+
+    /**
+     * Employee
+     */
+    Route::post('/sales-by-employee', [ReportsController::class, 'getSalesByEmployee']);
 });
-
-
-/**
- * CSV
- * Todo: export
- */
-Route::group(['prefix' => 'csv-export'], function ()
-{
-    Route::get('/invoice', [ExportInvoiceController::class, 'export']);
-    Route::get('/pos-payment', [ExportPaymentController::class, 'export']);
-});
-
 
 

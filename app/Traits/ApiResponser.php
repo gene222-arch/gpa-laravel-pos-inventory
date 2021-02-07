@@ -51,12 +51,12 @@ trait ApiResponser
      * @param integer $code
      * @return \Illuminate\Http\JsonResponse
      */
-	public function error($message = null, $code = 401)
+	public function error($message = null, $code = 401, $data = null)
 	{
 		return response()->json([
 			'status'=> 'Error',
 			'message' => $message,
-			'data' => null
+			'data' => $data
         ], $code);
     }
 

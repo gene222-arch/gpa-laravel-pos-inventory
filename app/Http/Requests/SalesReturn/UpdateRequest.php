@@ -14,16 +14,19 @@ class UpdateRequest extends BaseRequest
     public function rules()
     {
         return [
-            'sales_return_id' => ['required', 'integer', 'exists:sales_returns,id'],
-            'invoice_id' => ['required', 'integer', 'exists:invoices,id'],
+            'pos_sales_return_id' => ['required', 'integer', 'exists:sales_returns,id'],
+            'pos_id' => ['required', 'integer', 'exists:pos,id'],
 
-            'salesReturnDetails.*.invoice_details_id' => ['required', 'integer', 'exists:invoice_details,id'],
-            'salesReturnDetails.*.product_id' => ['required', 'integer', 'exists:products,id'],
-            'salesReturnDetails.*.defect' => ['required', 'string'],
-            'salesReturnDetails.*.quantity' => ['required', 'integer', 'min:1'],
-            'salesReturnDetails.*.price' => ['required', 'integer', 'min:1'],
-            'salesReturnDetails.*.amount' => ['required', 'integer', 'min:1'],
-            'salesReturnDetails.*.unit_of_measurement' => ['required', 'string'],
+            'posSalesReturnDetails.*.pos_details_id' => ['required', 'integer', 'exists:pos_details,id'],
+            'posSalesReturnDetails.*.product_id' => ['required', 'integer', 'exists:products,id'],
+            'posSalesReturnDetails.*.defect' => ['required', 'string'],
+            'posSalesReturnDetails.*.quantity' => ['required', 'integer', 'min:1'],
+            'posSalesReturnDetails.*.price' => ['required', 'numeric', 'min:1'],
+            'posSalesReturnDetails.*.unit_of_measurement' => ['required', 'string'],
+            'posSalesReturnDetails.*.sub_total' => ['required', 'numeric', 'min:1'],
+            'posSalesReturnDetails.*.discount' => ['required', 'numeric', 'min:1'],
+            'posSalesReturnDetails.*.tax' => ['required', 'numeric', 'min:1'],
+            'posSalesReturnDetails.*.total' => ['required', 'numeric', 'min:1'],
         ];
     }
 }
