@@ -12,11 +12,14 @@ use App\Models\Invoice;
 use App\Models\Pos;
 use App\Models\PurchaseOrder;
 use App\Models\SalesReturn;
+use App\Models\Stock;
+use App\Models\StockAdjustment;
 use App\Models\Supplier;
 use App\Policies\Customer\CustomerPolicy;
 use App\Policies\Employee\EmployeePolicy;
 use App\Policies\InventoryManagement\BadOrderPolicy;
 use App\Policies\InventoryManagement\PurchaseOrderPolicy;
+use App\Policies\InventoryManagement\StockPolicy;
 use App\Policies\InventoryManagement\SupplierPolicy;
 use App\Policies\Invoice\InvoicePolicy;
 use App\Policies\Pos\PosPolicy;
@@ -45,7 +48,8 @@ class AuthServiceProvider extends ServiceProvider
         SalesReturn::class => SalesReturnPolicy::class,
         Pos::class => PosPolicy::class,
         Discount::class => DiscountPolicy::class,
-        Employee::class => EmployeePolicy::class
+        Employee::class => EmployeePolicy::class,
+        Stock::class => StockPolicy::class
     ];
 
     /**
