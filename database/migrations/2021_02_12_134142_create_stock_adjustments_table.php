@@ -23,10 +23,11 @@ class CreateStockAdjustmentsTable extends Migration
         Schema::create('stock_adjustment_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('stock_adjustment_id');
-            $table->foreignId('product_id');
+            $table->foreignId('stock_id')->unique();
             $table->unsignedInteger('in_stock')->default(0);
             $table->unsignedInteger('added_stock')->default(0);
-            $table->unsignedDouble('updated_cost', 20, 2)->default(0.00);
+            $table->unsignedInteger('removed_stock')->default(0);
+            $table->unsignedInteger('counted_stock')->default(0);
             $table->unsignedInteger('stock_after')->default(0);
             $table->timestamps();
 
@@ -35,9 +36,9 @@ class CreateStockAdjustmentsTable extends Migration
                 ->on('stock_adjustments')
                 ->onDelete('cascade');
 
-            $table->foreign('product_id')
+            $table->foreign('stock_id')
                 ->references('id')
-                ->on('products')
+                ->on('stocks')
                 ->onDelete('cascade');
         });
     }

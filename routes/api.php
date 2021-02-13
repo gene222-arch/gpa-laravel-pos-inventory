@@ -28,7 +28,7 @@ use App\Http\Controllers\Api\ExportControllers\ExportPurchaseOrdersController;
 use App\Http\Controllers\Api\ExportControllers\ExportSalesReturnController;
 use App\Http\Controllers\Api\Imports\ImportProductsController;
 use App\Http\Controllers\Api\InventoryManagement\PurchaseOrdersController;
-use App\Http\Controllers\Api\InventoryManagement\StocksController;
+use App\Http\Controllers\Api\InventoryManagement\StockAdjustmentsController;
 use App\Http\Controllers\Api\Products\DiscountsController;
 use App\Http\Controllers\Api\Reports\ReportsController;
 
@@ -154,7 +154,9 @@ Route::group(['prefix' => 'supplier'], function ()
  */
 Route::prefix('stocks')->group(function ()
 {
-    Route::put('/stock-adjustments', [StocksController::class, 'update']);
+    Route::get('/stock-adjustments', [StockAdjustmentsController::class, 'index']);
+    Route::post('/stock-adjustment', [StockAdjustmentsController::class, 'show']);
+    Route::post('/stock-adjustments', [StockAdjustmentsController::class, 'store']);
 });
 
 

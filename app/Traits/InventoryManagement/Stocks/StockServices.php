@@ -8,7 +8,6 @@ use App\Models\Product;
 use App\Models\PurchaseOrder;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\QueueLowStockNotification;
-use App\Models\StockAdjustment;
 use App\Traits\InventoryManagement\Stocks\StocksHelper;
 use App\Traits\PDF\PDFGeneratorServices;
 
@@ -71,54 +70,6 @@ trait StockServices
     /**
      * Undocumented function
      *
-     * @param array $stockAdjustmentDetails
-     * @return mixed
-     */
-    public function adjustStocks(string $reason, array $stockAdjustmentDetails): mixed
-    {
-        try {
-            DB::transaction(function () use($reason, $stockAdjustmentDetails)
-            {
-                $stockAdjustment = StockAdjustment::create([
-                    'adjusted_by' => auth()->user()->name,
-                    'reason' => $reason
-                ]);
-
-                $stockAdjustment->stockAdjustmentDetails()->attach($stockAdjustmentDetails);
-
-                $data = [];
-
-                foreach ($stockAdjustmentDetails as $stockAdjustmentDetail)
-                {
-                    $data[] = [
-                        'product_id' => $stockAdjustmentDetail['product_id'],
-                        'in_stock' => $stockAdjustmentDetail['stock_after'],
-                        'default_purchase_costs' => $stockAdjustmentDetail['updated_cost']
-                    ];
-                }
-
-                $uniqueBy = 'product_id';
-
-                $update = [
-                    'in_stock',
-                    'default_purchase_costs'
-                ];
-
-                DB::table('stocks')->upsert($data, $uniqueBy, $update);
-            });
-        } catch (\Throwable $th) {
-            return $th->getMessage();
-        }
-
-        return true;
-    }
-
-
-
-
-    /**
-     * Undocumented function
-     *
      * @param integer $productId
      * @param integer $incomingQuantity
      * @return boolean
@@ -131,6 +82,7 @@ trait StockServices
                                     ])
         );
     }
+
 
 
     /**
