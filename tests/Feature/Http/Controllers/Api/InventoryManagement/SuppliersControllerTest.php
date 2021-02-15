@@ -18,7 +18,7 @@ class SuppliersControllerTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        $response = $this->get('/api/supplier', $this->apiHeaders());
+        $response = $this->get('/api/supplierss', $this->apiHeaders());
 
         $this->getResponse($response);
     }
@@ -45,7 +45,7 @@ class SuppliersControllerTest extends TestCase
             'province' => 'Laguna',
         ];
 
-        $response = $this->post('api/supplier', $data, $this->apiHeaders());
+        $response = $this->post('api/suppliers', $data, $this->apiHeaders());
 
         $this->getResponse($response, 201);
     }
@@ -73,7 +73,7 @@ class SuppliersControllerTest extends TestCase
             'province' => 'Laguna',
         ];
 
-        $response = $this->put('api/supplier', $data, $this->apiHeaders());
+        $response = $this->put('api/suppliers', $data, $this->apiHeaders());
 
         $this->getResponse($response, 201);
     }
@@ -90,7 +90,7 @@ class SuppliersControllerTest extends TestCase
             'id' => [2]
         ];
 
-        $response = $this->delete('api/supplier', $data, $this->apiHeaders());
+        $response = $this->delete('api/suppliers', $data, $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 

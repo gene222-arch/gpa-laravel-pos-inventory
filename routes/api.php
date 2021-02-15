@@ -48,10 +48,10 @@ use App\Http\Controllers\Api\Reports\ReportsController;
  */
 Route::group(['middleware' => 'api'], function ()
 {
-    Route::post('/register', [ RegisterController::class, 'register' ]);
-    Route::post('/login', [ LoginController::class, 'login' ]);
-    Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
-    Route::post('/password/reset', [ResetPasswordController::class, 'reset']);
+    Route::post('/auth/register', [ RegisterController::class, 'register' ]);
+    Route::post('/auth/login', [ LoginController::class, 'login' ]);
+    Route::post('/forgot-password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
+    Route::post('/forgot-password/reset', [ResetPasswordController::class, 'reset']);
 
 
     Route::group(['middleware' => 'auth:api'], function ()
@@ -101,7 +101,7 @@ Route::group([
  * *  Product Controller
  */
 
-Route::group(['prefix' => 'product'], function ()
+Route::group(['prefix' => 'products'], function ()
 {
     Route::get('/', [ProductsController::class, 'index']);
     Route::post('/', [ProductsController::class, 'store']);
@@ -114,7 +114,7 @@ Route::group(['prefix' => 'product'], function ()
   * Categories
   */
 
-Route::group(['prefix' => 'category'], function ()
+Route::group(['prefix' => 'categories'], function ()
 {
     Route::get('/', [CategoriesController::class, 'index']);
     Route::post('/', [CategoriesController::class, 'store']);
@@ -126,7 +126,7 @@ Route::group(['prefix' => 'category'], function ()
 /**
  * Discounts
  */
-Route::group(['prefix' => 'discount'], function ()
+Route::group(['prefix' => 'discounts'], function ()
 {
     Route::get('/', [DiscountsController::class, 'index']);
     Route::post('/detail', [DiscountsController::class, 'show']);
@@ -140,7 +140,7 @@ Route::group(['prefix' => 'discount'], function ()
  * * Suppliers
  */
 
-Route::group(['prefix' => 'supplier'], function ()
+Route::group(['prefix' => 'suppliers'], function ()
 {
     Route::get('/', [SuppliersController::class, 'index']);
     Route::post('/', [SuppliersController::class, 'store']);
@@ -164,7 +164,7 @@ Route::prefix('stocks')->group(function ()
  * * Purchase Order
  */
 
-Route::group(['prefix' => 'purchase-order'], function ()
+Route::group(['prefix' => 'purchase-orders'], function ()
 {
     Route::get('/', [PurchaseOrdersController::class, 'index']);
     Route::post('/purchase-order-detail', [PurchaseOrdersController::class, 'show']);

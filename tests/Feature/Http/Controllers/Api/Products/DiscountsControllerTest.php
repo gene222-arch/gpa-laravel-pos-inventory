@@ -15,7 +15,7 @@ class DiscountsControllerTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        $response = $this->get('api/discount', $this->apiHeaders());
+        $response = $this->get('api/discounts', $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -33,7 +33,7 @@ class DiscountsControllerTest extends TestCase
             'discount_id' => 1
         ];
 
-        $response = $this->post('api/discount/detail', $data, $this->apiHeaders());
+        $response = $this->post('api/discounts/detail', $data, $this->apiHeaders());
 
         $this->getResponse($response);
     }
@@ -51,7 +51,7 @@ class DiscountsControllerTest extends TestCase
             'percentage' => 50
         ];
 
-        $response = $this->post('api/discount', $data, $this->apiHeaders());
+        $response = $this->post('api/discounts', $data, $this->apiHeaders());
 
         $this->getResponse($response, 201);
     }
@@ -69,7 +69,7 @@ class DiscountsControllerTest extends TestCase
             'percentage' => 90.00
         ];
 
-        $response = $this->put('api/discount', $data, $this->apiHeaders());
+        $response = $this->put('api/discounts', $data, $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -90,7 +90,7 @@ class DiscountsControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->delete('api/discount', $data, $this->apiHeaders());
+        $response = $this->delete('api/discounts', $data, $this->apiHeaders());
 
         $this->getResponse($response);
     }

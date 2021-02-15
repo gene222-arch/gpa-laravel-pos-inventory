@@ -16,7 +16,7 @@ class ProductsControllerTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        $response = $this->get('/api/product', $this->apiHeaders());
+        $response = $this->get('/api/products', $this->apiHeaders());
 
         $this->getResponse($response);
     }
@@ -50,7 +50,7 @@ class ProductsControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->post('api/product',$data,$this->apiHeaders());
+        $response = $this->post('api/products',$data,$this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -91,7 +91,7 @@ class ProductsControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->put('api/product', $data, $this->apiHeaders());
+        $response = $this->put('api/products', $data, $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -110,7 +110,7 @@ class ProductsControllerTest extends TestCase
             'id' => [18]
         ];
 
-        $response = $this->delete('api/product',$data, $this->apiHeaders());
+        $response = $this->delete('api/products',$data, $this->apiHeaders());
 
         $this->getResponse($response);
     }

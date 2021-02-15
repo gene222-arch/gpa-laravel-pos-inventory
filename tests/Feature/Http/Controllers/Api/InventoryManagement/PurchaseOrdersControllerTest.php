@@ -17,7 +17,7 @@ class PurchaseOrdersControllerTest extends TestCase
     {
 
 
-        $response = $this->get('api/purchase-order', $this->apiHeaders());
+        $response = $this->get('api/purchase-orders', $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -37,7 +37,7 @@ class PurchaseOrdersControllerTest extends TestCase
             'purchase_order_id' => 4
         ];
 
-        $response = $this->post('api/purchase-order/purchase-order-detail',
+        $response = $this->post('api/purchase-orders/purchase-order-detail',
         $data,
         $this->apiHeaders());
 
@@ -73,7 +73,7 @@ class PurchaseOrdersControllerTest extends TestCase
             ],
         ];
 
-        $response = $this->post('api/purchase-order', $data, $this->apiHeaders());
+        $response = $this->post('api/purchase-orders', $data, $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -111,7 +111,7 @@ class PurchaseOrdersControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->put('api/purchase-order', $data, $this->apiHeaders());
+        $response = $this->put('api/purchase-orders', $data, $this->apiHeaders());
 
         $this->getResponse($response, 201);
     }
@@ -129,7 +129,7 @@ class PurchaseOrdersControllerTest extends TestCase
             'note' => 'Note'
         ];
 
-        $response = $this->post('api/purchase-order/mail-supplier', $data,
+        $response = $this->post('api/purchase-orders/mail-supplier', $data,
         $this->apiHeaders());
 
         $this->getResponse($response);
@@ -149,7 +149,7 @@ class PurchaseOrdersControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->put('api/purchase-order/mark-all-as-received', $data,
+        $response = $this->put('api/purchase-orders/mark-all-as-received', $data,
         $this->apiHeaders());
 
         $this->getResponse($response, 201);
@@ -176,7 +176,7 @@ class PurchaseOrdersControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->put('api/purchase-order/to-receive',
+        $response = $this->put('api/purchase-orders/to-receive',
         $data,
         $this->apiHeaders()
         );
@@ -197,7 +197,7 @@ class PurchaseOrdersControllerTest extends TestCase
             'purchase_order_id' => [6],
         ];
 
-        $response = $this->delete('api/purchase-order', $data, $this->apiHeaders());
+        $response = $this->delete('api/purchase-orders', $data, $this->apiHeaders());
 
         $this->getResponse($response, 200);
     }
@@ -217,7 +217,7 @@ class PurchaseOrdersControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->delete('api/purchase-order/products',
+        $response = $this->delete('api/purchase-orders/products',
         $data,
         $this->apiHeaders());
 

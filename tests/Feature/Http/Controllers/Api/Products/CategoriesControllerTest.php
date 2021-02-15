@@ -15,7 +15,7 @@ class CategoriesControllerTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        $response = $this->get('api/category', $this->apiHeaders());
+        $response = $this->get('api/categories', $this->apiHeaders());
 
         $this->getResponse($response);
     }
@@ -32,7 +32,7 @@ class CategoriesControllerTest extends TestCase
             'name' => 'Pogi'
         ];
 
-        $response = $this->post('api/category', $data, $this->apiHeaders());
+        $response = $this->post('api/categories', $data, $this->apiHeaders());
 
         $this->getResponse($response, 201);
     }
@@ -50,7 +50,7 @@ class CategoriesControllerTest extends TestCase
             'name' => 'Updated Category Name'
         ];
 
-        $response = $this->put('api/category',$data, $this->apiHeaders());
+        $response = $this->put('api/categories',$data, $this->apiHeaders());
 
         $this->getResponse($response, 201);
     }
@@ -67,7 +67,7 @@ class CategoriesControllerTest extends TestCase
             'id' => [17, 18],
         ];
 
-        $response = $this->delete('api/category',$data, $this->apiHeaders());
+        $response = $this->delete('api/categories',$data, $this->apiHeaders());
 
         $this->getResponse($response);
     }
