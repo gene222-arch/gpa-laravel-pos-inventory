@@ -16,6 +16,7 @@ trait PosServices
 
     use PosHelperServices, PaymentServices;
 
+
     /**
      * Undocumented function
      *
@@ -36,7 +37,7 @@ trait PosServices
     public function findCustomerPos(int $customerId): Object|null
     {
         return Pos::where('customer_id', '=', $customerId)
-                    ->where('status', '=', 'Processing')
+                    ->where('status', '=', 'Pending')
                     ->first();
     }
 
@@ -51,7 +52,7 @@ trait PosServices
     public function findPosProduct(int $customerId, int $productId): mixed
     {
         return Pos::where('customer_id', '=', $customerId)
-                    ->where('status', '=', 'Processing')
+                    ->where('status', '=', 'Pending')
                     ->first()
                     ->posDetails()
                     ->wherePivot('product_id', $productId)
@@ -70,7 +71,7 @@ trait PosServices
     public function findCustomerPosDetails(int $customerId): Object|null
     {
         return Pos::where('customer_id', '=', $customerId)
-                    ->where('status', '=', 'Processing')
+                    ->where('status', '=', 'Pending')
                     ->first()
                     ->posDetails;
     }
@@ -553,6 +554,46 @@ trait PosServices
 
         return true;
     }
+
+
+    public function applyDiscountWithQuantity(int $customerId, int $productId, int $discountId, int $quantity): mixed
+    {
+        try {
+            DB::transaction(function () use($customerId, $productId, $discountId, $quantity)
+            {
+                $customerPos = $this->findCustomerPos($customerId);
+
+                if (!$customerPos)
+                {
+                    throw new \Exception("Customer has yet to order");
+                }
+
+                # select discount
+                $discount = ((new Discount())->getDiscount($discountId)->percentage / 100);
+
+                $result = \boolval($customerPos->posDetails()
+                        ->updateExistingPivot($productId,[
+                            'quantity' => $quantity,
+                            'sub_total' => DB::raw('price * quantity'),
+                            'discount' => DB::raw('sub_total * ' . $discount),
+                            'tax' => DB::raw('sub_total * 0.12' ),
+                            'total' => DB::raw('sub_total + tax - discount'),
+                            'updated_at' => now()
+                        ])
+                );
+
+                if (!$result)
+                {
+                    throw new \Exception("Product was not found within customer's order");
+                }
+            });
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+
+        return true;
+    }
+
 
 
 

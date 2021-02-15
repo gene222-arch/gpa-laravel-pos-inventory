@@ -63,8 +63,8 @@ class PosControllerTest extends TestCase
     public function user_can_add_to_cart_in_customers_orders_in_pos()
     {
         $data = [
-            'customer_id' => 2,
-            'product_id' => 23
+            'customer_id' => 1,
+            'product_id' => 20
         ];
 
         $response = $this->post('api/pos/add-to-cart', $data, $this->apiHeaders());
@@ -216,13 +216,33 @@ class PosControllerTest extends TestCase
 
 
     /**
+     * test
+     */
+   public function user_can_apply_discount_add_quantity()
+   {
+       $data = [
+           'customer_id' => 2,
+           'discount_id' => 1,
+           'product_id' => 19,
+           'quantity' => 10,
+       ];
+
+       $response = $this->put('api/pos/discount/item-quantity', $data, $this->apiHeaders());
+
+       dd(json_decode($response->getContent()));
+
+       $this->getResponse($response, 201);
+   }
+
+
+    /**
      * @test
      */
     public function user_can_process_customer_payment()
     {
         $data = [
             'customer_id' => 2,
-            'payment_method' => 'credit',
+            'payment_method' => 'invoice',
             'should_mail' => true
         ];
 

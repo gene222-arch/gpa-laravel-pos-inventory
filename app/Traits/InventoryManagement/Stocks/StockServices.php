@@ -11,6 +11,8 @@ use App\Jobs\QueueLowStockNotification;
 use App\Traits\InventoryManagement\Stocks\StocksHelper;
 use App\Traits\PDF\PDFGeneratorServices;
 
+use function PHPUnit\Framework\isEmpty;
+
 trait StockServices
 {
 
@@ -338,7 +340,7 @@ trait StockServices
 
         $products = $products->filter(fn ($p) => $p->stock->minimum_reorder_level >= $p->stock->in_stock);
 
-        if ($products)
+        if (!empty($products->count()))
         {
             $fileName = 'low-stock-' . now()->toDateString() . '-' . time() . '.pdf';
 

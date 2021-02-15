@@ -34,6 +34,7 @@ use App\Http\Controllers\Api\ExportControllers\ExportSalesReturnController;
 use App\Http\Controllers\Api\InventoryManagement\StockAdjustmentsController;
 use App\Http\Controllers\Api\ExportControllers\ExportPurchaseOrdersController;
 use App\Http\Controllers\Api\InventoryManagement\ReceivedStocksController;
+use App\Http\Controllers\Api\Transactions\TransactionsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -242,6 +243,7 @@ Route::group(['prefix' => 'employees'], function ()
 
 /**
  * Pos
+ * !remove {discount, incrementQty, decrementQty}
  */
 
 Route::group(['prefix' => 'pos'], function ()
@@ -252,14 +254,11 @@ Route::group(['prefix' => 'pos'], function ()
     Route::post('/to-pay', [PosController::class, 'showAmountToPay']);
     Route::post('/process-payment', [PosController::class, 'processPayment']);
     Route::post('/invoice', [PosController::class, 'invoice']);
-    Route::put('/discount', [PosController::class, 'assignDiscount']);
     Route::put('/discount-all', [PosController::class, 'assignDiscountToAll']);
-    Route::put('/increase-item-qty', [PosController::class, 'incrementQuantity']);
-    Route::put('/decrease-item-qty', [PosController::class, 'decrementQuantity']);
-    Route::put('/item-qty', [PosController::class, 'update']);
+    Route::put('/discount/item-quantity', [PosController::class, 'applyDiscountAddQuantity']);
     Route::delete('/discount', [PosController::class, 'removeDiscount']);
     Route::delete('/discount-all', [PosController::class, 'removeDiscountToAll']);
-    Route::delete('/item', [PosController::class, 'removeItems']);
+    Route::delete('/items', [PosController::class, 'removeItems']);
     Route::delete('/cancel-orders', [PosController::class, 'cancelOrders']);
 });
 
@@ -279,7 +278,7 @@ Route::group(['prefix' => 'invoices'], function ()
 
 
 /**
- * Sales Return
+ * * Sales Return
  * Todo: Update Method
  */
 
@@ -294,14 +293,14 @@ Route::group(['prefix' => 'sales-return'], function ()
 
 
 /**
- * Transactions
+ * * Transactions
  */
 Route::prefix('transactions')->group(function ()
 {
-    Route::get('/customer-orders', [PosController::class, 'index']);
-    Route::get('/invoices', [InvoiceController::class, 'index']);
-    Route::get('/purchase-orders', [PurchaseOrdersController::class, 'index']);
-    Route::get('/received-stocks', [ReceivedStocksController::class, 'index']);
+    Route::get('/customer-orders', [TransactionsController::class, 'customerOrderTransactions']);
+    Route::get('/invoices', [TransactionsController::class, 'invoiceTransactions']);
+    Route::get('/purchase-orders', [TransactionsController::class, 'purchaseOrderTransactions']);
+    Route::get('/received-stocks', [TransactionsController::class, 'receivedStocksTransactions']);
 });
 
 
@@ -352,7 +351,7 @@ Route::group(['middleware' => ['role:admin|manager']], function ()
     /**
      * Excel/CSV Import
      */
-    Route::get('import/products', [ImportProductsController::class, 'import']);
+    Route::post('import/products', [ImportProductsController::class, 'import']);
 
 });
 

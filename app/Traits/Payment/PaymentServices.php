@@ -380,7 +380,7 @@ trait PaymentServices
         {
             $subTotal = ($customerOrderDetail->price * $customerOrderDetail->quantity);
             $tax = ($subTotal * 0.12);
-            $total = ($subTotal + $tax);
+            $total = ($subTotal + $tax) - $customerOrderDetail->discount;
 
             $invoiceDetails[] =
             [

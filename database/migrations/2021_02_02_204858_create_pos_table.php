@@ -17,7 +17,7 @@ class CreatePosTable extends Migration
             $table->id();
             $table->string('cashier');
             $table->foreignId('customer_id')->nullable();
-            $table->char('status', 20)->default('Processing');
+            $table->char('status', 20)->default('Pending');
             $table->timestamps();
 
             $table->foreign('customer_id')

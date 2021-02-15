@@ -50,7 +50,7 @@ trait PDFGeneratorServices
                 'discount' => $discount,
                 'taxRate' => '%12',
                 'tax' => $tax,
-                'total' => $total
+                'total' => $total - $discount
             ]
         ])
         ->setOptions([

@@ -27,6 +27,6 @@ class ReceivedStocksController extends Controller
     {
         $this->authorize('viewAny', $this->receivedStocks);
 
-        return $this->success($this->receivedStocks->getAllReceivedStocks());
+        return $this->success($this->receivedStocks->all());
     }
 }

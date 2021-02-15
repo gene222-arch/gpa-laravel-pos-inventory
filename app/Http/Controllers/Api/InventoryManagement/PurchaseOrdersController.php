@@ -47,7 +47,7 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('viewAny', $this->purchaseOrder);
 
-        return $this->success($this->purchaseOrder->loadPurchaseOrders(),
+        return $this->success($this->purchaseOrder->all(),
         'Purchase orders fetched successfully');
     }
 

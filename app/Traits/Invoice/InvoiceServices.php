@@ -15,36 +15,6 @@ trait InvoiceServices
 
     use InvoiceHelperServices, PDFGeneratorServices;
 
-    /**
-     * Undocumented function
-     *
-     * @param integer $invoiceId
-     * @return void
-     */
-    public function loadInvoiceWithDetails()
-    {
-        DB::statement("SET sql_mode = '' ");
-
-        return DB::table('invoices')
-            ->join('invoice_details', 'invoice_details.invoice_id', '=', 'invoices.id')
-            ->join('products', 'products.id', '=', 'invoice_details.product_id')
-            ->join('customers', 'customers.id', '=', 'invoices.customer_id')
-            ->selectRaw('
-                    invoices.id AS invoice_id,
-                    customers.name AS customer_name,
-                    SUM(invoice_details.quantity) AS number_of_items,
-                    SUM(invoice_details.sub_total) AS sub_total,
-                    SUM(invoice_details.tax) AS tax,
-                    SUM(invoice_details.total) AS total,
-                    invoices.created_at AS invoice_date,
-                    invoices.payment_date AS payment_date
-            ')
-            ->groupBy('invoice_details.invoice_id')
-            ->get()
-            ->toArray();
-    }
-
-
 
     /**
      * Undocumented function

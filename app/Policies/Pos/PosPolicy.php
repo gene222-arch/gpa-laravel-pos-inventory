@@ -85,6 +85,19 @@ class PosPolicy
 
 
 
+      /**
+     * Determine whether the user can assign a discount.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Pos  $pos
+     * @return mixed
+     */
+    public function applyDiscountAddQuantity(User $user, Pos $pos)
+    {
+        return $user->hasPermissionTo('apply_discount_add_quantity_in_pos', 'api');
+    }
+
+
     /**
      * Determine whether the user can assign a discount.
      *

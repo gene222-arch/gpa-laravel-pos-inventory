@@ -31,7 +31,7 @@ class InvoiceController extends Controller
     {
         $this->authorize('viewAny', $this->invoice);
 
-        return $this->success($this->invoice->loadInvoiceWithDetails(),
+        return $this->success($this->invoice->all(),
         'Success');
     }
 

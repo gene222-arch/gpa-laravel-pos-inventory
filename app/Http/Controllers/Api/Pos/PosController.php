@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Pos;
 use App\Models\Pos;
 use App\Traits\ApiResponser;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Pos\AddDiscountQuantity;
 use App\Http\Requests\Pos\ShowRequest;
 use App\Http\Requests\Pos\StoreRequest;
 use App\Http\Requests\Pos\UpdateRequest;
@@ -34,7 +35,7 @@ class PosController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -53,7 +54,7 @@ class PosController extends Controller
      * Undocumented function
      *
      * @param ShowRequest $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function showAmountToPay(ShowRequest $request)
     {
@@ -74,7 +75,7 @@ class PosController extends Controller
      * Undocumented function
      *
      * @param ShowRequest $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
    public function showCartDetails(ShowRequest $request)
    {
@@ -93,7 +94,7 @@ class PosController extends Controller
      * Undocumented function
      *
      * @param ProcessPaymentRequest $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function processPayment(ProcessPaymentRequest $request)
     {
@@ -121,7 +122,7 @@ class PosController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreRequest $request)
     {
@@ -145,9 +146,9 @@ class PosController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(UpdateRequest $request)
+    public function updateProductQty(UpdateRequest $request)
     {
         $this->authorize('update', $this->pos);
 
@@ -170,7 +171,7 @@ class PosController extends Controller
      * Undocumented function
      *
      * @param IncrementItemQtyRequest $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function incrementQuantity(IncrementItemQtyRequest $request)
     {
@@ -193,7 +194,7 @@ class PosController extends Controller
      * Undocumented function
      *
      * @param IncrementItemQtyRequest $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function decrementQuantity(DecrementItemQtyRequest $request)
     {
@@ -216,7 +217,7 @@ class PosController extends Controller
      * Undocumented function
      *
      * @param IncrementItemQtyRequest $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function assignDiscount(AssignDiscountRequest $request)
     {
@@ -241,7 +242,7 @@ class PosController extends Controller
      * Undocumented function
      *
      * @param IncrementItemQtyRequest $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function assignDiscountToAll(AssignDiscountToAllRequest $request)
     {
@@ -261,10 +262,35 @@ class PosController extends Controller
 
 
     /**
+     * Undocumented function
+     *
+     * @param AddDiscountQuantity $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function applyDiscountAddQuantity(AddDiscountQuantity $request)
+    {
+        $this->authorize('applyDiscountAddQuantity', $this->pos);
+
+        $result = $this->pos->applyDiscountWithQuantity(
+                $request->customer_id,
+                $request->product_id,
+                $request->discount_id,
+                $request->quantity
+            );
+
+        return ($result !== true)
+            ? $this->error($result)
+            : $this->success([],
+                'Success',
+                201);
+    }
+
+
+    /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function cancelOrders(CancelOrdersRequest $request)
     {
@@ -287,7 +313,7 @@ class PosController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function removeDiscount(RemoveDiscountRequest $request)
     {
@@ -310,7 +336,7 @@ class PosController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function removeDiscountToAll(RemoveDiscountToAllRequest $request)
     {
@@ -332,7 +358,7 @@ class PosController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function removeItems(RemoveItemRequest $request)
     {

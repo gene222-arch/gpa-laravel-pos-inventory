@@ -18,33 +18,6 @@ trait PurchaseOrderServices
     /**
      * Undocumented function
      *
-     * @return array
-     */
-    public function loadPurchaseOrders(): array
-    {
-        DB::statement('SET sql_mode = "" ');
-
-        return DB::table('purchase_order')
-            ->selectRaw("
-                CONCAT('PO', purchase_order.id) as id,
-                DATE_FORMAT(purchase_order.purchase_order_date, '%M %d %Y') as purchase_date,
-                suppliers.name as supplier,
-                purchase_order.status,
-                purchase_order.total_received_quantity as received,
-                purchase_order.expected_delivery_date as expected_on,
-                SUM(purchase_order_details.amount) as total
-            ")
-            ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
-            ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
-            ->groupBy('id')
-            ->get()
-            ->toArray();
-    }
-
-
-    /**
-     * Undocumented function
-     *
      * @param integer $purchaseOrderId
      * @return Illuminate\Support\Collection
      */
