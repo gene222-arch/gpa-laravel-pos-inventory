@@ -118,7 +118,7 @@ class PurchaseOrdersControllerTest extends TestCase
 
 
     /**
-     * @test
+     * test
      */
     public function user_can_mail_supplier()
     {
@@ -157,19 +157,17 @@ class PurchaseOrdersControllerTest extends TestCase
 
 
     /**
-     * test
+     * @test
      */
     public function user_can_receive_purchase_order()
     {
-
-
         $data = [
             'supplier_id' => 3,
-            'purchase_order_id' => 8,
+            'purchase_order_id' => 4,
             'items_received_quantities' =>
             [
                 [
-                    'purchase_order_details_id' => 1,
+                    'purchase_order_details_id' => 7,
                     'product_id' => 19,
                     'received_quantity' => 20,
                 ],
@@ -180,6 +178,9 @@ class PurchaseOrdersControllerTest extends TestCase
         $data,
         $this->apiHeaders()
         );
+
+        dd(json_decode($response->getContent()));
+
 
         $this->getResponse($response, 201);
     }

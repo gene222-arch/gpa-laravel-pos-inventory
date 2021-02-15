@@ -193,15 +193,15 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('receivePurchaseOrder', $this->purchaseOrder);
 
-        $purchaseOrderedIsReceived = $this->purchaseOrder
-                                          ->toReceive(
-                                            $request->supplier_id,
-                                            $request->purchase_order_id,
-                                            $request->items_received_quantities
-                                          );
+        $result = $this->purchaseOrder
+                        ->toReceive(
+                        $request->supplier_id,
+                        $request->purchase_order_id,
+                        $request->items_received_quantities
+                        );
 
-        return (!$purchaseOrderedIsReceived)
-            ? $this->serverError()
+        return ($result !== true)
+            ? $this->error($result)
             : $this->success([],
             'Purchase order received successfully',
             201

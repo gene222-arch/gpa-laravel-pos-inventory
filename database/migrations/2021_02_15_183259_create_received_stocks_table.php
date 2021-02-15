@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateStockReceivedTable extends Migration
+class CreateReceivedStocksTable extends Migration
 {
     /**
      * Run the migrations.
@@ -18,8 +18,6 @@ class CreateStockReceivedTable extends Migration
             $table->foreignId('purchase_order_id');
             $table->foreignId('supplier_id');
             $table->timestamps();
-
-            $table->unique(['purchase_order_id', 'supplier_id']);
 
             $table->foreign('purchase_order_id')
                   ->references('id')

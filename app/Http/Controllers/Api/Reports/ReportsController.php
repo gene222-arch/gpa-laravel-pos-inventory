@@ -29,11 +29,7 @@ class ReportsController extends Controller
      */
     public function generalAnalytics()
     {
-        return $this->salesSummary();
-
-        return (!true)
-            ? $this->serverError()
-            : $this->success('Success');
+        return $this->success($this->salesSummary(), 'Success');
     }
 
 

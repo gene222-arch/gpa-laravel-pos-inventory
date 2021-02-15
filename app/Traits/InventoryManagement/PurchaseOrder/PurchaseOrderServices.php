@@ -308,9 +308,9 @@ trait PurchaseOrderServices
      * @param integer $supplierId
      * @param integer $purchaseOrderId
      * @param array $purchaseOrderDetails
-     * @return boolean
+     * @return mixed
      */
-    public function toReceive(int $supplierId, int $purchaseOrderId, array $purchaseOrderDetails): bool
+    public function toReceive(int $supplierId, int $purchaseOrderId, array $purchaseOrderDetails): mixed
     {
         try {
             DB::transaction(function () use($supplierId, $purchaseOrderId, $purchaseOrderDetails)
@@ -328,6 +328,7 @@ trait PurchaseOrderServices
                 # attach `stock_received_details`
                 $stockReceived->receiveStockDetails()->attach($purchaseOrderDetails);
 
+                # update stocks
                 (new Stock())->stockIn($purchaseOrderDetails);
 
                 # Update purchase order table
@@ -335,7 +336,7 @@ trait PurchaseOrderServices
             });
 
         } catch (\Throwable $th) {
-            return false;
+            return $th->getMessage();
         }
 
         return true;

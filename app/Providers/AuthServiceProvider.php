@@ -12,6 +12,7 @@ use App\Models\Employee;
 use App\Models\Invoice;
 use App\Models\Pos;
 use App\Models\PurchaseOrder;
+use App\Models\ReceivedStock;
 use App\Models\SalesReturn;
 use App\Models\StockAdjustment;
 use App\Models\Supplier;
@@ -20,6 +21,7 @@ use App\Policies\Employee\AccessRightsPolicy as EmployeeAccessRightsPolicy;
 use App\Policies\Employee\EmployeePolicy;
 use App\Policies\InventoryManagement\BadOrderPolicy;
 use App\Policies\InventoryManagement\PurchaseOrderPolicy;
+use App\Policies\InventoryManagement\ReceivedStocksPolicy;
 use App\Policies\InventoryManagement\StockAdjustmentPolicy;
 use App\Policies\InventoryManagement\SupplierPolicy;
 use App\Policies\Invoice\InvoicePolicy;
@@ -52,7 +54,8 @@ class AuthServiceProvider extends ServiceProvider
         Discount::class => DiscountPolicy::class,
         Employee::class => EmployeePolicy::class,
         AccessRights::class=> EmployeeAccessRightsPolicy::class,
-        StockAdjustment::class => StockAdjustmentPolicy::class
+        StockAdjustment::class => StockAdjustmentPolicy::class,
+        ReceivedStock::class => ReceivedStocksPolicy::class
     ];
 
     /**

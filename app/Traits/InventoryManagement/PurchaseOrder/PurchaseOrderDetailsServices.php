@@ -21,6 +21,16 @@ trait PurchaseOrderDetailsServices
             'purchase_order_id' => $purchaseOrderId
         ], $purchaseOrderDetails);
 
+        foreach ($purchaseOrderDetails as $purchaseOrderDetail)
+        {
+            $data = [
+                'id' => $purchaseOrderDetail['purchase_order_details_id'],
+                'purchase_order_id' => $purchaseOrderDetail['purchase_order_id'],
+                'product_id' => $purchaseOrderDetail['product_id'],
+                'received_quantity' => $purchaseOrderDetail['received_quantity'],
+            ];
+        }
+
         $uniqueBy = 'product_id';
 
         $update = [
@@ -32,7 +42,7 @@ trait PurchaseOrderDetailsServices
 
         DB::table('purchase_order_details')
             ->where('purchase_order_id', '=', $purchaseOrderId)
-            ->upsert($purchaseOrderDetails,
+            ->upsert($data,
             $uniqueBy,
             $update);
     }

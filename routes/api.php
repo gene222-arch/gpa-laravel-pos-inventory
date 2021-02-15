@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\InventoryManagement\PurchaseOrdersController;
 use App\Http\Controllers\Api\ExportControllers\ExportSalesReturnController;
 use App\Http\Controllers\Api\InventoryManagement\StockAdjustmentsController;
 use App\Http\Controllers\Api\ExportControllers\ExportPurchaseOrdersController;
+use App\Http\Controllers\Api\InventoryManagement\ReceivedStocksController;
 
 /*
 |--------------------------------------------------------------------------
@@ -292,6 +293,17 @@ Route::group(['prefix' => 'sales-return'], function ()
 });
 
 
+/**
+ * Transactions
+ */
+Route::prefix('transactions')->group(function ()
+{
+    Route::get('/customer-orders', [PosController::class, 'index']);
+    Route::get('/invoices', [InvoiceController::class, 'index']);
+    Route::get('/purchase-orders', [PurchaseOrdersController::class, 'index']);
+    Route::get('/received-stocks', [ReceivedStocksController::class, 'index']);
+});
+
 
 /**
  * Export or Import
@@ -347,10 +359,10 @@ Route::group(['middleware' => ['role:admin|manager']], function ()
 
 
 /**
- * Summary Reports
+ * * Summary Reports
  */
 Route::group([
-    'prefix' => 'report',
+    'prefix' => 'reports',
     'middleware' => 'role:admin|manager'
 ], function ()
 {
@@ -365,7 +377,7 @@ Route::group([
     Route::group(['prefix' => 'sales-by-item'], function ()
     {
         Route::post('/top-5', [ReportsController::class, 'getTopFiveSalesByItem']);
-        Route::post('/reports', [ReportsController::class, 'getSalesByItemReports']);
+        Route::post('/', [ReportsController::class, 'getSalesByItemReports']);
     });
 
     /**
