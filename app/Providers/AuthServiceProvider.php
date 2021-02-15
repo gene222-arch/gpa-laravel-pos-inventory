@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\AccessRights;
 use App\Models\BadOrder;
 use App\Models\Product;
 use App\Models\Category;
@@ -15,6 +16,7 @@ use App\Models\SalesReturn;
 use App\Models\StockAdjustment;
 use App\Models\Supplier;
 use App\Policies\Customer\CustomerPolicy;
+use App\Policies\Employee\AccessRightsPolicy as EmployeeAccessRightsPolicy;
 use App\Policies\Employee\EmployeePolicy;
 use App\Policies\InventoryManagement\BadOrderPolicy;
 use App\Policies\InventoryManagement\PurchaseOrderPolicy;
@@ -28,6 +30,7 @@ use App\Policies\Products\CategoryPolicy;
 use App\Policies\Products\DiscountPolicy;
 use App\Policies\SalesReturn\SalesReturnPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -48,6 +51,7 @@ class AuthServiceProvider extends ServiceProvider
         Pos::class => PosPolicy::class,
         Discount::class => DiscountPolicy::class,
         Employee::class => EmployeePolicy::class,
+        AccessRights::class=> EmployeeAccessRightsPolicy::class,
         StockAdjustment::class => StockAdjustmentPolicy::class
     ];
 

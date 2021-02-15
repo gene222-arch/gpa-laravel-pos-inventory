@@ -6,17 +6,20 @@ use App\Http\Controllers\Api\Pos\PosController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Admin\AdminController;
-use App\Http\Controllers\Api\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\Auth\RegisterController;
-use App\Http\Controllers\Api\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\Users\CashierController;
 use App\Http\Controllers\Api\Invoice\InvoiceController;
+use App\Http\Controllers\Api\Reports\ReportsController;
 use App\Http\Controllers\Api\Products\ProductsController;
+use App\Http\Controllers\Api\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\Customer\CustomersController;
 use App\Http\Controllers\Api\Employee\EmployeesController;
-use App\Http\Controllers\Api\ExportControllers\ExportBadOrdersController;
-use App\Http\Controllers\Api\ExportControllers\ExportCustomersController;
+use App\Http\Controllers\Api\Products\DiscountsController;
+use App\Http\Controllers\Api\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\Products\CategoriesController;
+use App\Http\Controllers\Api\Employee\AccessRightsController;
+use App\Http\Controllers\Api\Employee\AccessRightsControllers;
+use App\Http\Controllers\Api\Imports\ImportProductsController;
 use App\Http\Controllers\Api\SalesReturn\SalesReturnController;
 use App\Http\Controllers\Api\InventoryManagement\BadOrdersController;
 use App\Http\Controllers\Api\InventoryManagement\SuppliersController;
@@ -24,13 +27,12 @@ use App\Http\Controllers\Api\ExportControllers\ExportInvoiceController;
 use App\Http\Controllers\Api\ExportControllers\ExportLowStockController;
 use App\Http\Controllers\Api\ExportControllers\ExportPaymentsController;
 use App\Http\Controllers\Api\ExportControllers\ExportProductsController;
-use App\Http\Controllers\Api\ExportControllers\ExportPurchaseOrdersController;
-use App\Http\Controllers\Api\ExportControllers\ExportSalesReturnController;
-use App\Http\Controllers\Api\Imports\ImportProductsController;
+use App\Http\Controllers\Api\ExportControllers\ExportBadOrdersController;
+use App\Http\Controllers\Api\ExportControllers\ExportCustomersController;
 use App\Http\Controllers\Api\InventoryManagement\PurchaseOrdersController;
+use App\Http\Controllers\Api\ExportControllers\ExportSalesReturnController;
 use App\Http\Controllers\Api\InventoryManagement\StockAdjustmentsController;
-use App\Http\Controllers\Api\Products\DiscountsController;
-use App\Http\Controllers\Api\Reports\ReportsController;
+use App\Http\Controllers\Api\ExportControllers\ExportPurchaseOrdersController;
 
 /*
 |--------------------------------------------------------------------------
@@ -156,7 +158,7 @@ Route::group(['prefix' => 'suppliers'], function ()
 Route::prefix('stocks')->group(function ()
 {
     Route::get('/stock-adjustments', [StockAdjustmentsController::class, 'index']);
-    Route::post('/stock-adjustment', [StockAdjustmentsController::class, 'show']);
+    Route::post('/details', [StockAdjustmentsController::class, 'show']);
     Route::post('/stock-adjustments', [StockAdjustmentsController::class, 'store']);
 });
 
@@ -212,6 +214,16 @@ Route::group(['prefix' => 'customers'], function ()
 });
 
 
+Route::prefix('access-rights')->group(function ()
+{
+    Route::get('/', [AccessRightsController::class, 'index']);
+    Route::post('/details', [AccessRightsController::class, 'show']);
+    Route::post('/', [AccessRightsController::class, 'store']);
+    Route::put('/', [AccessRightsController::class, 'update']);
+    Route::delete('/', [AccessRightsController::class, 'destroy']);
+});
+
+
 /**
  * Employeees
  */
@@ -224,6 +236,7 @@ Route::group(['prefix' => 'employees'], function ()
     Route::put('/', [EmployeesController::class, 'update']);
     Route::delete('/', [EmployeesController::class, 'destroy']);
 });
+
 
 
 /**
