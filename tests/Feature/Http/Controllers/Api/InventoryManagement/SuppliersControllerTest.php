@@ -16,8 +16,6 @@ class SuppliersControllerTest extends TestCase
      */
     public function user_can_get_suppliers()
     {
-        $this->actingAsAdmin();
-
         $response = $this->get('/api/supplierss', $this->apiHeaders());
 
         $this->getResponse($response);
@@ -27,14 +25,27 @@ class SuppliersControllerTest extends TestCase
     /**
      * * test
      */
+    public function user_can_get_supplier()
+    {
+        $data = [
+            'supplier_id' => 3
+        ];
+
+        $response = $this->post('/api/suppliers/supplier-details', $data, $this->apiHeaders());
+
+        $this->getResponse($response, 201);
+    }
+
+
+    /**
+     * * test
+     */
     public function user_can_create_suppliers()
     {
-        $this->actingAsAdmin();
-
         $data = [
             'name' => 'Kenkeen',
             'contact' => '1234567891',
-            'email' => 'ken@gmail.com',
+            'email' => 'kengmail.com',
             'phone' => '1234567891',
             'website' => 'https://www.facebook.com/',
             'main_address' => 'Brgy. 134 Daisy St.',
@@ -56,13 +67,11 @@ class SuppliersControllerTest extends TestCase
      */
     public function user_can_update_suppliers()
     {
-        $this->actingAsAdmin();
-
         $data = [
             'id' => 4,
             'name' => 'New Supplier',
             'contact' => '32323232323',
-            'email' => 'genephillip222@gmail.com',
+            'email' => 'genephillip222gmail.com',
             'phone' => '32323232323',
             'website' => 'https://www.facebook.com/',
             'main_address' => 'Brgy. 134 Daisy St.',
@@ -80,11 +89,11 @@ class SuppliersControllerTest extends TestCase
 
 
     /**
-     * @test
+     * test
      */
     public function user_can_delete_suppliers()
     {
-        $this->actingAsAdmin();
+
 
         $data = [
             'id' => [2]

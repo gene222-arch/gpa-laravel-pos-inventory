@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Api\InventoryManagement;
 
 use App\Models\Supplier;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\InventoryManagement\Supplier\DeleteRequest;
-use App\Http\Requests\InventoryManagement\Supplier\StoreRequest;
-use App\Http\Requests\InventoryManagement\Supplier\UpdateRequest;
 use App\Traits\ApiResponser;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\InventoryManagement\Supplier\ShowRequest;
+use App\Http\Requests\InventoryManagement\Supplier\StoreRequest;
+use App\Http\Requests\InventoryManagement\Supplier\DeleteRequest;
+use App\Http\Requests\InventoryManagement\Supplier\UpdateRequest;
 
 class SuppliersController extends Controller
 {
@@ -35,6 +36,27 @@ class SuppliersController extends Controller
         return $this->success($this->supplier->all(),
             'Suppliers Fetched Successfully',
             200
+        );
+    }
+
+
+   /**
+     * * Get a supplier
+     *
+     * @param ShowRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(ShowRequest $request)
+    {
+        $this->authorize('view', $this->supplier);
+
+        $supplier = $this->supplier->find($request->supplier_id);
+
+        return (! $supplier )
+            ? $this->serverError()
+            : $this->success($supplier,
+            'Success',
+            201
         );
     }
 

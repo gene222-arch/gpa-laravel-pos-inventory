@@ -143,6 +143,7 @@ Route::group(['prefix' => 'discounts'], function ()
 Route::group(['prefix' => 'suppliers'], function ()
 {
     Route::get('/', [SuppliersController::class, 'index']);
+    Route::post('/supplier-details', [SuppliersController::class, 'show']);
     Route::post('/', [SuppliersController::class, 'store']);
     Route::put('/', [SuppliersController::class, 'update']);
     Route::delete('/', [SuppliersController::class, 'destroy']);
