@@ -21,6 +21,7 @@ class CustomersController extends Controller
     public function __construct(Customer $customer)
     {
         $this->customer = $customer;
+        $this->middleware(['auth:api', 'role:admin|manager']);
     }
 
 

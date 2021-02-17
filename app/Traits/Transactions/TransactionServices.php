@@ -15,7 +15,7 @@ trait TransactionServices
             ->selectRaw("
                 pos.id,
                 DATE_FORMAT(pos.created_at, '%M %d, %Y %h:%i %p') as ordered_at,
-                customers.name,
+                customers.name as customer,
                 CASE
                     WHEN
                         customers.address = 'NULL'
@@ -55,7 +55,7 @@ trait TransactionServices
                 SUM(invoice_details.discount) AS discount,
                 SUM(invoice_details.tax) AS tax,
                 SUM(invoice_details.total) AS total,
-                DATE_FORMAT(invoices.payment_date, '%M %d, %Y)' AS payment_date
+                DATE_FORMAT(invoices.payment_date, '%M %d, %Y') AS payment_date
             ")
             ->join('invoice_details', 'invoice_details.invoice_id', '=', 'invoices.id')
             ->join('products', 'products.id', '=', 'invoice_details.product_id')
@@ -80,8 +80,8 @@ trait TransactionServices
             ->selectRaw("
                 purchase_order.id as id,
                 DATE_FORMAT(purchase_order.purchase_order_date, '%M %d %Y %H:%i %p') as purchase_date,
-                suppliers.name as supplier,
                 purchase_order.status,
+                suppliers.name as supplier,
                 purchase_order.total_received_quantity as received,
                 purchase_order.total_ordered_quantity as ordered,
                 DATE_FORMAT(purchase_order.expected_delivery_date, '%M %d %Y %H:%i %p') as expected_on,
@@ -106,14 +106,13 @@ trait TransactionServices
 
         return DB::table('received_stocks')
             ->selectRaw("
-                SELECT
-                    received_stocks.id,
+                    received_stocks.id as id,
                     DATE_FORMAT(received_stocks.created_at, '%M %d, %Y %H:%i %p') as received_at,
-                    received_stocks.purchase_order_id,
-                    suppliers.name as supplier_name,
-                    SUM(received_stock_details.received_quantity) as received_quantity
+                    received_stocks.purchase_order_id as po_id,
+                    suppliers.name as supplier,
+                    SUM(received_stock_details.received_quantity) as received
             ")
-            ->join('receive_stock_details', 'receive_stock_details.received_stock_id', '=', 'received_stocks.id')
+            ->join('received_stock_details', 'received_stock_details.received_stock_id', '=', 'received_stocks.id')
             ->join('suppliers', 'suppliers.id', '=', 'received_stocks.supplier_id')
             ->groupBy('received_stocks.id')
             ->get()

@@ -7,11 +7,11 @@ use Tests\TestCase;
 class ReportsControllerTest extends TestCase
 {
     /**
-     * test
+     * @test
      */
     public function user_can_get_general_analytics()
     {
-        $response = $this->get('api/report/general', $this->apiHeaders());
+        $response = $this->get('api/reports/general', $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -28,7 +28,7 @@ class ReportsControllerTest extends TestCase
             'monthNumber' => 2
         ];
 
-        $response = $this->post('api/report/sales-by-item/top-5', $data, $this->apiHeaders());
+        $response = $this->post('api/reports/sales-by-item/top-5', $data, $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -46,7 +46,7 @@ class ReportsControllerTest extends TestCase
             'endDate' => '2021-05-01'
         ];
 
-        $response = $this->post('api/report/sales-by-item', $data, $this->apiHeaders());
+        $response = $this->post('api/reports/sales-by-item', $data, $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -60,11 +60,11 @@ class ReportsControllerTest extends TestCase
     public function user_can_get_sales_by_category()
     {
         $data = [
-            'startDate' => '2021-01-01',
-            'endDate' => '2021-05-01'
+            'startDate' => '2021-1-01',
+            'endDate' => '2021-5-01'
         ];
 
-        $response = $this->post('api/report/sales-by-category', $data, $this->apiHeaders());
+        $response = $this->post('api/reports/sales-by-category', $data, $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -82,7 +82,7 @@ class ReportsControllerTest extends TestCase
             'endDate' => '2021-05-01'
         ];
 
-        $response = $this->post('api/report/sales-by-payment-type', $data, $this->apiHeaders());
+        $response = $this->post('api/reports/sales-by-payment-type', $data, $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -100,7 +100,7 @@ class ReportsControllerTest extends TestCase
             'endDate' => '2021-05-01'
         ];
 
-        $response = $this->post('api/report/sales-by-employee', $data, $this->apiHeaders());
+        $response = $this->post('api/reports/sales-by-employee', $data, $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 

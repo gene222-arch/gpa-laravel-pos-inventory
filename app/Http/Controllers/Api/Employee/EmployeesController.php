@@ -20,7 +20,7 @@ class EmployeesController extends Controller
     public function __construct(Employee $employee)
     {
         $this->employee = $employee;
-        $this->middleware(['role:admin']);
+        $this->middleware(['auth:api', 'role:admin']);
     }
 
 
@@ -33,7 +33,7 @@ class EmployeesController extends Controller
     {
         $this->authorize('viewAny', $this->employee);
 
-        return $this->success($this->employee->getEmployees(),
+        return $this->success($this->employee->all(),
             'Success');
     }
 

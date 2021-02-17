@@ -19,6 +19,7 @@ class DiscountsController extends Controller
     public function __construct(Discount $discount)
     {
         $this->discount = $discount;
+        $this->middleware(['auth:api', 'role:admin|manager']);
     }
 
 
@@ -31,10 +32,7 @@ class DiscountsController extends Controller
     {
         $this->authorize('viewAny', $this->discount);
 
-        return (!$this->discount->getDiscountList())
-            ? $this->serverError()
-            : $this->success($this->discount->getDiscountList(),
-            'Success');
+        return $this->success($this->discount->all(), 'Success');
     }
 
 

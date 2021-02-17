@@ -10,6 +10,20 @@ class ProductPolicy
 {
     use HandlesAuthorization;
 
+
+    /**
+     * Determine whether the user can view the model.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Product  $product
+     * @return mixed
+     */
+    public function viewAny(User $user)
+    {
+        return $user->hasPermissionTo('view_products', 'api');
+    }
+
+
     /**
      * Determine whether the user can view the model.
      *
@@ -19,7 +33,7 @@ class ProductPolicy
      */
     public function view(User $user, Product $product)
     {
-        return $user->hasPermissionTo('view_products', 'api');
+        return $user->hasPermissionTo('show_products', 'api');
     }
 
     /**

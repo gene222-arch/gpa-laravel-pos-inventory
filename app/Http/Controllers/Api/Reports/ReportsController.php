@@ -43,7 +43,7 @@ class ReportsController extends Controller
     {
         $topFiveMonthlySales = $this->topFiveSalesByItem(
             $request->year,
-    $request->monthNumber
+            $request->monthNumber
         );
 
         return (!$topFiveMonthlySales)
@@ -81,15 +81,12 @@ class ReportsController extends Controller
      */
     public function getSalesByCategory(SalesByCategoryRequest $request)
     {
-        $topFiveSales = $this->salesByCategory(
+        $salesByCategory = $this->salesByCategory(
             $request->startDate,
             $request->endDate
         );
 
-        return (!true)
-            ? $this->serverError()
-            : $this->success($topFiveSales,
-            'Success');
+        return $this->success($salesByCategory, 'Success');
     }
 
 

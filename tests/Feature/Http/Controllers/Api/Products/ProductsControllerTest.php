@@ -107,7 +107,7 @@ class ProductsControllerTest extends TestCase
         $this->actingAsAdmin();
 
         $data = [
-            'id' => [18]
+            'product_ids' => [18]
         ];
 
         $response = $this->delete('api/products',$data, $this->apiHeaders());

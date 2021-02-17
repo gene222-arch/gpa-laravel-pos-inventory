@@ -13,7 +13,7 @@ class TransactionsController extends Controller
 
     public function __construct()
     {
-        $this->middleware(['role:admin|manager']);
+        $this->middleware(['auth:api', 'role:admin|manager']);
     }
 
 

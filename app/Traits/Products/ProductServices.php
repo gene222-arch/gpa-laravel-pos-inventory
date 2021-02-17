@@ -18,24 +18,19 @@ trait ProductServices
     {
         return DB::table('products')
             ->join('stocks', 'stocks.product_id', '=', 'products.id')
+            ->join('categories', 'categories.id', '=', 'products.category')
             ->selectRaw('
-                products.id as id,
-                stocks.supplier_id as supplier_id,
-                products.sku,
+                products.id,
                 products.barcode,
                 products.name,
-                products.category,
-                products.sold_by,
+                categories.name as category,
                 products.price,
                 products.cost,
+                (products.price / products.cost) * 100 as margin,
                 stocks.in_stock,
-                stocks.bad_order_stock,
-                stocks.stock_in,
-                stocks.stock_out,
-                stocks.minimum_reorder_level,
-                stocks.incoming,
-                stocks.default_purchase_costs
-            ')
+                stocks.minimum_reorder_level as minimum_reorder_level
+            '
+            )
             ->get()
             ->toArray();
     }
@@ -105,10 +100,7 @@ trait ProductServices
      */
     public function deleteMany(array $productIds): bool
     {
-        return \boolval(DB::table('products')
-                            ->whereIn('id', $productIds)
-                            ->delete()
-        );
+        return Product::whereIn('id', $productIds)->delete();
     }
 
 }

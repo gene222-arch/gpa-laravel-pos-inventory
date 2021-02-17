@@ -13,141 +13,132 @@ trait ReportsSummaryServices
     /**
      * Undocumented function
      *
-     * @return Collection
      */
-    public function salesSummary(): Collection
+    public function salesSummary()
     {
-        return DB::table('pos_payments')
-            ->select(
-                DB::raw('
-                            (
-                                SELECT
-                                    SUM(pos_details.sub_total + pos_details.tax)
-                                FROM
-                                    pos
-                                INNER JOIN
-                                    pos_details
-                                ON
-                                    pos_details.pos_id = pos.id
-                                WHERE
-                                    pos.status
-                                NOT IN ("Cancelled", "Processing")
-                            )
-                            AS gross_sales
-                    '), // Gross sales
+        DB::statement('SET sql_mode="" ');
 
-                    DB::raw("
-                        (
-                            SELECT
-                                SUM(sales_return_details.total)
-                            FROM
-                                `sales_return_details`
-                        )
-                        AS sales_return
-                    "), // Sales Return
-
-                    DB::raw("
-                        (
-                            SELECT
-                                SUM(bad_order_details.amount)
-                            FROM
-                                `bad_order_details`
-                        )
-                        AS purchase_return
-                    "), // Purchase Return
-
-                    DB::raw('
-                        (
-                            SELECT
-                                SUM(pos_details.discount)
-                            FROM
-                                pos
-                            INNER JOIN
-                                pos_details
-                            ON
-                                pos_details.pos_id = pos.id
-                            WHERE
-                                pos.status
-                            NOT IN("Cancelled", "Processing")
-                        )
-                        AS discounts
-                    '), // Discounts
-
-                    DB::raw('
-                        (
-                            SELECT
-                                SUM(pos_details.quantity * products.cost)
-                            FROM
-                                pos
-                            INNER JOIN
-                                pos_details
-                            ON
-                                pos.id = pos_details.pos_id
-                            INNER JOIN
-                                products
-                            ON
-                                products.id = pos_details.product_id
-                            WHERE
-                                pos.status
-                            NOT IN ("Cancelled", "Processing")
-                        )
-                        AS total_cost_of_goods_sold
-                    '), // Total cost of goods sold
-
-                    DB::raw('
-                        (
-                            SELECT
-                                ROUND(
-                                    (
-                                        SUM(pos_details.sub_total + pos_details.tax) -
-                                        SUM(pos_details.quantity * products.cost)
-                                    )
-                                / SUM(pos_details.sub_total + pos_details.tax) * 100
-                                ,2)
-                            FROM
-                                pos
-                            INNER JOIN
-                                pos_details
-                            ON
-                                pos.id = pos_details.pos_id
-                            INNER JOIN
-                                products
-                            ON
-                                products.id = pos_details.product_id
-                            WHERE
-                                pos.status
-                            NOT IN ("Cancelled", "Processing")
-                        )
-                        AS margin_percentage
-                    '), // Margin Percentage
-
-                    DB::raw('
-                        (
-                            SELECT
-                                ROUND((
-                                    SUM(pos_details.sub_total + pos_details.tax) -
-                                    SUM(pos_details.quantity * products.cost))
-                                , 2)
-                            FROM
-                                pos
-                            INNER JOIN
-                                pos_details
-                            ON
-                                pos.id = pos_details.pos_id
-                            INNER JOIN
-                                products
-                            ON
-                                products.id = pos_details.product_id
-                            WHERE
-                                pos.status
-                            NOT IN ("Cancelled", "Processing")
-
-                        )
-                        AS margin_sales
-                    ') // Margin Sales
+        return DB::table('users')
+        ->selectRaw('
+            (
+                SELECT
+                    SUM(pos_details.sub_total + pos_details.tax)
+                FROM
+                    pos
+                INNER JOIN
+                    pos_details
+                ON
+                    pos_details.pos_id = pos.id
+                WHERE
+                    pos.status
+                NOT IN ("Cancelled", "Processing")
             )
-            ->limit(1)
-            ->get();
+            AS gross_sales,
+            (
+                SELECT
+                    CASE
+                        WHEN
+                            SUM(sales_return_details.total) != NULL
+                        THEN
+                            SUM(sales_return_details.total)
+                        ELSE
+                            0.00
+                    END
+                FROM
+                    sales_return_details
+            )
+            AS sales_return,
+            (
+                SELECT
+                    SUM(bad_order_details.amount)
+                FROM
+                    `bad_order_details`
+            )
+            AS purchase_return,
+            (
+                SELECT
+                    SUM(pos_details.discount)
+                FROM
+                    pos
+                INNER JOIN
+                    pos_details
+                ON
+                    pos_details.pos_id = pos.id
+                WHERE
+                    pos.status
+                NOT IN("Cancelled", "Processing")
+            )
+            AS discounts,
+
+
+            (
+                SELECT
+                    SUM(pos_details.quantity * products.cost)
+                FROM
+                    pos
+                INNER JOIN
+                    pos_details
+                ON
+                    pos.id = pos_details.pos_id
+                INNER JOIN
+                    products
+                ON
+                    products.id = pos_details.product_id
+                WHERE
+                    pos.status
+                NOT IN ("Cancelled", "Processing")
+            )
+            AS total_cost_of_goods_sold,
+            (
+                SELECT
+                    ROUND(
+                        (
+                            SUM(pos_details.sub_total + pos_details.tax) -
+                            SUM(pos_details.quantity * products.cost)
+                        )
+                    / SUM(pos_details.sub_total + pos_details.tax) * 100
+                    ,2)
+                FROM
+                    pos
+                INNER JOIN
+                    pos_details
+                ON
+                    pos.id = pos_details.pos_id
+                INNER JOIN
+                    products
+                ON
+                    products.id = pos_details.product_id
+                WHERE
+                    pos.status
+                NOT IN ("Cancelled", "Processing")
+            )
+            AS margin_percentage,
+            (
+                SELECT
+                    ROUND((
+                        SUM(pos_details.sub_total + pos_details.tax) -
+                        SUM(pos_details.quantity * products.cost))
+                    , 2)
+                FROM
+                    pos
+                INNER JOIN
+                    pos_details
+                ON
+                    pos.id = pos_details.pos_id
+                INNER JOIN
+                    products
+                ON
+                    products.id = pos_details.product_id
+                WHERE
+                    pos.status
+                NOT IN ("Cancelled", "Processing")
+
+            )
+            AS margin_sales
+
+        ')
+        ->first();
+
     }
 
 
@@ -252,6 +243,7 @@ trait ReportsSummaryServices
 
         return DB::table('pos')
             ->selectRaw('
+                categories.id as id,
                 products.category as category,
                 SUM(pos_details.quantity) as items_sold,
                 SUM(pos_details.sub_total + pos_details.tax) as sales,
@@ -277,12 +269,13 @@ trait ReportsSummaryServices
             ->leftJoin('sales_returns', 'sales_returns.pos_id', '=', 'pos.id')
             ->leftJoin('sales_return_details', 'sales_return_details.product_id', '=', 'pos_details.product_id')
             ->join('products', 'products.id', '=', 'pos_details.product_id')
+            ->join('categories', 'categories.id', '=', 'products.category')
             ->whereDate('pos_details.created_at', '>=', $startDate)
             ->when($endDate, function ($q, $endDate) {
                 return $q->whereDate('pos_details.created_at', '<=', $endDate);
             })
             ->whereNotIn('pos.status', ['Cancelled', 'Processing'])
-            ->groupBy('category')
+            ->groupBy('categories.id')
             ->orderByDesc('net_sales')
             ->get()
             ->toArray();

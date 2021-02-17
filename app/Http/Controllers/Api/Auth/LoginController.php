@@ -58,7 +58,7 @@ class LoginController extends Controller
 
         return $this->token(
             $this->getPersonalAccessToken($request),
-            'Successful Authentication',
+            auth()->user()->with('roles')->get(),
             201
         );
     }

@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Pos\PosController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -21,6 +20,7 @@ use App\Http\Controllers\Api\Employee\AccessRightsController;
 use App\Http\Controllers\Api\Employee\AccessRightsControllers;
 use App\Http\Controllers\Api\Imports\ImportProductsController;
 use App\Http\Controllers\Api\SalesReturn\SalesReturnController;
+use App\Http\Controllers\Api\Transactions\TransactionsController;
 use App\Http\Controllers\Api\InventoryManagement\BadOrdersController;
 use App\Http\Controllers\Api\InventoryManagement\SuppliersController;
 use App\Http\Controllers\Api\ExportControllers\ExportInvoiceController;
@@ -30,11 +30,10 @@ use App\Http\Controllers\Api\ExportControllers\ExportProductsController;
 use App\Http\Controllers\Api\ExportControllers\ExportBadOrdersController;
 use App\Http\Controllers\Api\ExportControllers\ExportCustomersController;
 use App\Http\Controllers\Api\InventoryManagement\PurchaseOrdersController;
+use App\Http\Controllers\Api\InventoryManagement\ReceivedStocksController;
 use App\Http\Controllers\Api\ExportControllers\ExportSalesReturnController;
 use App\Http\Controllers\Api\InventoryManagement\StockAdjustmentsController;
 use App\Http\Controllers\Api\ExportControllers\ExportPurchaseOrdersController;
-use App\Http\Controllers\Api\InventoryManagement\ReceivedStocksController;
-use App\Http\Controllers\Api\Transactions\TransactionsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -108,6 +107,7 @@ Route::group([
 Route::group(['prefix' => 'products'], function ()
 {
     Route::get('/', [ProductsController::class, 'index']);
+    Route::post('/details', [ProductsController::class, 'show']);
     Route::post('/', [ProductsController::class, 'store']);
     Route::put('/', [ProductsController::class, 'update']);
     Route::delete('/', [ProductsController::class, 'destroy']);
@@ -360,10 +360,7 @@ Route::group(['middleware' => ['role:admin|manager']], function ()
 /**
  * * Summary Reports
  */
-Route::group([
-    'prefix' => 'reports',
-    'middleware' => 'role:admin|manager'
-], function ()
+Route::group(['prefix' => 'reports'], function ()
 {
     /**
      * General

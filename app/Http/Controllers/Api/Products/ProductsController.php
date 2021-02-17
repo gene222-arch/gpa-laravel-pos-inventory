@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Products\Product\StoreRequest;
 use App\Http\Requests\Products\Product\DeleteRequest;
+use App\Http\Requests\Products\Product\ShowRequest;
 use App\Http\Requests\Products\Product\UpdateRequest;
 
 class ProductsController extends Controller
@@ -35,9 +36,25 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        $this->authorize('view', $this->product);
+        $this->authorize('viewAny', $this->product);
 
         return $this->success($this->product->loadProductsWithStocks(),
+            'Fetched Successfully',
+            200
+        );
+    }
+
+
+    public function show(ShowRequest $request)
+    {
+        $this->authorize('view', $this->product);
+
+        $product = $this->product
+            ->where('id', '=', $request->product_id)
+            ->with('stock')
+            ->first();
+
+        return $this->success($product,
             'Fetched Successfully',
             200
         );
@@ -57,14 +74,9 @@ class ProductsController extends Controller
         try {
             DB::transaction(function () use($request)
             {
-                $productId = $this->product
-                                  ->createProduct($request->product);
+                $productId = $this->product->createProduct($request->product);
 
-                $this->stock
-                     ->createStock(
-                         $productId,
-                     $request->stock
-                     );
+                $this->stock->createStock($productId, $request->stock);
 
             });
         } catch (\Throwable $th) {
@@ -104,7 +116,7 @@ class ProductsController extends Controller
                     );
             });
         } catch (\Throwable $th) {
-            return $this->error('');
+            return $this->error($th->getMessage());
         }
 
         return $this->success([],
@@ -124,7 +136,7 @@ class ProductsController extends Controller
     {
         $this->authorize('delete', $this->product);
 
-        $isProductsDeleted = $this->product->deleteMany($request->id);
+        $isProductsDeleted = $this->product->deleteMany($request->product_ids);
 
         return ( !$isProductsDeleted )
             ? $this->serverError()

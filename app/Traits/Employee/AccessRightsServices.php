@@ -10,6 +10,37 @@ trait AccessRightsServices
 {
 
 
+    public function getAllAccessRights()
+    {
+        DB::statement('SET sql_mode="" ');
+
+        return DB::table('access_rights')
+            ->selectRaw("
+                access_rights.id,
+                roles.name as role,
+                CASE
+                    WHEN
+                        access_rights.back_office = 1 AND access_rights.pos = 1
+                    THEN
+                        'Back office and POS'
+                    WHEN
+                        access_rights.back_office = 1 AND access_rights.pos = 0
+                    THEN
+                        'Back office'
+                    WHEN
+                        access_rights.back_office = 0 AND access_rights.pos = 1
+                    THEN
+                        'POS'
+                END as access,
+                COUNT(roles.id) as employees
+            ")
+            ->join('roles', 'roles.id', '=', 'access_rights.role_id')
+            ->groupBy('roles.id')
+            ->get()
+            ->toArray();
+    }
+
+
     public function getAccessRights (int $roleId)
     {
         return (new AccessRights())->where('role_id', '=', $roleId)->get();
