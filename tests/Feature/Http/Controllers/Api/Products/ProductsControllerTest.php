@@ -43,8 +43,6 @@ class ProductsControllerTest extends TestCase
             'stock' => [
                 'supplier_id' => 3,
                 'in_stock' => 100000,
-                'stock_in' => 0,
-                'stock_out' => 0,
                 'minimum_reorder_level' => 100,
                 'default_purchase_costs' => 100.50
             ]

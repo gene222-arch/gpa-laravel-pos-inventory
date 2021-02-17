@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Api\Products;
 use App\Models\User;
 use App\Models\Category;
 use App\Traits\ApiResponser;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Products\Category\ShowRequest;
 use App\Http\Requests\Products\Category\StoreRequest;
 use App\Http\Requests\Products\Category\DeleteRequest;
 use App\Http\Requests\Products\Category\UpdateRequest;
-use Illuminate\Http\Request;
 
 class CategoriesController extends Controller
 {
@@ -29,14 +30,30 @@ class CategoriesController extends Controller
     /**
      * * Get resources of categories
      *
-     * @return void
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
         $this->authorize('view', $this->category);
 
-        return $this->success($this->category->all(),
+        return $this->success($this->category->latest()->get(),
             'Fetched successfully',
+            200
+        );
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param ShowRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(ShowRequest $request)
+    {
+        $this->authorize('view', $this->category);
+
+        return $this->success($this->category->find($request->category_id),
+            'Fetched Successfully',
             200
         );
     }
@@ -61,6 +78,7 @@ class CategoriesController extends Controller
             201
         );
     }
+
 
 
     /**
@@ -97,7 +115,7 @@ class CategoriesController extends Controller
     {
         $this->authorize('delete', $this->category);
 
-        $isCategoriesDeleted = $this->category->deleteMany($request->id);
+        $isCategoriesDeleted = $this->category->deleteMany($request->category_ids);
 
         return ( !$isCategoriesDeleted )
             ? $this->serverError()

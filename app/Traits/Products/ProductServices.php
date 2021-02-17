@@ -20,17 +20,26 @@ trait ProductServices
             ->join('stocks', 'stocks.product_id', '=', 'products.id')
             ->join('categories', 'categories.id', '=', 'products.category')
             ->selectRaw('
+                stocks.supplier_id as supplier_id,
+                stocks.bad_order_stock as bad_order_stock,
+                stocks.stock_in as stock_in,
+                stocks.stock_out as stock_out,
+                stocks.incoming as incoming,
+                stocks.default_purchase_costs,
                 products.id,
+                products.sku,
                 products.barcode,
                 products.name,
                 categories.name as category,
                 products.price,
+                products.sold_by,
                 products.cost,
                 (products.price / products.cost) * 100 as margin,
                 stocks.in_stock,
                 stocks.minimum_reorder_level as minimum_reorder_level
             '
             )
+            ->orderByDesc('products.created_at')
             ->get()
             ->toArray();
     }

@@ -4,9 +4,8 @@ namespace App\Http\Requests\Products\Category;
 
 use App\Http\Requests\BaseRequest;
 
-class DeleteRequest extends BaseRequest
+class ShowRequest extends BaseRequest
 {
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -15,7 +14,7 @@ class DeleteRequest extends BaseRequest
     public function rules()
     {
         return [
-            'category_ids.*' => ['required', 'integer', 'distinct', 'exists:categories,id']
+            'category_id' => ['required', 'integer', 'exists:categories,id']
         ];
     }
 }

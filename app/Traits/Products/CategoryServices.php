@@ -2,10 +2,12 @@
 
 namespace App\Traits\Products;
 
+use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 
 trait CategoryServices
 {
+
 
     /**
      * Delete multiple records in the categories table
@@ -15,10 +17,7 @@ trait CategoryServices
      */
     public function deleteMany(array $categoryIds): bool
     {
-        return \boolval(DB::table('categories')
-                            ->whereIn('id', $categoryIds)
-                            ->delete()
-        );
+        return Category::whereIn('id', $categoryIds)->delete();
     }
 
 }

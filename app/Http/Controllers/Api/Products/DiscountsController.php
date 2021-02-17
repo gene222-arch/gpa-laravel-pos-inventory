@@ -32,7 +32,7 @@ class DiscountsController extends Controller
     {
         $this->authorize('viewAny', $this->discount);
 
-        return $this->success($this->discount->all(), 'Success');
+        return $this->success($this->discount->latest()->get(), 'Success');
     }
 
 
@@ -72,8 +72,7 @@ class DiscountsController extends Controller
     {
         $this->authorize('view', $this->discount);
 
-        $discount = $this->discount
-            ->getDiscount($request->discount_id);
+        $discount = $this->discount->find($request->discount_id);
 
         return (!$discount)
             ? $this->serverError()

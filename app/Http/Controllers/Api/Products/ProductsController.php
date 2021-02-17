@@ -80,7 +80,7 @@ class ProductsController extends Controller
 
             });
         } catch (\Throwable $th) {
-            return $this->serverError();
+            return $this->error($th->getMessage());
         }
 
         return $this->success([],

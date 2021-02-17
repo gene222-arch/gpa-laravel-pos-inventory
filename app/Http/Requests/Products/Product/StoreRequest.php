@@ -38,8 +38,6 @@ class StoreRequest extends BaseRequest
         return [
             'stock.supplier_id' => ['required', 'integer', 'exists:suppliers,id'],
             'stock.in_stock' => ['required', 'integer', 'min:0'],
-            'stock.stock_in' => ['required', 'integer', 'min:0'],
-            'stock.stock_out' => ['required', 'integer', 'min:0'],
             'stock.minimum_reorder_level' => ['required', 'integer', 'min:1'],
             'stock.default_purchase_costs' => ['required', 'numeric', 'min:0'],
         ];

@@ -10,6 +10,20 @@ class CategoryPolicy
 {
     use HandlesAuthorization;
 
+
+    /**
+     * Determine whether the user can view the model.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Category  $category
+     * @return mixed
+     */
+    public function viewAny(User $user)
+    {
+        return $user->hasPermissionTo('view_categories', 'api');
+    }
+
+
     /**
      * Determine whether the user can view the model.
      *
@@ -19,7 +33,7 @@ class CategoryPolicy
      */
     public function view(User $user, Category $category)
     {
-        return $user->hasPermissionTo('view_categories');
+        return $user->hasPermissionTo('show_categories', 'api');
     }
 
     /**
@@ -30,7 +44,7 @@ class CategoryPolicy
      */
     public function create(User $user)
     {
-        return $user->hasPermissionTo('create_categories');
+        return $user->hasPermissionTo('create_categories', 'api');
     }
 
     /**
@@ -42,7 +56,7 @@ class CategoryPolicy
      */
     public function update(User $user, Category $category)
     {
-        return $user->hasPermissionTo('update_categories');
+        return $user->hasPermissionTo('update_categories', 'api');
     }
 
     /**
@@ -54,7 +68,7 @@ class CategoryPolicy
      */
     public function delete(User $user, Category $category)
     {
-        return $user->hasPermissionTo('delete_categories');
+        return $user->hasPermissionTo('delete_categories', 'api');
     }
 
 }

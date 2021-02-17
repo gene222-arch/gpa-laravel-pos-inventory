@@ -26,7 +26,7 @@
                 <th align="center"><strong>Sold by</strong></th>
                 <th align="center"><strong>Price</strong></th>
                 <th align="center"><strong>Cost</strong></th>
-            <th align="center"><strong>Supplier id</strong></th>
+                <th align="center"><strong>Supplier id</strong></th>
                 <th align="center"><strong>In stock</strong></th>
                 <th align="center"><strong>Bad order stock</strong></th>
                 <th align="center"><strong>Stock in</strong></th>

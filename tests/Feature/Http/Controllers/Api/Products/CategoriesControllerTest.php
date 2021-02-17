@@ -64,7 +64,7 @@ class CategoriesControllerTest extends TestCase
         $this->actingAsAdmin();
 
         $data = [
-            'id' => [17, 18],
+            'category_ids' => [17, 18],
         ];
 
         $response = $this->delete('api/categories',$data, $this->apiHeaders());

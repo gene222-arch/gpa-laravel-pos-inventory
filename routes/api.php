@@ -121,6 +121,7 @@ Route::group(['prefix' => 'products'], function ()
 Route::group(['prefix' => 'categories'], function ()
 {
     Route::get('/', [CategoriesController::class, 'index']);
+    Route::post('/details', [CategoriesController::class, 'show']);
     Route::post('/', [CategoriesController::class, 'store']);
     Route::put('/', [CategoriesController::class, 'update']);
     Route::delete('/', [CategoriesController::class, 'destroy']);
@@ -133,7 +134,7 @@ Route::group(['prefix' => 'categories'], function ()
 Route::group(['prefix' => 'discounts'], function ()
 {
     Route::get('/', [DiscountsController::class, 'index']);
-    Route::post('/detail', [DiscountsController::class, 'show']);
+    Route::post('/details', [DiscountsController::class, 'show']);
     Route::post('/', [DiscountsController::class, 'store']);
     Route::put('/', [DiscountsController::class, 'update']);
     Route::delete('/', [DiscountsController::class, 'destroy']);
@@ -307,7 +308,7 @@ Route::prefix('transactions')->group(function ()
 /**
  * Export or Import
  */
-Route::group(['middleware' => ['role:admin|manager']], function ()
+Route::group(['middleware' => ['auth:api', 'role:admin|manager']], function ()
 {
     /**
      * PDF Export
