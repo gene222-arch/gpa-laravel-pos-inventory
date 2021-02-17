@@ -51,21 +51,19 @@ class PurchaseOrdersControllerTest extends TestCase
      */
     public function user_can_purchase_order()
     {
-
-
         $data = [
             'supplier_id' => 3,
             'purchase_order_date' => Carbon::now(),
             'expected_delivery_date' => Carbon::now()->addDays(10),
             'items' => [
                 [
-                    'product_id' => 19,
+                    'product_id' => 23,
                     'ordered_quantity' => 100,
                     'purchase_cost' => 1200.00,
                     'amount' => 100.00,
                 ],
                 [
-                    'product_id' => 20,
+                    'product_id' => 24,
                     'ordered_quantity' => 150,
                     'purchase_cost' => 1200.00,
                     'amount' => 100.00,
@@ -87,8 +85,6 @@ class PurchaseOrdersControllerTest extends TestCase
      */
     public function user_can_upsert_purchase_order()
     {
-
-
         $data = [
             'purchase_order_id' => 8,
             'expected_delivery_date' => now(),
@@ -144,8 +140,8 @@ class PurchaseOrdersControllerTest extends TestCase
         $data = [
             'purchase_order_id' => 1,
             'product_ids' => [
-                19,
-                20
+                21,
+                22
             ]
         ];
 
@@ -163,12 +159,12 @@ class PurchaseOrdersControllerTest extends TestCase
     {
         $data = [
             'supplier_id' => 3,
-            'purchase_order_id' => 4,
+            'purchase_order_id' => 5,
             'items_received_quantities' =>
             [
                 [
-                    'purchase_order_details_id' => 7,
-                    'product_id' => 19,
+                    'purchase_order_details_id' => 9,
+                    'product_id' => 22,
                     'received_quantity' => 20,
                 ],
             ]
@@ -192,8 +188,6 @@ class PurchaseOrdersControllerTest extends TestCase
      */
     public function user_can_delete_purchase_order()
     {
-
-
         $data = [
             'purchase_order_id' => [6],
         ];

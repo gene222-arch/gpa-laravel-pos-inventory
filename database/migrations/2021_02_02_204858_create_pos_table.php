@@ -48,11 +48,6 @@ class CreatePosTable extends Migration
                     ->references('id')
                     ->on('pos')
                     ->onDelete('cascade');
-
-            $table->foreign('product_id')
-                ->references('id')
-                ->on('products')
-                ->onDelete('cascade');
         });
     }
 
@@ -63,7 +58,7 @@ class CreatePosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pos');
         Schema::dropIfExists('pos_details');
+        Schema::dropIfExists('pos');
     }
 }

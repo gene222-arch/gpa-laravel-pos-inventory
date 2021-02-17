@@ -50,7 +50,7 @@ class CreateStockAdjustmentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('stock_adjustments');
         Schema::dropIfExists('stock_adjustment_details');
+        Schema::dropIfExists('stock_adjustments');
     }
 }

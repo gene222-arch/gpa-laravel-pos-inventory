@@ -45,11 +45,6 @@ class CreateInvoicesTable extends Migration
                     ->references('id')
                     ->on('invoices')
                     ->onDelete('cascade');
-
-            $table->foreign('product_id')
-                ->references('id')
-                ->on('products')
-                ->onDelete('cascade');
         });
     }
 

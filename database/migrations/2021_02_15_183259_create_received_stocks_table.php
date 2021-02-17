@@ -34,7 +34,7 @@ class CreateReceivedStocksTable extends Migration
             $table->id();
             $table->foreignId('received_stock_id');
             $table->foreignId('purchase_order_details_id');
-            $table->foreignId('product_id');
+            $table->foreignId('product_id')->nullable();
             $table->unsignedInteger('received_quantity');
             $table->timestamps();
 
@@ -48,11 +48,6 @@ class CreateReceivedStocksTable extends Migration
                   ->on('purchase_order_details')
                   ->onDelete('cascade');
 
-            $table->foreign('product_id')
-                  ->references('id')
-                  ->on('products')
-                  ->onDelete('cascade');
-
         });
     }
 
@@ -63,7 +58,7 @@ class CreateReceivedStocksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('stock_received');
         Schema::dropIfExists('stock_received_details');
+        Schema::dropIfExists('stock_received');
     }
 }

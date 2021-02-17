@@ -36,14 +36,7 @@ trait ReportsSummaryServices
             AS gross_sales,
             (
                 SELECT
-                    CASE
-                        WHEN
-                            SUM(sales_return_details.total) != NULL
-                        THEN
-                            SUM(sales_return_details.total)
-                        ELSE
-                            0.00
-                    END
+                    SUM(sales_return_details.total)
                 FROM
                     sales_return_details
             )

@@ -2,6 +2,7 @@
 
 namespace App\Traits\SalesReturn;
 
+use App\Models\Pos;
 use App\Models\Stock;
 use App\Models\SalesReturn;
 use Illuminate\Support\Facades\DB;

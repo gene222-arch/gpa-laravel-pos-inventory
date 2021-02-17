@@ -47,7 +47,7 @@ class SalesReturnControllerTest extends TestCase
             'posSalesReturnDetails' => [
                 [
                     'pos_details_id' => 1,
-                    'product_id' => 19,
+                    'product_id' => 22,
                     'defect' => 'Slightly Damaged',
                     'quantity' => 22,
                     'price' => 20.00,

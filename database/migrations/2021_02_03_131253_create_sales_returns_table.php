@@ -54,10 +54,6 @@ class CreateSalesReturnsTable extends Migration
                 ->on('sales_returns')
                 ->onDelete('cascade');
 
-            $table->foreign('product_id')
-                ->references('id')
-                ->on('products')
-                ->onDelete('cascade');
         });
     }
 
