@@ -19,6 +19,7 @@ class InvoiceController extends Controller
     public function __construct(Invoice $invoice)
     {
         $this->invoice = $invoice;
+        $this->middleware(['auth:api', 'role:admin|manager']);
     }
 
 
@@ -64,7 +65,7 @@ class InvoiceController extends Controller
     {
         $this->authorize('update', $this->invoice);
 
-        $invoiceDetails = $this->invoice->paid($request->invoice_ids);
+        $invoiceDetails = $this->invoice->updateStatus($request->invoice_ids);
 
         return $this->success($invoiceDetails,
         'Success',

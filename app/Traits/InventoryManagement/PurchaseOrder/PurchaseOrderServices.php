@@ -15,6 +15,28 @@ trait PurchaseOrderServices
     use PurchaseOrderDetailsServices, PurchaseOrderHelpers, PDFGeneratorServices;
 
 
+    public function getAllPurchaseOrders(): array
+    {
+        DB::statement('SET sql_mode = "" ');
+
+        return DB::table('purchase_order')
+            ->selectRaw("
+                purchase_order.id as id,
+                DATE_FORMAT(purchase_order.purchase_order_date, '%M %d, %Y') as purchase_order_date,
+                purchase_order.status as status,
+                suppliers.name as supplier,
+                purchase_order.total_received_quantity as received,
+                DATE_FORMAT(purchase_order.expected_delivery_date, '%M %d, %Y') as expected_on,
+                purchase_order.total_ordered_quantity total_ordered_quantity
+            ")
+            ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
+            ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
+            ->groupBy('purchase_order.id')
+            ->get()
+            ->toArray();
+    }
+
+
     /**
      * Undocumented function
      *
@@ -42,6 +64,24 @@ trait PurchaseOrderServices
 
 
 
+    public function getPurchaseOrder(int $purchaseOrderId)
+    {
+        return DB::table('purchase_order')
+            ->selectRaw('
+                purchase_order.id,
+                purchase_order.ordered_by,
+                suppliers.name as supplier,
+                DATE_FORMAT(purchase_order.purchase_order_date, "%M %d, %Y") as purchase_order_date,
+                DATE_FORMAT(purchase_order.expected_delivery_date, "%M %d, %Y") as expected_delivery_date,
+                purchase_order.total_received_quantity,
+                purchase_order.total_ordered_quantity
+            ')
+            ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
+            ->where('purchase_order.id', '=', $purchaseOrderId)
+            ->first();
+    }
+
+
     /**
      * * Get record from `purchase_order_details`  via ['purchase_order_id']
      *
@@ -50,7 +90,27 @@ trait PurchaseOrderServices
      */
     public function findPurchaseOrderDetails(int $purchaseOrderId)
     {
-        return PurchaseOrder::find($purchaseOrderId)->purchaseOrderDetails;
+        DB::statement('SET sql_mode= "" ');
+
+        return DB::table('purchase_order')
+            ->selectRaw('
+                purchase_order_details.id as id,
+                products.id as product_id,
+                products.name as product_description,
+                stocks.in_stock as in_stock,
+                purchase_order_details.remaining_ordered_quantity as quantity,
+                purchase_order_details.purchase_cost as purchase_cost,
+                stocks.incoming as incoming,
+                purchase_order_details.amount
+            ')
+            ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
+            ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
+            ->join('products', 'products.id', '=', 'purchase_order_details.product_id')
+            ->join('stocks', 'stocks.product_id', '=', 'products.id')
+            ->where('purchase_order.id', '=', $purchaseOrderId)
+            ->groupBy('purchase_order_details.id')
+            ->get()
+            ->toArray();
     }
 
 

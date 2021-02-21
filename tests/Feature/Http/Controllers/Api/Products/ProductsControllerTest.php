@@ -14,9 +14,28 @@ class ProductsControllerTest extends TestCase
      */
     public function user_can_get_products()
     {
-        $this->actingAsAdmin();
+
 
         $response = $this->get('/api/products', $this->apiHeaders());
+
+        $this->getResponse($response);
+    }
+
+
+    /**
+     * @test
+     */
+    public function user_can_get_filtered_products()
+    {
+
+
+        $data = [
+            'productName' => 20
+        ];
+
+        $response = $this->post('/api/products/category', $data, $this->apiHeaders());
+
+        dd(json_decode($response->getContent()));
 
         $this->getResponse($response);
     }
@@ -27,7 +46,7 @@ class ProductsControllerTest extends TestCase
      */
     public function user_can_store_product()
     {
-        $this->actingAsAdmin();
+
 
         $data = [
             'product' => [
@@ -57,11 +76,11 @@ class ProductsControllerTest extends TestCase
 
 
     /**
-     * @test
+     * test
      */
     public function user_can_update_product()
     {
-        $this->actingAsAdmin();
+
 
         $data = [
             'product' => [
@@ -102,7 +121,7 @@ class ProductsControllerTest extends TestCase
      */
     public function user_can_delete_product()
     {
-        $this->actingAsAdmin();
+
 
         $data = [
             'product_ids' => [18]

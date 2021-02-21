@@ -29,6 +29,7 @@ class PosController extends Controller
     public function __construct(Pos $pos)
     {
         $this->pos = $pos;
+        $this->middleware(['auth:api', 'role:admin|manager']);
     }
 
 
@@ -83,10 +84,8 @@ class PosController extends Controller
 
        $result = $this->pos->getCustomerCartDetails($request->customer_id);
 
-       return (!$result)
-               ? $this->serverError()
-               : $this->success($result,
-               'Success');
+       return $this->success($result,
+        'Success');
    }
 
 
@@ -366,7 +365,7 @@ class PosController extends Controller
 
         $result = $this->pos->removeItem(
             $request->customer_id,
-            $request->product_id
+            $request->product_ids
         );
 
         return ($result !== true)

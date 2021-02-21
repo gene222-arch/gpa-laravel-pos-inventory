@@ -30,6 +30,7 @@ class CreatePosTable extends Migration
             $table->id();
             $table->foreignId('pos_id');
             $table->foreignId('product_id');
+            $table->foreignId('discount_id')->nullable();
             $table->unsignedInteger('quantity')->default(1);
             $table->unsignedDouble('price', 20, 2)->default(0.00);
             $table->char('unit_of_measurement', 20)->default('pcs');

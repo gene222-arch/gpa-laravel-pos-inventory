@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Reports;
+namespace App\Http\Requests\Products\Product;
 
 use App\Http\Requests\BaseRequest;
 
-class TopFiveSalesByItemRequest extends BaseRequest
+class FilterProductsRequest extends BaseRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -14,8 +14,8 @@ class TopFiveSalesByItemRequest extends BaseRequest
     public function rules()
     {
         return [
-            'year' => ['nullable', 'integer'],
-            'monthNumber' => ['nullable', 'integer', 'min:1', 'max:12'],
+            'category_id' => ['nullable'],
+            'productName' => ['nullable', 'string']
         ];
     }
 }

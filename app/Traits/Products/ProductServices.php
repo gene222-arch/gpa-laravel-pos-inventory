@@ -14,7 +14,7 @@ trait ProductServices
      *
      * @return array
      */
-    public function loadProductsWithStocks(): array
+    public function getAll($categoryId = 0, $productName = null): array
     {
         return DB::table('products')
             ->join('stocks', 'stocks.product_id', '=', 'products.id')
@@ -30,6 +30,7 @@ trait ProductServices
                 products.sku,
                 products.barcode,
                 products.name,
+                categories.id as category_id,
                 categories.name as category,
                 products.price,
                 products.sold_by,
@@ -39,9 +40,41 @@ trait ProductServices
                 stocks.minimum_reorder_level as minimum_reorder_level
             '
             )
+            ->when($categoryId, function ($q, $categoryId) {
+                return $q->where('products.category', '=', $categoryId);
+            })
+            ->when($productName, function ($q, $productName) {
+                return $q->where('products.name', 'like', "%$productName%");
+            })
             ->orderByDesc('products.created_at')
             ->get()
             ->toArray();
+    }
+
+
+        /**
+     * Undocumented function
+     *
+     */
+    public function getProductWithStock(int $productId)
+    {
+        $result = DB::table('products')
+            ->join('stocks', 'stocks.product_id', '=', 'products.id')
+            ->selectRaw('
+                products.id as id,
+                products.id as product_id,
+                products.name as product_description,
+                stocks.in_stock as in_stock,
+                stocks.incoming as incoming
+            ')
+            ->where('products.id', '=', $productId)
+            ->first();
+
+        $result->ordered_quantity = 0;
+        $result->purchase_cost = 0.00;
+        $result->amount = 0.00;
+
+        return $result;
     }
 
 

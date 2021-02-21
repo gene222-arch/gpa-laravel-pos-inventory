@@ -93,8 +93,8 @@ class SuppliersController extends Controller
         $this->authorize('update', $this->supplier);
 
         $isUpdated = $this->supplier
-                          ->find($request->id)
-                          ->update($request->validated());
+                          ->find($request->supplier_id)
+                          ->update($request->except('supplier_id'));
 
         return (!$isUpdated)
             ? $this->serverError()
@@ -116,7 +116,7 @@ class SuppliersController extends Controller
     {
         $this->authorize('delete', $this->supplier);
 
-        $isDeleted = $this->supplier->deleteMany($request->id);
+        $isDeleted = $this->supplier->deleteMany($request->supplier_ids);
 
         return ( !$isDeleted )
             ? $this->serverError()

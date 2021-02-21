@@ -25,37 +25,6 @@ class ReportsController extends Controller
     /**
      * Undocumented function
      *
-     * @return \Illuminate\Http\Response
-     */
-    public function generalAnalytics()
-    {
-        return $this->success($this->salesSummary(), 'Success');
-    }
-
-
-    /**
-     * Undocumented function
-     *
-     * @param TopFiveSalesByItemRequest $request
-     * @return \Illuminate\Http\Response
-     */
-    public function getTopFiveSalesByItem(TopFiveSalesByItemRequest $request)
-    {
-        $topFiveMonthlySales = $this->topFiveSalesByItem(
-            $request->year,
-            $request->monthNumber
-        );
-
-        return (!$topFiveMonthlySales)
-            ? $this->serverError()
-            : $this->success( $topFiveMonthlySales,
-            'Success');
-    }
-
-
-    /**
-     * Undocumented function
-     *
      * @param SalesByItemReportRequest $request
      * @return \Illuminate\Http\Response
      */
@@ -104,10 +73,8 @@ class ReportsController extends Controller
             $request->endDate
         );
 
-        return (!$salesByPaymentType)
-            ? $this->serverError()
-            : $this->success($salesByPaymentType,
-            'Success');
+        return $this->success($salesByPaymentType,
+        'Success');
     }
 
 
@@ -124,10 +91,8 @@ class ReportsController extends Controller
             $request->endDate
         );
 
-        return (!$salesByEmployee)
-            ? $this->serverError()
-            : $this->success($salesByEmployee,
-            'Success');
+        return $this->success($salesByEmployee,
+        'Success');
     }
 
 

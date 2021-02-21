@@ -18,7 +18,6 @@ class CreateEmployeesTable extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->char('phone', 15);
-            $table->string('role');
             $table->timestamps();
         });
     }

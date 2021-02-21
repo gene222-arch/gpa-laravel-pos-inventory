@@ -34,6 +34,7 @@ class PurchaseOrdersController extends Controller
         $this->supplier = $supplier;
         $this->product = $product;
         $this->stock = $stock;
+        $this->middleware(['auth:api', 'role:admin|manager']);
     }
 
 
@@ -47,8 +48,8 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('viewAny', $this->purchaseOrder);
 
-        return $this->success($this->purchaseOrder->all(),
-        'Purchase orders fetched successfully');
+        return $this->success($this->purchaseOrder->getAllPurchaseOrders(),
+        'Success');
     }
 
 
@@ -63,11 +64,16 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('view', $this->purchaseOrder);
 
-        $purchaseOrder = $this->purchaseOrder
+        $purchaseOrder = $this->purchaseOrder->getPurchaseOrder($request->purchase_order_id);
+
+        $purchaseOrderDetails = $this->purchaseOrder
             ->findPurchaseOrderDetails($request->purchase_order_id);
 
-        return $this->success($purchaseOrder,
-        'Purchase Order fetched successfully');
+        return $this->success([
+            'purchaseOrder' => $purchaseOrder,
+            'items' => $purchaseOrderDetails
+        ],
+        'Success');
     }
 
 

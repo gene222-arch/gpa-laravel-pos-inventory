@@ -14,7 +14,7 @@ class UpdateRequest extends BaseRequest
     public function rules()
     {
         return [
-            'id' => ['required', 'integer', 'exists:suppliers,id'],
+            'supplier_id' => ['required', 'integer', 'exists:suppliers,id'],
             'name' => ['required', 'string'],
             'contact' => ['required', 'string', 'min:10', 'max:15'],
             'email' => ['required', 'email', 'string', 'unique:suppliers,email,' . $this->id],

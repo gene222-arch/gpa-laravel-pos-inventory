@@ -16,7 +16,8 @@ class StoreRequest extends BaseRequest
         return [
             'name' => ['required', 'string'],
             'email' => ['required', 'email', 'unique:employees,email', 'unique:users,email', 'unique:suppliers,email'],
-            'phone' => ['required', 'string', 'min:11', 'max:15','unique:employees,phone',  'unique:suppliers,phone']
+            'phone' => ['required', 'string', 'min:11', 'max:15','unique:employees,phone',  'unique:suppliers,phone'],
+            'role' => ['required', 'string', 'exists:roles,name']
         ];
     }
 }

@@ -28,6 +28,7 @@ class Pos extends Model
                     'product_id')
                     ->withPivot([
                         'pos_id',
+                        'discount_id',
                         'quantity',
                         'price',
                         'unit_of_measurement',
@@ -36,6 +37,27 @@ class Pos extends Model
                         'tax',
                         'total'
                     ])
+                    ->withTimestamps();
+    }
+
+    public function latestPosDetails()
+    {
+        return $this->belongsToMany(\App\Models\Product::class,
+                    'pos_details',
+                    'pos_id',
+                    'product_id')
+                    ->withPivot([
+                        'pos_id',
+                        'discount_id',
+                        'quantity',
+                        'price',
+                        'unit_of_measurement',
+                        'sub_total',
+                        'discount',
+                        'tax',
+                        'total'
+                    ])
+                    ->orderBy('created_at', 'asc')
                     ->withTimestamps();
     }
 

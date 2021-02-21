@@ -17,7 +17,8 @@ class UpdateRequest extends BaseRequest
             'employee_id' => ['required', 'integer', 'exists:employees,id'],
             'name' => ['required', 'string'],
             'email' => ['required', 'email', 'unique:employees,email,' . $this->employee_id, 'unique:users,email', 'unique:suppliers,email'],
-            'phone' => ['required', 'string', 'min:11', 'max:15', 'unique:employees,phone,' . $this->employee_id, 'unique:suppliers,phone']
+            'phone' => ['required', 'string', 'min:11', 'max:15', 'unique:employees,phone,' . $this->employee_id, 'unique:suppliers,phone'],
+            'role' => ['required', 'string', 'exists:roles,name']
         ];
     }
 }

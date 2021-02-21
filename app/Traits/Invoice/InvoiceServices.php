@@ -110,12 +110,30 @@ trait InvoiceServices
      * @param array $invoiceIds
      * @return boolean
      */
-    public function paid(array $invoiceIds): bool
+    public function updateStatus(array $invoiceIds): bool
     {
         return \boolval(Invoice::whereIn('id', $invoiceIds)
                                 ->update([
-                                    'status' => 'Paid',
-                                    'paid_at' => now()
+                                    'status' => DB::raw('
+                                        CASE
+                                            WHEN
+                                                status = "Paid"
+                                            THEN
+                                                "Payment in process"
+                                            ELSE
+                                                "Paid"
+                                        END
+                                    '),
+                                    'paid_at' => DB::raw('
+                                        CASE
+                                            WHEN
+                                                status = "Paid"
+                                            THEN
+                                                now()
+                                            ELSE
+                                                NULL
+                                        END
+                                    ')
                                 ])
         );
     }

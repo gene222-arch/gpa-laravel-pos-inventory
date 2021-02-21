@@ -29,7 +29,7 @@ class PosControllerTest extends TestCase
     public function user_can_get_customer_cart_details()
     {
         $data = [
-            'customer_id' => 1
+            'customer_id' => 3
         ];
 
         $response = $this->post('api/pos/cart-details', $data, $this->apiHeaders());
@@ -206,7 +206,7 @@ class PosControllerTest extends TestCase
     {
         $data = [
             'customer_id' => 1,
-            'product_id' => 19
+            'product_id' => [19]
         ];
 
         $response = $this->delete('api/pos/item', $data, $this->apiHeaders());

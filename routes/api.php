@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Customer\CustomersController;
 use App\Http\Controllers\Api\Employee\EmployeesController;
 use App\Http\Controllers\Api\Products\DiscountsController;
 use App\Http\Controllers\Api\Auth\ForgotPasswordController;
+use App\Http\Controllers\Api\Dashboard\DashboardController;
 use App\Http\Controllers\Api\Products\CategoriesController;
 use App\Http\Controllers\Api\Employee\AccessRightsController;
 use App\Http\Controllers\Api\Employee\AccessRightsControllers;
@@ -34,6 +35,7 @@ use App\Http\Controllers\Api\InventoryManagement\ReceivedStocksController;
 use App\Http\Controllers\Api\ExportControllers\ExportSalesReturnController;
 use App\Http\Controllers\Api\InventoryManagement\StockAdjustmentsController;
 use App\Http\Controllers\Api\ExportControllers\ExportPurchaseOrdersController;
+use App\Http\Controllers\Api\RolesPermission\RolesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,39 +67,18 @@ Route::group(['middleware' => 'api'], function ()
 
 
 
-/**
- * Get current authenticated user
- */
+Route::get('/roles', [RolesController::class, 'index']);
 
-Route::group(['middleware' => 'auth:api'], function ()
-{
-    Route::get('/authenticated-user', [AuthController::class, 'getAuthenticatedUser']);
-    Route::get('/authenticated-user-roles', [AuthController::class, 'getAuthenticatedUserWithRoles' ]);
-});
-
-
-/**
- * Cashier Controller
- */
-Route::group([
-        'prefix' => 'cashier',
-        'middleware' => 'auth:api'
-], function ()
-{
-    Route::get('/auth', [CashierController::class, 'cashier']);
-});
 
 
 /**
  * Admin Controller
  */
-Route::group([
-    'prefix' => 'admin',
-    'middleware' => 'auth:api'
-], function()
+Route::group(['prefix' => 'dashboard',], function()
 {
-    Route::get('/auth', [AdminController::class, 'admin']);
+    Route::get('/', [DashboardController::class, 'index']);
 });
+
 
 
 /**
@@ -108,6 +89,8 @@ Route::group(['prefix' => 'products'], function ()
 {
     Route::get('/', [ProductsController::class, 'index']);
     Route::post('/details', [ProductsController::class, 'show']);
+    Route::post('/to-purchase', [ProductsController::class, 'showProductToPurchase']);
+    Route::post('/filter', [ProductsController::class, 'showFilteredProducts']);
     Route::post('/', [ProductsController::class, 'store']);
     Route::put('/', [ProductsController::class, 'update']);
     Route::delete('/', [ProductsController::class, 'destroy']);
@@ -173,7 +156,7 @@ Route::prefix('stocks')->group(function ()
 Route::group(['prefix' => 'purchase-orders'], function ()
 {
     Route::get('/', [PurchaseOrdersController::class, 'index']);
-    Route::post('/purchase-order-detail', [PurchaseOrdersController::class, 'show']);
+    Route::post('/purchase-order-details', [PurchaseOrdersController::class, 'show']);
     Route::post('/', [PurchaseOrdersController::class, 'store']);
     Route::put('/', [PurchaseOrdersController::class, 'upsert']);
     Route::put('/to-receive', [PurchaseOrdersController::class, 'toReceivePurchaseOrder']);
@@ -216,7 +199,9 @@ Route::group(['prefix' => 'customers'], function ()
     Route::delete('/', [CustomersController::class, 'destroy']);
 });
 
-
+/**
+ * Access Rights
+ */
 Route::prefix('access-rights')->group(function ()
 {
     Route::get('/', [AccessRightsController::class, 'index']);
@@ -234,7 +219,7 @@ Route::group(['prefix' => 'employees'], function ()
 {
     Route::get('/', [EmployeesController::class, 'index']);
     Route::get('/access_rights', [EmployeesController::class, 'employeeAccessRights']);
-    Route::post('/detail', [EmployeesController::class, 'show']);
+    Route::post('/details', [EmployeesController::class, 'show']);
     Route::post('/', [EmployeesController::class, 'store']);
     Route::put('/', [EmployeesController::class, 'update']);
     Route::delete('/', [EmployeesController::class, 'destroy']);
@@ -257,10 +242,10 @@ Route::group(['prefix' => 'pos'], function ()
     Route::post('/invoice', [PosController::class, 'invoice']);
     Route::put('/discount-all', [PosController::class, 'assignDiscountToAll']);
     Route::put('/discount/item-quantity', [PosController::class, 'applyDiscountAddQuantity']);
+    Route::put('/cancel-orders', [PosController::class, 'cancelOrders']);
     Route::delete('/discount', [PosController::class, 'removeDiscount']);
     Route::delete('/discount-all', [PosController::class, 'removeDiscountToAll']);
     Route::delete('/items', [PosController::class, 'removeItems']);
-    Route::delete('/cancel-orders', [PosController::class, 'cancelOrders']);
 });
 
 
@@ -371,11 +356,8 @@ Route::group(['prefix' => 'reports'], function ()
     /**
      * Item
      */
-    Route::group(['prefix' => 'sales-by-item'], function ()
-    {
-        Route::post('/top-5', [ReportsController::class, 'getTopFiveSalesByItem']);
-        Route::post('/', [ReportsController::class, 'getSalesByItemReports']);
-    });
+    Route::post('/sales-by-item', [ReportsController::class, 'getSalesByItemReports']);
+
 
     /**
      * Category

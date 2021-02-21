@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Products\Product\StoreRequest;
 use App\Http\Requests\Products\Product\DeleteRequest;
+use App\Http\Requests\Products\Product\FilterProductsRequest;
 use App\Http\Requests\Products\Product\ShowRequest;
 use App\Http\Requests\Products\Product\UpdateRequest;
 
@@ -38,13 +39,57 @@ class ProductsController extends Controller
     {
         $this->authorize('viewAny', $this->product);
 
-        return $this->success($this->product->loadProductsWithStocks(),
+        return $this->success($this->product->getAll(),
             'Fetched Successfully',
             200
         );
     }
 
 
+    /**
+     * * Get resources from products and stocks
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showFilteredProducts(FilterProductsRequest $request)
+    {
+        $this->authorize('viewAny', $this->product);
+
+        return $this->success($this->product->loadProductsWithStocks(
+            $request->category_id,
+            $request->productName
+        ),
+            'Fetched Successfully',
+            200
+        );
+    }
+
+
+    /**
+     * * Get resources from products and stocks
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showProductToPurchase(ShowRequest $request)
+    {
+        $this->authorize('view', $this->product);
+
+        $product = $this->product->getProductWithStock(
+            $request->product_id
+        );
+
+        return $this->success($product,
+        'Fetched Successfully',
+        200
+        );
+    }
+
+
+    /**
+     * * Get resources from products and stocks
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(ShowRequest $request)
     {
         $this->authorize('view', $this->product);

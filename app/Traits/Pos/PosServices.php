@@ -103,7 +103,14 @@ trait PosServices
      */
     public function getCustomerCartDetails(int $customerId): array
     {
-        $posDetails = $this->findCustomerPosDetails($customerId);
+        $customer = $this->findCustomerPos($customerId);
+
+        if (is_null($customer))
+        {
+            return [];
+        }
+
+        $posDetails = $customer->latestPosDetails;
 
         $tax = \number_format($posDetails->map->pivot->map->tax->sum(), 2);
         $subTotal = \number_format($posDetails->map->pivot->map->sub_total->sum(), 2);
@@ -115,14 +122,19 @@ trait PosServices
         foreach ($posDetails as $posDetail)
         {
             $orderDetails[] = [
+                'id' => $posDetail->id,
+                'pos_details_id' => $posDetail->id,
+                'product_id' => $posDetail->pivot->product_id,
+                'discount_id' => $posDetail->pivot->discount_id,
                 'product_description' => $posDetail->name,
                 'quantity' => $posDetail->pivot->quantity,
-                'total' => $posDetail->pivot->sub_total
+                'price' => \number_format($posDetail->pivot->price, 2),
+                'discount' => \number_format($posDetail->pivot->discount, 2)
             ];
         }
 
         return [
-            'order_details' => $orderDetails,
+            'orderDetails' => $orderDetails,
             'subTotal' => $subTotal,
             'discount' => $discount,
             'tax' => $tax,
@@ -383,6 +395,7 @@ trait PosServices
                 # update customer `pos_details` discount
                 $customerPos->posDetails()
                     ->update([
+                        'discount_id' => $discountId,
                         'discount' => DB::raw("sub_total * $discount"),
                         'total' => DB::raw("(sub_total + tax) - (sub_total * $discount)"),
                         'updated_at' => now()
@@ -424,6 +437,7 @@ trait PosServices
                 # update customer `pos_details` discount
                 $result = \boolval($customerPos->posDetails()
                     ->updateExistingPivot( $productId, [
+                        'discount_id' => NULL,
                         'total' => DB::raw('total + discount'),
                         'discount' => 0.00,
                     ]));
@@ -465,6 +479,7 @@ trait PosServices
                 # update customer `pos_details` discount
                 $result = \boolval($customerPos->posDetails()
                     ->update([
+                        'discount_id' => NULL,
                         'total' => DB::raw('total + discount'),
                         'discount' => 0.00,
                     ]));
@@ -601,13 +616,13 @@ trait PosServices
      * Undocumented function
      *
      * @param integer $customerId
-     * @param integer $productId
+     * @param array $productId
      * @return mixed
      */
-    public function removeItem(int $customerId, int $productId): mixed
+    public function removeItem(int $customerId, array $productIds): mixed
     {
         try {
-            DB::transaction(function () use($customerId, $productId)
+            DB::transaction(function () use($customerId, $productIds)
             {
                 $pos = $this->findCustomerPos($customerId);
 
@@ -616,7 +631,7 @@ trait PosServices
                     throw new \Exception("Customer has yet to order");
                 }
 
-                return \boolval($pos->posDetails()->detach($productId));
+                return \boolval($pos->posDetails()->detach($productIds));
             });
         } catch (\Throwable $th) {
             return $th->getMessage();

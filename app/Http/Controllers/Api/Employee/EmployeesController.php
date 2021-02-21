@@ -33,7 +33,7 @@ class EmployeesController extends Controller
     {
         $this->authorize('viewAny', $this->employee);
 
-        return $this->success($this->employee->all(),
+        return $this->success($this->employee->getEmployees(),
             'Success');
     }
 

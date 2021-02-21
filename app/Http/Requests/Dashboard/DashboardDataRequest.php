@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Requests\InventoryManagement\Supplier;
+namespace App\Http\Requests\Dashboard;
 
 use App\Http\Requests\BaseRequest;
 
-class DeleteRequest extends BaseRequest
+class DashboardDataRequest extends BaseRequest
 {
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -15,8 +14,7 @@ class DeleteRequest extends BaseRequest
     public function rules()
     {
         return [
-            'supplier_ids.*' => ['required', 'integer', 'distinct', 'exists:suppliers,id']
+            'year' => ['nullable', 'integer', 'min:1970']
         ];
     }
-
 }
