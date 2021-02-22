@@ -9,6 +9,7 @@ use App\Traits\ApiResponser;
 use App\Models\PurchaseOrder;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\InventoryManagement\PurchaseOrder\CancelOrderRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\ShowRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\StoreRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\DeleteRequest;
@@ -64,10 +65,55 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('view', $this->purchaseOrder);
 
-        $purchaseOrder = $this->purchaseOrder->getPurchaseOrder($request->purchase_order_id);
+        $purchaseOrder = $this->purchaseOrder
+            ->getPurchaseOrder($request->purchase_order_id);
 
         $purchaseOrderDetails = $this->purchaseOrder
             ->findPurchaseOrderDetails($request->purchase_order_id);
+
+        return $this->success([
+            'purchaseOrder' => $purchaseOrder,
+            'items' => $purchaseOrderDetails
+        ],
+        'Success');
+    }
+
+
+  /**
+     * * Show `purchase_order` resources via ['id']
+     *
+     * @param ShowRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showReceivedStocks(ShowRequest $request)
+    {
+        $this->authorize('view', $this->purchaseOrder);
+
+        $receivedStocks = $this->purchaseOrder->findStockReceiveDetails(
+            $request->purchase_order_id
+        );
+
+        return $this->success($receivedStocks,
+        'Success');
+    }
+
+
+
+    /**
+     * * Show `purchase_order` resources via ['id']
+     *
+     * @param ShowRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function editToReceive(ShowRequest $request)
+    {
+        $this->authorize('view', $this->purchaseOrder);
+
+        $purchaseOrder = $this->purchaseOrder
+            ->getPurchaseOrderForReceive($request->purchase_order_id);
+
+        $purchaseOrderDetails = $this->purchaseOrder
+            ->findPurchaseOrderDetailToReceive($request->purchase_order_id);
 
         return $this->success([
             'purchaseOrder' => $purchaseOrder,
@@ -94,14 +140,14 @@ class PurchaseOrdersController extends Controller
             'expectedDeliveryDate' => $request->expected_delivery_date
         ];
 
-        $isOrderPurchased = $this->purchaseOrder->purchaseOrder(
+        $result = $this->purchaseOrder->purchaseOrder(
             $request->supplier_id,
             $purchaseOrderDates,
             $request->items
         );
 
-        return (!$isOrderPurchased)
-            ? $this->serverError()
+        return ($result !== true)
+            ? $this->error($result)
             : $this->success(
             'Purchase ordered successfully',
             'Success',
@@ -122,11 +168,12 @@ class PurchaseOrdersController extends Controller
         $this->authorize('update', $this->purchaseOrder);
 
         $isPurchaseOrderUpserted = $this->purchaseOrder
-                                        ->upsertPurchaseOrderDetails(
-                                        $request->purchase_order_id,
-                                        $request->expected_delivery_date,
-                                        $request->items
-                                        );
+            ->upsertPurchaseOrderDetails(
+            $request->purchase_order_id,
+            $request->purchase_order_date,
+            $request->expected_delivery_date,
+            $request->items
+            );
 
         return (!$isPurchaseOrderUpserted)
             ? $this->serverError()
@@ -215,6 +262,21 @@ class PurchaseOrdersController extends Controller
     }
 
 
+    public function cancelOrder(CancelOrderRequest $request)
+    {
+        $this->authorize('update', $this->purchaseOrder);
+
+        $result = $this->purchaseOrder->cancelRemainingProducts(
+            $request->purchase_order_id,
+            $request->product_ids
+        );
+
+        return $result !== true
+            ? $this->error($result)
+            : $this->success($result, 'Success');
+    }
+
+
 
     /**
      * Delete a `purchase_order_details` via ['purchase_order_id']
@@ -260,14 +322,14 @@ class PurchaseOrdersController extends Controller
                     ($purchaseOrderDetailsCount > 1) &&
                     ($purchaseOrderTotalReceivedItems > 0))
                 {
-                    $isProductDeleted = $this->purchaseOrder
-                                             ->deleteProducts(
-                                            $request->purchase_order_id,
-                                            $request->product_ids
-                                             );
+                    $result = $this->purchaseOrder
+                        ->deleteProducts(
+                            $request->purchase_order_id,
+                            $request->product_ids
+                        );
 
-                    return (!$isProductDeleted)
-                        ? $this->serverError()
+                    return ($result !== true)
+                        ? $this->error($result)
                         : $this->success([],
                         'Product deleted successfully');
                 }

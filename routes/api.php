@@ -144,8 +144,9 @@ Route::group(['prefix' => 'suppliers'], function ()
 Route::prefix('stocks')->group(function ()
 {
     Route::get('/stock-adjustments', [StockAdjustmentsController::class, 'index']);
-    Route::post('/details', [StockAdjustmentsController::class, 'show']);
-    Route::post('/stock-adjustments', [StockAdjustmentsController::class, 'store']);
+    Route::post('/stock-adjustments/stock', [StockAdjustmentsController::class, 'showStockToAdjust']);
+    Route::post('/stock-adjustments/details', [StockAdjustmentsController::class, 'show']);
+    Route::post('/stock-adjustment', [StockAdjustmentsController::class, 'store']);
 });
 
 
@@ -157,10 +158,13 @@ Route::group(['prefix' => 'purchase-orders'], function ()
 {
     Route::get('/', [PurchaseOrdersController::class, 'index']);
     Route::post('/purchase-order-details', [PurchaseOrdersController::class, 'show']);
+    Route::post('/purchase-order-details/to-receive', [PurchaseOrdersController::class, 'editToReceive']);
+    Route::post('/received-stocks-details', [PurchaseOrdersController::class, 'showReceivedStocks']);
     Route::post('/', [PurchaseOrdersController::class, 'store']);
     Route::put('/', [PurchaseOrdersController::class, 'upsert']);
     Route::put('/to-receive', [PurchaseOrdersController::class, 'toReceivePurchaseOrder']);
     Route::put('/mark-all-as-received', [PurchaseOrdersController::class, 'markAllPurchasedOrderAsReceived']);
+    Route::put('/cancel', [PurchaseOrdersController::class, 'cancelOrder']);
     Route::delete('/', [PurchaseOrdersController::class, 'destroy']);
     Route::delete('/products', [PurchaseOrdersController::class, 'deleteProducts']);
     Route::post('/mail-supplier', [PurchaseOrdersController::class, 'sendMailToSupplier']);

@@ -4,7 +4,7 @@ namespace App\Http\Requests\InventoryManagement\PurchaseOrder;
 
 use App\Http\Requests\BaseRequest;
 
-class DeleteProductsRequest extends BaseRequest
+class CancelOrderRequest extends BaseRequest
 {
     /**
      * Get the validation rules that apply to the request.

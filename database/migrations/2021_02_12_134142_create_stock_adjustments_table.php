@@ -23,7 +23,7 @@ class CreateStockAdjustmentsTable extends Migration
         Schema::create('stock_adjustment_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('stock_adjustment_id');
-            $table->foreignId('stock_id')->unique();
+            $table->foreignId('stock_id');
             $table->unsignedInteger('in_stock')->default(0);
             $table->unsignedInteger('added_stock')->default(0);
             $table->unsignedInteger('removed_stock')->default(0);

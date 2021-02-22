@@ -24,7 +24,7 @@ class StockAdjustmentsControllerTest extends TestCase
 
 
     /**
-     * @test
+     * test
      */
     public function user_can_get_stock_adjustment()
     {
@@ -42,7 +42,7 @@ class StockAdjustmentsControllerTest extends TestCase
     }
 
     /**
-     * test
+     * @test
      */
     public function user_can_create_stock_adjustment()
     {
@@ -50,7 +50,7 @@ class StockAdjustmentsControllerTest extends TestCase
             'reason' => 'Received items',
             'stockAdjustmentDetails' => [
                 [
-                    'stock_id' => 1,
+                    'stock_id' => 3,
                     'in_stock' => 120,
                     'added_stock' => 0,
                     'removed_stock' => 0,
@@ -58,7 +58,7 @@ class StockAdjustmentsControllerTest extends TestCase
                     'stock_after' => 1000
                 ],
                 [
-                    'stock_id' => 2,
+                    'stock_id' => 5,
                     'in_stock' => 120,
                     'added_stock' => 0,
                     'removed_stock' => 0,
@@ -68,7 +68,7 @@ class StockAdjustmentsControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->post('api/stocks/stock-adjustments',
+        $response = $this->post('api/stocks/stock-adjustment',
             $data,
             $this->apiHeaders());
 

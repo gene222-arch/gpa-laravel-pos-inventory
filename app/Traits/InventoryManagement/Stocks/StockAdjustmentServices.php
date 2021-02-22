@@ -20,9 +20,9 @@ trait StockAdjustmentServices
 
         return DB::table('stock_adjustments')
             ->selectRaw("
-                stock_adjustments.id,
+                stock_adjustments.id as id,
                 DATE_FORMAT(stock_adjustments.created_at, '%M %d %Y') AS adjusted_at,
-                stock_adjustments.reason,
+                stock_adjustments.reason as reason,
                 SUM(
                     stock_adjustment_details.added_stock +
                     stock_adjustment_details.counted_stock +
@@ -36,6 +36,29 @@ trait StockAdjustmentServices
     }
 
 
+
+    public function getStockToAdjust(int $productId)
+    {
+        $result = DB::table('stocks')
+            ->selectRaw('
+                stocks.id as id,
+                stocks.id as stock_id,
+                products.name as product_description,
+                stocks.in_stock
+            ')
+            ->join('products', 'products.id', '=', 'stocks.product_id')
+            ->where('products.id', '=', $productId)
+            ->first();
+
+        $result->added_stock = 0;
+        $result->removed_stock = 0;
+        $result->counted_stock = 0;
+        $result->stock_after = 0;
+
+        return $result;
+    }
+
+
     /**
      * Undocumented function
      *
@@ -44,12 +67,38 @@ trait StockAdjustmentServices
      */
     public function getStockAdjustment(int $stockAdjustmentId)
     {
-        return (new StockAdjustment())->with('stockAdjustmentDetails')
-            ->whereHas('stockAdjustmentDetails', function ($q) use($stockAdjustmentId)
-            {
-                return $q->where('stock_adjustment_id', '=', $stockAdjustmentId);
-            })
-            ->get();
+        $stockAdjustment = DB::table('stock_adjustments')
+            ->selectRaw('
+                id,
+                reason,
+                adjusted_by,
+                DATE_FORMAT(created_at, "%M %d, %Y") as adjusted_at
+            ')
+            ->where('id', '=', $stockAdjustmentId)
+            ->first();
+
+        DB::statement('SET sql_mode="" ');
+
+        $stockAdjustmentDetails = DB::table('stock_adjustment_details')
+            ->selectRaw('
+                stock_adjustment_details.id as id,
+                products.name as product_description,
+                SUM(stock_adjustment_details.added_stock + stock_adjustment_details.counted_stock + stock_adjustment_details.removed_stock) as quantity,
+                stock_adjustment_details.added_stock as added_stock,
+                stock_adjustment_details.counted_stock as counted_stock,
+                stock_adjustment_details.removed_stock as removed_stock
+            ')
+            ->join('stocks', 'stocks.id', '=', 'stock_adjustment_details.stock_id')
+            ->join('products', 'products.id', '=', 'stocks.product_id')
+            ->where('stock_adjustment_details.stock_adjustment_id', '=', $stockAdjustmentId)
+            ->groupBy('stock_adjustment_details.id')
+            ->get()
+            ->toArray();
+
+        return [
+            'stockAdjustment' => $stockAdjustment,
+            'stockAdjustmentDetails' => $stockAdjustmentDetails
+        ];
     }
 
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\InventoryManagement;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\InventoryManagement\StockAdjustment\ShowRequest;
+use App\Http\Requests\InventoryManagement\StockAdjustment\ShowStockToAdjust;
 use App\Http\Requests\InventoryManagement\StockAdjustment\StoreRequest;
 use App\Models\StockAdjustment;
 use App\Traits\ApiResponser;
@@ -18,6 +19,7 @@ class StockAdjustmentsController extends Controller
     public function __construct(StockAdjustment $stockAdjustment)
     {
         $this->stockAdjustment = $stockAdjustment;
+        $this->middleware(['auth:api', 'role:admin|manager']);
     }
 
 
@@ -49,6 +51,16 @@ class StockAdjustmentsController extends Controller
         );
 
         return $this->success($data, 'Success');
+    }
+
+
+    public function showStockToAdjust(ShowStockToAdjust $request)
+    {
+        $this->authorize('view', $this->stockAdjustment);
+
+        return $this->success($this->stockAdjustment->getStockToAdjust(
+            $request->product_id
+        ));
     }
 
 

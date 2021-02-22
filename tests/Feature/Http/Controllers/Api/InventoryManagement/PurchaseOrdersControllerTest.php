@@ -59,12 +59,14 @@ class PurchaseOrdersControllerTest extends TestCase
                 [
                     'product_id' => 23,
                     'ordered_quantity' => 100,
+                    'remaining_ordered_quantity' => 100,
                     'purchase_cost' => 1200.00,
                     'amount' => 100.00,
                 ],
                 [
                     'product_id' => 24,
                     'ordered_quantity' => 150,
+                    'remaining_ordered_quantity' => 150,
                     'purchase_cost' => 1200.00,
                     'amount' => 100.00,
                 ],
@@ -153,18 +155,23 @@ class PurchaseOrdersControllerTest extends TestCase
 
 
     /**
-     * @test
+     * test
      */
     public function user_can_receive_purchase_order()
     {
         $data = [
             'supplier_id' => 3,
-            'purchase_order_id' => 5,
+            'purchase_order_id' => 29,
             'items_received_quantities' =>
             [
                 [
-                    'purchase_order_details_id' => 9,
-                    'product_id' => 22,
+                    'purchase_order_details_id' => 50,
+                    'product_id' => 23,
+                    'received_quantity' => 20,
+                ],
+                [
+                    'purchase_order_details_id' => 51,
+                    'product_id' => 24,
                     'received_quantity' => 20,
                 ],
             ]
@@ -179,6 +186,26 @@ class PurchaseOrdersControllerTest extends TestCase
 
 
         $this->getResponse($response, 201);
+    }
+
+
+   /**
+     * @test
+     */
+    public function user_can_cancel_remaining_orders()
+    {
+        $data = [
+            'purchase_order_id' => 32,
+            'product_ids' => [
+                29
+            ]
+        ];
+
+        $response = $this->put('api/purchase-orders/cancel', $data, $this->apiHeaders());
+
+        dd(json_decode($response->getContent()));
+
+        $this->getResponse($response, 200);
     }
 
 

@@ -16,7 +16,7 @@ use function PHPUnit\Framework\isEmpty;
 trait StockServices
 {
 
-    use StocksHelper, PDFGeneratorServices;
+    use PDFGeneratorServices;
 
 
     /**
@@ -106,7 +106,7 @@ trait StockServices
             ];
         }
 
-        $uniqueBy = 'product_id';
+        $uniqueBy = ['product_id'];
 
         $update = [
             'in_stock' => DB::raw('stocks.in_stock + stocks.stock_in + values(stock_in)'),
@@ -236,30 +236,38 @@ trait StockServices
      * * after purchase of order
      *
      * @param array $productId
-     * @return boolean
+     * @return mixed
      */
-    public function updateIncomingStocksOf(array $productIds): bool
+    public function updateIncomingStocksOf(array $productIds): mixed
     {
         try {
             DB::transaction(function () use($productIds)
             {
-                $incomingStocks = $this->prepareGetProductTotalIncomingStocks($productIds);
+                $incomingStocks = DB::table('purchase_order_details')
+                    ->whereIn('product_id', $productIds)
+                    ->get(['product_id', 'remaining_ordered_quantity'])
+                    ->toArray();
 
-                $uniqueBy = ['product_id'];
+                foreach ($incomingStocks as $incomingStock)
+                {
+                    $data[] = [
+                        'product_id' => $incomingStock->product_id,
+                        'incoming' => $incomingStock->remaining_ordered_quantity
+                    ];
+                }
+
+                $uniqueBy = 'product_id';
 
                 $update = [
                     'incoming' => DB::raw('stocks.incoming + values(incoming)')
                 ];
 
                 #update stocks
-                DB::table('stocks')
-                    ->upsert($incomingStocks,
-                    $uniqueBy,
-                    $update);
+                DB::table('stocks')->upsert($data, $uniqueBy, $update);
             });
 
         } catch (\Throwable $th) {
-            return false;
+            return $th->getMessage();
         }
 
         return true;
@@ -309,22 +317,41 @@ trait StockServices
 
 
 
-    /**
-     * Update record ['incoming'] field from stocks table
-     * after cancellation of purchase of order
-     *
-     * @param integer $productId
-     * @param integer $outgoingQuantity
-     * @return boolean
-     */
-    public function outgoingStock(int $productId, int $outgoingQuantity): bool
+   /**
+    * Undocumented function
+    *
+    * @param integer $purchaseOrderId
+    * @param array $productIds
+    * @return mixed
+    */
+    public function outGoingStocks(int $purchaseOrderId, array $productIds): mixed
     {
-        return \boolval(Stock::where('product_id', '=', $productId)
-                                ->update([
-                                    'incoming' => DB::raw('incoming - ' . $outgoingQuantity)
-                                ])
-        );
+        try {
+            DB::transaction(function () use($purchaseOrderId, $productIds)
+            {
+                # get the remaining quantity of a product via ['product_id']
+                $data = (new PurchaseOrder)->prepareGetPODRemainingQty(
+                    $purchaseOrderId,
+                    $productIds
+                );
+
+                $uniqueBy = 'product_id';
+
+                $update = [
+                    'incoming' => DB::raw('stocks.incoming - values(stock_in)'),
+                ];
+
+                DB::table('stocks')->upsert($data, $uniqueBy, $update);
+
+            });
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+
+        return true;
     }
+
+
 
 
 

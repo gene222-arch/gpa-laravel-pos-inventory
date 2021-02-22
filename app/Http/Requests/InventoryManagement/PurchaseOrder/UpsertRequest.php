@@ -31,6 +31,7 @@ class UpsertRequest extends BaseRequest
     {
         return [
             'purchase_order_id' => ['required', 'integer', 'exists:purchase_order,id'],
+            'purchase_order_date' => ['required', 'date'],
             'expected_delivery_date' => ['required', 'date'],
         ];
     }
