@@ -12,7 +12,9 @@ class SalesReturn extends Model
 
 
     protected $fillable = [
+        'user_id',
         'pos_id',
+        'status',
     ];
 
     public function posSalesReturnDetails()

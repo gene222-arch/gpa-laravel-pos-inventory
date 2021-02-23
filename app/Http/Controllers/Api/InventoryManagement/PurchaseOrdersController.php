@@ -9,15 +9,16 @@ use App\Traits\ApiResponser;
 use App\Models\PurchaseOrder;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\InventoryManagement\PurchaseOrder\CancelOrderRequest;
+use App\Http\Requests\InventoryManagement\PurchaseOrder\MailRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\ShowRequest;
+use App\Http\Requests\InventoryManagement\PurchaseOrder\IndexRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\StoreRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\DeleteRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\UpsertRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\ReceiveRequest;
-use App\Http\Requests\InventoryManagement\PurchaseOrder\DeleteProductsRequest;
-use App\Http\Requests\InventoryManagement\PurchaseOrder\MailRequest;
+use App\Http\Requests\InventoryManagement\PurchaseOrder\CancelOrderRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\MailSupplierRequest;
+use App\Http\Requests\InventoryManagement\PurchaseOrder\DeleteProductsRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\MarkAllReceivedRequest;
 
 class PurchaseOrdersController extends Controller
@@ -54,6 +55,28 @@ class PurchaseOrdersController extends Controller
     }
 
 
+        /**
+     * * Get resources of purchase order details
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function filteredIndex(IndexRequest $request)
+    {
+        $this->authorize('viewAny', $this->purchaseOrder);
+
+        $purchaseOrders = $this->purchaseOrder->getAllPurchaseOrders(
+            true,
+            $request->operator,
+            $request->filterBy,
+            $request->filters
+        );
+
+        return $this->success($purchaseOrders,
+        'Success');
+    }
+
+
+
 
     /**
      * * Show `purchase_order` resources via ['id']
@@ -79,7 +102,7 @@ class PurchaseOrdersController extends Controller
     }
 
 
-  /**
+    /**
      * * Show `purchase_order` resources via ['id']
      *
      * @param ShowRequest $request
@@ -96,6 +119,30 @@ class PurchaseOrdersController extends Controller
         return $this->success($receivedStocks,
         'Success');
     }
+
+
+    /**
+     * * Show `purchase_order` resources via ['id']
+     *
+     * @param ShowRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showForBadOrdersRequest(ShowRequest $request)
+    {
+        $this->authorize('view', $this->purchaseOrder);
+
+        $purchaseOrder = $this->purchaseOrder->getPurchaseOrder($request->purchase_order_id);
+        $items = $this->purchaseOrder->findPurchaseOrderForBadOrders(
+            $request->purchase_order_id
+        );
+
+        return $this->success([
+            'purchaseOrder' => $purchaseOrder,
+            'items' => $items
+        ],
+        'Success');
+    }
+
 
 
 

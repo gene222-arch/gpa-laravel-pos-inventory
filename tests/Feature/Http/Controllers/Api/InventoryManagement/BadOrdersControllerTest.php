@@ -47,22 +47,22 @@ class BadOrdersControllerTest extends TestCase
         $this->actingAsAdmin();
 
         $data = [
-            'purchase_order_id' => 1,
+            'purchase_order_id' => 29,
             'badOrderDetails' => [
                 [
-                    'purchase_order_details_id' => 1,
-                    'product_id' => 19,
+                    'purchase_order_details_id' => 50,
+                    'product_id' => 23,
                     'defect' => 'Damaged',
-                    'quantity' => 10,
+                    'quantity' => 1,
                     'price' => 20.00,
                     'unit_of_measurement' => 'pcs',
                     'amount' => 2000.00
                 ],
                 [
-                    'purchase_order_details_id' => 2,
-                    'product_id' => 20,
+                    'purchase_order_details_id' => 51,
+                    'product_id' => 24,
                     'defect' => 'Damaged',
-                    'quantity' => 10,
+                    'quantity' => 1,
                     'price' => 20.00,
                     'unit_of_measurement' => 'pcs',
                     'amount' => 2000.00

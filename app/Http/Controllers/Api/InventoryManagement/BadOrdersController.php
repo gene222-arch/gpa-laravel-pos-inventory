@@ -34,8 +34,8 @@ class BadOrdersController extends Controller
     {
         $this->authorize('viewAny', $this->badOrder);
 
-        return $this->success($this->badOrder->loadBadOrdersWithDetails(),
-        ''
+        return $this->success($this->badOrder->getBadOrders(),
+        'Success'
         );
     }
 
@@ -52,7 +52,7 @@ class BadOrdersController extends Controller
         $badOrderDetails = $this->badOrder
                                 ->getBadOrderWithDetails($request->bad_order_id);
 
-        return $this->success( $badOrderDetails,
+        return $this->success($badOrderDetails,
         'Success'
         );
     }

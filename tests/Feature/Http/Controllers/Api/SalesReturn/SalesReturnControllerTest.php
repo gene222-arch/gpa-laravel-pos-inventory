@@ -13,7 +13,7 @@ class SalesReturnControllerTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        $response = $this->get('api/sales-return', $this->apiHeaders());
+        $response = $this->get('api/sales-returns', $this->apiHeaders());
 
         $this->getResponse($response);
     }
@@ -29,7 +29,7 @@ class SalesReturnControllerTest extends TestCase
             'sales_return_id' => 1
         ];
 
-        $response = $this->post('api/sales-return', $data, $this->apiHeaders());
+        $response = $this->post('api/sales-returns', $data, $this->apiHeaders());
 
         $this->getResponse($response);
     }
@@ -47,20 +47,20 @@ class SalesReturnControllerTest extends TestCase
             'posSalesReturnDetails' => [
                 [
                     'pos_details_id' => 1,
-                    'product_id' => 22,
+                    'product_id' => 23,
                     'defect' => 'Slightly Damaged',
-                    'quantity' => 22,
-                    'price' => 20.00,
-                    'unit_of_measurement' => 'pcs',
-                    'sub_total' => 330.00,
-                    'discount' => 10.00,
-                    'tax' => 39.60,
-                    'total' => 369.60
+                    'quantity' => 1,
+                    'price' => 215.00,
+                    'unit_of_measurement' => 'each',
+                    'sub_total' => 15.00,
+                    'discount' => 0.00,
+                    'tax' => 1.80,
+                    'total' => 16.80
                 ],
             ]
         ];
 
-        $response = $this->post('api/sales-return', $data, $this->apiHeaders());
+        $response = $this->post('api/sales-returns', $data, $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -105,7 +105,7 @@ class SalesReturnControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->put('api/sales-return', $data, $this->apiHeaders());
+        $response = $this->put('api/sales-returns', $data, $this->apiHeaders());
 
         $this->getResponse($response, 201);
     }
@@ -122,7 +122,7 @@ class SalesReturnControllerTest extends TestCase
 
         ];
 
-        $response = $this->delete('api/sales-return', $data, $this->apiHeaders());
+        $response = $this->delete('api/sales-returns', $data, $this->apiHeaders());
 
         $this->getResponse($response);
     }
@@ -138,7 +138,7 @@ class SalesReturnControllerTest extends TestCase
             'pos_sales_return_ids' => [1]
         ];
 
-        $response = $this->delete('api/sales-return', $data, $this->apiHeaders());
+        $response = $this->delete('api/sales-returns', $data, $this->apiHeaders());
 
         dd(json_decode($response->getContent()));
 
@@ -161,7 +161,7 @@ class SalesReturnControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->delete('api/sales-return/items', $data, $this->apiHeaders());
+        $response = $this->delete('api/sales-returns/items', $data, $this->apiHeaders());
 
         $this->getResponse($response);
     }

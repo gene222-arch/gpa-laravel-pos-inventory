@@ -26,6 +26,29 @@ class PurchaseOrdersControllerTest extends TestCase
 
 
 
+        /**
+     * @test
+     */
+    public function user_can_get_filtered_purchase_orders()
+    {
+        $data = [
+            'filterBy' => 'status',
+            'operator' => '!=',
+            'filters' => [
+                'Pending'
+            ]
+        ];
+
+        $response = $this->post('api/purchase-orders/filtered', $data, $this->apiHeaders());
+
+        dd(json_decode($response->getContent()));
+
+        $this->getResponse($response);
+    }
+
+
+
+
     /**
      * * test
      */
@@ -190,7 +213,7 @@ class PurchaseOrdersControllerTest extends TestCase
 
 
    /**
-     * @test
+     * test
      */
     public function user_can_cancel_remaining_orders()
     {

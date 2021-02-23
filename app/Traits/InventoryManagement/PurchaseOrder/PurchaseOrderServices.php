@@ -14,8 +14,7 @@ trait PurchaseOrderServices
 {
     use PurchaseOrderDetailsServices, PurchaseOrderHelpers, PDFGeneratorServices;
 
-
-    public function getAllPurchaseOrders(): array
+    public function getAllPurchaseOrders(bool $doFilter = false, string $operator = null, string $filterBy = null, array $filters = NULL): array
     {
         DB::statement('SET sql_mode = "" ');
 
@@ -31,6 +30,12 @@ trait PurchaseOrderServices
             ")
             ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
             ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
+            ->when(($doFilter === true && $operator === '!='), function($q) use ($filterBy, $filters) {
+                return $q->whereNotIn('purchase_order.' . $filterBy, $filters);
+            })
+            ->when(($doFilter === true && $operator === '='), function($q) use ($filterBy, $filters) {
+                return $q->where('purchase_order.' . $filterBy, $filters);
+            })
             ->groupBy('purchase_order.id')
             ->orderBy('purchase_order.created_at', 'desc')
             ->get()
@@ -126,6 +131,45 @@ trait PurchaseOrderServices
             ->groupBy('purchase_order_details.id')
             ->get()
             ->toArray();
+    }
+
+
+
+       /**
+     * * Get record from `purchase_order_details`  via ['purchase_order_id']
+     *
+     * @param integer $purchaseOrderId
+     * @return \App\Modles\Product
+     */
+    public function findPurchaseOrderForBadOrders(int $purchaseOrderId)
+    {
+        DB::statement('SET sql_mode= "" ');
+
+        $result = DB::table('purchase_order')
+            ->selectRaw('
+                purchase_order_details.id as id,
+                products.id as product_id,
+                products.name as product_description,
+                stocks.in_stock as in_stock,
+                products.sold_by as unit_of_measurement,
+                purchase_order_details.received_quantity as received_quantity,
+                purchase_order_details.purchase_cost as purchase_cost
+            ')
+            ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
+            ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
+            ->join('products', 'products.id', '=', 'purchase_order_details.product_id')
+            ->join('stocks', 'stocks.product_id', '=', 'products.id')
+            ->where('purchase_order.id', '=', $purchaseOrderId)
+            ->get()
+            ->toArray();
+
+        foreach ($result as $val) {
+            $val->quantity = 0;
+            $val->amount = 0;
+            $val->defect = '';
+        }
+
+        return $result;
     }
 
 

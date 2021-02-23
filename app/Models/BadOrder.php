@@ -10,7 +10,12 @@ class BadOrder extends Model
 {
     use HasFactory, BadOrderServices;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'user_id',
+        'purchase_order_id',
+        'status',
+    ];
+
 
     protected $table = 'bad_orders';
 

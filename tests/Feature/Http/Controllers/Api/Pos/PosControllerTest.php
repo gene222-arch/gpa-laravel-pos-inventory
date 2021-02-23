@@ -63,7 +63,7 @@ class PosControllerTest extends TestCase
     public function user_can_add_to_cart_in_customers_orders_in_pos()
     {
         $data = [
-            'customer_id' => 2,
+            'customer_id' => 3,
             'product_id' => 23
         ];
 
@@ -241,7 +241,7 @@ class PosControllerTest extends TestCase
     public function user_can_process_customer_payment()
     {
         $data = [
-            'customer_id' => 1,
+            'customer_id' => 3,
             'payment_method' => 'invoice',
             'should_mail' => false
         ];

@@ -17,6 +17,8 @@ use App\Http\Requests\Pos\RemoveDiscountRequest;
 use App\Http\Requests\Pos\DecrementItemQtyRequest;
 use App\Http\Requests\Pos\IncrementItemQtyRequest;
 use App\Http\Requests\Pos\AssignDiscountToAllRequest;
+use App\Http\Requests\Pos\ForSalesReturnRequest;
+use App\Http\Requests\Pos\IndexFilterRequest;
 use App\Http\Requests\Pos\RemoveDiscountToAllRequest;
 
 class PosController extends Controller
@@ -42,12 +44,24 @@ class PosController extends Controller
     {
         $this->authorize('viewAny', $this->pos);
 
-        $orderLists = $this->pos->loadOrders();
+        $orderLists = $this->pos->all();
 
-        return (!$orderLists)
-            ? $this->serverError()
-            : $this->success($orderLists,
-            'Success');
+        return $this->success($orderLists, 'Success');
+    }
+
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexFiltered(IndexFilterRequest $request)
+    {
+        $this->authorize('viewAny', $this->pos);
+
+        $orderLists = $this->pos->all($request->filters);
+
+        return $this->success($orderLists, 'Success');
     }
 
 
@@ -70,6 +84,25 @@ class PosController extends Controller
                 ],
                 'Success');
     }
+
+
+        /**
+     * Undocumented function
+     *
+     * @param ForSalesReturnRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showForSalesReturn(ForSalesReturnRequest $request)
+    {
+        $this->authorize('view', $this->pos);
+
+        $result = $this->pos->findCustomerOrderForSalesReturn($request->pos_id);
+
+        return !$result
+            ? $this->error('Fail', 204)
+            : $this->success($result, 'Success');
+    }
+
 
 
     /**

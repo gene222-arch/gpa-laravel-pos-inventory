@@ -15,25 +15,25 @@ trait BadOrderServices
      *
      * @return array
      */
-    public function loadBadOrdersWithDetails(): array
+    public function getBadOrders(): array
     {
+        DB::statement('SET sql_mode=""');
+
         return DB::table('bad_orders')
             ->join('bad_order_details', 'bad_order_details.bad_order_id', '=', 'bad_orders.id')
             ->join('purchase_order_details', 'purchase_order_details.id', '=', 'bad_order_details.purchase_order_details_id')
             ->join('purchase_order', 'purchase_order.id', '=', 'purchase_order_details.purchase_order_id')
             ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
+            ->join('users', 'users.id', '=', 'bad_orders.user_id')
             ->selectRaw('
                 bad_orders.id as id,
-                suppliers.name as supplier_name,
+                users.name as created_by,
+                suppliers.name as supplier,
                 SUM(bad_order_details.amount) as purchase_return,
                 SUM(bad_order_details.quantity) as no_of_items,
-                purchase_order.purchase_order_date as purchase_order_date
+                DATE_FORMAT(purchase_order.purchase_order_date, "%M %d, %Y") as purchase_order_date
             ')
-            ->groupBy(
-                'id',
-                'supplier_name',
-                'purchase_order_date'
-            )
+            ->groupBy('id')
             ->get()
             ->toArray();
     }
@@ -46,9 +46,38 @@ trait BadOrderServices
      */
     public function getBadOrderWithDetails(int $badOrderId)
     {
-        return $this->badOrder
-                    ->find($badOrderId)
-                    ->with('bad_order_details');
+        $badOrder = DB::table('bad_orders')
+            ->selectRaw('
+                bad_orders.id as id,
+                users.name as created_by,
+                bad_orders.status as status,
+                DATE_FORMAT(purchase_order.purchase_order_date, "%M %d, %Y") as purchase_order_date,
+                DATE_FORMAT(bad_orders.created_at, "%M %d, %Y") as created_at
+            ')
+            ->join('purchase_order', 'purchase_order.id', '=', 'bad_orders.purchase_order_id')
+            ->join('users', 'users.id', '=', 'bad_orders.user_id')
+            ->where('bad_orders.id', '=', $badOrderId)
+            ->first();
+
+        $badOrderDetails = DB::table('bad_order_details')
+            ->selectRaw('
+                bad_order_details.id as id,
+                bad_order_details.defect as defect,
+                products.name as product_description,
+                bad_order_details.amount as purchase_return,
+                bad_order_details.quantity as number_of_items
+            ')
+            ->join('products', 'products.id', '=', 'bad_order_details.product_id')
+            ->join('purchase_order_details', 'purchase_order_details.id', '=', 'bad_order_details.purchase_order_details_id')
+            ->where('bad_order_id', '=', $badOrderId)
+            ->get()
+            ->toArray();
+
+        return [
+            'badOrder' => $badOrder,
+            'details' => $badOrderDetails
+        ];
+
     }
 
 
@@ -141,6 +170,7 @@ trait BadOrderServices
     public function createBadOrder(int $purchaseOrderId): BadOrder
     {
         return BadOrder::create([
+            'user_id' => auth()->user()->id,
             'purchase_order_id' => $purchaseOrderId
         ]);
     }

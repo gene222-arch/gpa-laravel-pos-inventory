@@ -22,6 +22,18 @@ class SalesReturnPolicy
     }
 
 
+        /**
+     * Determine whether the user can view any models.
+     *
+     * @param  \App\Models\User  $user
+     * @return mixed
+     */
+    public function view(User $user)
+    {
+        return $user->hasPermissionTo('show_sales_return', 'api');
+    }
+
+
     /**
      * Determine whether the user can create models.
      *

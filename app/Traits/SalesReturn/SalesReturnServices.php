@@ -26,15 +26,53 @@ trait SalesReturnServices
             ->join('customers', 'customers.id', '=', 'pos.customer_id')
             ->selectRaw('
                 sales_returns.id as id,
-                customers.name as customer_name,
+                customers.name as customer,
                 SUM(sales_return_details.total) as sales_return,
                 SUM(sales_return_details.quantity) as no_of_items,
-                sales_returns.created_at as returned_at
+                DATE_FORMAT(sales_returns.created_at, "%M %d, %Y") as returned_at,
+                DATE_FORMAT(pos.created_at, "%M %d, %Y") as purchased_at
             ')
             ->groupBy('id')
             ->get()
             ->toArray();
     }
+
+
+
+    public function getSalesReturnWithDetails(int $salesReturnId)
+    {
+        $salesReturn = DB::table('sales_returns')
+            ->selectRaw('
+            sales_returns.id as id,
+            users.name as created_by,
+            DATE_FORMAT(pos.created_at, "%M %d, %Y") as purchased_at,
+            DATE_FORMAT(sales_returns.created_at, "%M %d, %Y") as returned_at
+            ')
+            ->join('pos', 'pos.id', '=', 'sales_returns.pos_id')
+            ->join('users', 'users.id', '=', 'sales_returns.user_id')
+            ->where('sales_returns.id', '=', $salesReturnId)
+            ->first();
+
+        $salesReturnDetails = DB::table('sales_return_details')
+            ->selectRaw('
+                sales_return_details.id as id,
+                products.name as product_description,
+                sales_return_details.defect as defect,
+                sales_return_details.quantity as quantity,
+                sales_return_details.price as price,
+                sales_return_details.total as total
+            ')
+            ->join('products', 'products.id', '=', 'sales_return_details.product_id')
+            ->where('sales_return_details.sales_return_id', '=', $salesReturnId)
+            ->get()
+            ->toArray();
+
+        return [
+            'salesReturn' => $salesReturn,
+            'items' => $salesReturnDetails
+        ];
+    }
+
 
 
     /**
@@ -73,6 +111,7 @@ trait SalesReturnServices
     private function createSalesReturnWithPos(int $posId): SalesReturn
     {
         return SalesReturn::create([
+            'user_id' => auth()->user()->id,
             'pos_id' => $posId
         ]);
     }

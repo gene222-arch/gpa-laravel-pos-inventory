@@ -23,7 +23,7 @@ class StoreRequest extends BaseRequest
             'posSalesReturnDetails.*.price' => ['required', 'numeric', 'min:1'],
             'posSalesReturnDetails.*.unit_of_measurement' => ['required', 'string'],
             'posSalesReturnDetails.*.sub_total' => ['required', 'numeric', 'min:1'],
-            'posSalesReturnDetails.*.discount' => ['required', 'numeric', 'min:1'],
+            'posSalesReturnDetails.*.discount' => ['required', 'numeric', 'min:0'],
             'posSalesReturnDetails.*.tax' => ['required', 'numeric', 'min:1'],
             'posSalesReturnDetails.*.total' => ['required', 'numeric', 'min:1'],
 

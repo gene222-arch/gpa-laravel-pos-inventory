@@ -21,6 +21,7 @@ class SalesReturnController extends Controller
     public function __construct(SalesReturn $salesReturn)
     {
         $this->salesReturn = $salesReturn;
+        $this->middleware(['auth:api', 'role:admin|manager']);
     }
 
 
@@ -68,11 +69,9 @@ class SalesReturnController extends Controller
     {
         $this->authorize('view', $this->salesReturn);
 
-        return (!true)
-                ? $this->serverError()
-                : $this->success([],
-                    'Success',
-                    201);
+        return $this->success($this->salesReturn->getSalesReturnWithDetails(
+            $request->sales_return_id
+        ));
     }
 
     /**

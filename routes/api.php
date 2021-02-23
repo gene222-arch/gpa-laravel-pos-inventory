@@ -157,7 +157,9 @@ Route::prefix('stocks')->group(function ()
 Route::group(['prefix' => 'purchase-orders'], function ()
 {
     Route::get('/', [PurchaseOrdersController::class, 'index']);
+    Route::post('/filtered', [PurchaseOrdersController::class, 'filteredIndex']);
     Route::post('/purchase-order-details', [PurchaseOrdersController::class, 'show']);
+    Route::post('/purchase-order-details/to-bad-orders', [PurchaseOrdersController::class, 'showForBadOrdersRequest']);
     Route::post('/purchase-order-details/to-receive', [PurchaseOrdersController::class, 'editToReceive']);
     Route::post('/received-stocks-details', [PurchaseOrdersController::class, 'showReceivedStocks']);
     Route::post('/', [PurchaseOrdersController::class, 'store']);
@@ -239,6 +241,8 @@ Route::group(['prefix' => 'employees'], function ()
 Route::group(['prefix' => 'pos'], function ()
 {
     Route::get('/order-lists', [PosController::class, 'index']);
+    Route::post('/order-lists/filtered', [PosController::class, 'indexFiltered']);
+    Route::post('/customer-orders/to-sales-return', [PosController::class, 'showForSalesReturn']);
     Route::post('/cart-details', [PosController::class, 'showCartDetails']);
     Route::post('/add-to-cart', [PosController::class, 'store']);
     Route::post('/to-pay', [PosController::class, 'showAmountToPay']);
@@ -272,9 +276,10 @@ Route::group(['prefix' => 'invoices'], function ()
  * Todo: Update Method
  */
 
-Route::group(['prefix' => 'sales-return'], function ()
+Route::group(['prefix' => 'sales-returns'], function ()
 {
     Route::get('/', [SalesReturnController::class, 'index']);
+    Route::post('/details', [SalesReturnController::class, 'show']);
     Route::post('/', [SalesReturnController::class, 'store']);
     Route::put('/', [SalesReturnController::class, 'update']);
     Route::delete('/', [SalesReturnController::class, 'destroy']);
