@@ -35,10 +35,9 @@ class ReportsController extends Controller
             $request->endDate
         );
 
-        return (!$topFiveSales)
-            ? $this->serverError()
-            : $this->success($topFiveSales,
-            'Success');
+        return !$topFiveSales
+            ? $this->success([], 'No Content', 204)
+            : $this->success($topFiveSales, 'Success');
     }
 
 
@@ -55,7 +54,9 @@ class ReportsController extends Controller
             $request->endDate
         );
 
-        return $this->success($salesByCategory, 'Success');
+        return !$salesByCategory
+            ? $this->success([], 'No Content', 204)
+            : $this->success($salesByCategory, 'Success');
     }
 
 
@@ -73,8 +74,9 @@ class ReportsController extends Controller
             $request->endDate
         );
 
-        return $this->success($salesByPaymentType,
-        'Success');
+        return !$salesByPaymentType
+            ? $this->success([], 'No Content', 204)
+            : $this->success($salesByPaymentType, 'Success');
     }
 
 
@@ -91,8 +93,9 @@ class ReportsController extends Controller
             $request->endDate
         );
 
-        return $this->success($salesByEmployee,
-        'Success');
+        return !$salesByEmployee
+            ? $this->success([], 'No Content', 204)
+            : $this->success($salesByEmployee, 'Success');
     }
 
 

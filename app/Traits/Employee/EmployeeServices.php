@@ -32,6 +32,8 @@ trait EmployeeServices
 
     public function getEmployees()
     {
+        DB::statement('SET sql_mode="" ');
+
         return DB::table('employees')
             ->selectRaw('
                 employees.id as id,
@@ -42,6 +44,7 @@ trait EmployeeServices
             ')
             ->join('model_has_roles', 'model_has_roles.model_id', '=', 'employees.id')
             ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->groupBy('id')
             ->get()
             ->toArray();
     }
@@ -53,7 +56,10 @@ trait EmployeeServices
         $role = $emp->roles->first()->name;
 
         return [
-            'employee' => $emp,
+            'employee_id' => $emp->id,
+            'name' => $emp->name,
+            'email' => $emp->email,
+            'phone' => $emp->phone,
             'role' => $role
         ];
     }
@@ -97,7 +103,7 @@ trait EmployeeServices
 
                 DB::table('model_has_roles')
                     ->where('model_id', '=', $employeeId)
-                    ->updateTs([
+                    ->update([
                         'role_id' => $role->id
                     ]);
             });

@@ -19,7 +19,7 @@ trait BadOrderServices
     {
         DB::statement('SET sql_mode=""');
 
-        return DB::table('bad_orders')
+        $result = DB::table('bad_orders')
             ->join('bad_order_details', 'bad_order_details.bad_order_id', '=', 'bad_orders.id')
             ->join('purchase_order_details', 'purchase_order_details.id', '=', 'bad_order_details.purchase_order_details_id')
             ->join('purchase_order', 'purchase_order.id', '=', 'purchase_order_details.purchase_order_id')
@@ -36,6 +36,12 @@ trait BadOrderServices
             ->groupBy('id')
             ->get()
             ->toArray();
+
+        foreach ($result as $val) {
+            $val->purchase_return = \number_format($val->purchase_return, 2);
+        }
+
+        return $result;
     }
 
 

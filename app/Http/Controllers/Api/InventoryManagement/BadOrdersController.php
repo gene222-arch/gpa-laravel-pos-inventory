@@ -75,7 +75,7 @@ class BadOrdersController extends Controller
         return ($isRequestFormCreated !== true)
             ? $this->error($isRequestFormCreated)
             : $this->success([],
-            '',
+            'Bad order form created successfully.',
             201
             );
     }
@@ -102,7 +102,7 @@ class BadOrdersController extends Controller
         return (!$isRequestFormUpdated)
             ? $this->serverError()
             : $this->success([],
-            '',
+            'Bad order form updated successfully.',
             201
             );
     }

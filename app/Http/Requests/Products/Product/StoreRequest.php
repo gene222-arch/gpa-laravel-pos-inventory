@@ -3,9 +3,14 @@
 namespace App\Http\Requests\Products\Product;
 
 use App\Http\Requests\BaseRequest;
+use App\Traits\ApiResponser;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreRequest extends BaseRequest
 {
+    use ApiResponser;
 
     /**
      * Get the validation rules that apply to the request.
@@ -27,7 +32,7 @@ class StoreRequest extends BaseRequest
             'product.image' => ['image', 'mimes:jpeg,png', 'max:2048', 'nullable'],
             'product.category' => ['required', 'integer', 'exists:categories,id'],
             'product.sold_by' => ['required', 'in:each,weight/volume'],
-            'product.price' => ['numeric', 'nullable'],
+            'product.price' => [ 'required', 'numeric', 'nullable'],
             'product.cost' => ['required', 'numeric'],
         ];
     }
@@ -42,5 +47,25 @@ class StoreRequest extends BaseRequest
             'stock.default_purchase_costs' => ['required', 'numeric', 'min:0'],
         ];
     }
+
+
+    public function attributes()
+    {
+        return [
+            'product.sku' => 'sku',
+            'product.barcode' => 'barcode',
+            'product.name' => 'name',
+            'product.image' => 'image',
+            'product.category' => 'category',
+            'product.sold_by' => 'sold by',
+            'product.price' => 'price',
+            'product.cost' => 'cost',
+            'stock.supplier_id' => 'supplier id',
+            'stock.in_stock' => 'in stock',
+            'stock.minimum_reorder_level' => 'minimum reorder level',
+            'stock.default_purchase_costs' => 'default purchase costs',
+        ];
+    }
+
 
 }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Products\Category;
 use App\Http\Requests\BaseRequest;
-use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRequest extends BaseRequest
 {

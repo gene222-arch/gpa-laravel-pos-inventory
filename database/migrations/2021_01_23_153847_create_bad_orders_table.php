@@ -28,8 +28,8 @@ class CreateBadOrdersTable extends Migration
         Schema::create('bad_order_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('bad_order_id');
-            $table->foreignId('purchase_order_details_id');
-            $table->foreignId('product_id');
+            $table->foreignId('purchase_order_details_id')->nullable();
+            $table->foreignId('product_id')->nullable();
             $table->string('defect');
             $table->unsignedInteger('quantity')->default(1);
             $table->unsignedDouble('price', 20, 2)->default(0.00);
@@ -50,12 +50,12 @@ class CreateBadOrdersTable extends Migration
             $table->foreign('purchase_order_details_id')
                 ->references('id')
                 ->on('purchase_order_details')
-                ->onDelete('cascade');
+                ->onDelete('NULL');
 
             $table->foreign('product_id')
                 ->references('id')
                 ->on('products')
-                ->onDelete('cascade');
+                ->onDelete('NULL');
 
         });
     }

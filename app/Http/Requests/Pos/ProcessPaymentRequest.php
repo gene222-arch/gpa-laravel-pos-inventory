@@ -20,7 +20,6 @@ class ProcessPaymentRequest extends BaseRequest
             'payment_method' => ['required', 'string', 'in:cash,credit,invoice'],
             'should_mail' => ['required', 'boolean'],
             'cash' => ['nullable', 'numeric'],
-            'shipping_fee' => ['nullable', 'integer'],
             'number_of_days' => ['nullable', 'integer'],
         ];
     }

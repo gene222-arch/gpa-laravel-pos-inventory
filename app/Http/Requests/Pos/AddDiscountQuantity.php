@@ -17,7 +17,8 @@ class AddDiscountQuantity extends BaseRequest
         return [
             'customer_id' => ['required', 'integer', 'exists:customers,id'],
             'product_id' => ['required', 'integer', 'exists:products,id'],
-            'discount_id' => ['required', 'integer', 'exists:discounts,id'],
+            'hasDiscount' => ['required', 'boolean'],
+            'discount_id' => ['nullable', 'integer', 'exists:discounts,id'],
             'quantity' => $this->quantityRules()
         ];
     }

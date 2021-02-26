@@ -35,7 +35,7 @@ trait ProductServices
                 products.price,
                 products.sold_by,
                 products.cost,
-                (products.price / products.cost) * 100 as margin,
+                (products.price - products.cost) * .100 as margin,
                 stocks.in_stock,
                 stocks.minimum_reorder_level as minimum_reorder_level
             '
@@ -56,7 +56,7 @@ trait ProductServices
      * Undocumented function
      *
      */
-    public function getProductWithStock(int $productId)
+    public function getProductForPurchaseOrder(int $productId)
     {
         $result = DB::table('products')
             ->join('stocks', 'stocks.product_id', '=', 'products.id')
@@ -70,7 +70,7 @@ trait ProductServices
             ->where('products.id', '=', $productId)
             ->first();
 
-        $result->ordered_quantity = 0;
+        $result->ordered_quantity = 1;
         $result->purchase_cost = 0.00;
         $result->amount = 0.00;
 

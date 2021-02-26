@@ -34,8 +34,11 @@ class CustomersController extends Controller
     {
         $this->authorize('viewAny', $this->customer);
 
-        return $this->success($this->customer->loadCustomers(),
-        'Success');
+        $result = $this->customer->loadCustomers();
+
+        return !$result
+            ? $this->success($result, 'Success')
+            : $this->success($result, 'Success');
     }
 
 
@@ -55,7 +58,7 @@ class CustomersController extends Controller
         return (!$isCustomerCreated)
             ? $this->serverError()
             : $this->success([],
-            'Success',
+            'Customer created successfully.',
             201);
     }
 
@@ -71,9 +74,11 @@ class CustomersController extends Controller
     {
         $this->authorize('view', $this->customer);
 
-        return $this->success($this->customer->find($request->customer_id),
-            'Success',
-            201);
+        $customer = $this->customer->find($request->customer_id);
+
+        return !$customer
+            ? $this->success([], 'No Content', 204)
+            : $this->success($customer, 'Success');
     }
 
 
@@ -96,7 +101,7 @@ class CustomersController extends Controller
         return (!$isCustomerUpdated)
             ? $this->serverError()
             : $this->success([],
-            'Success',
+            'Customer updated successfully.',
             201);
     }
 
@@ -119,7 +124,7 @@ class CustomersController extends Controller
         return (!$isCustomerDeleted)
             ? $this->serverError()
             : $this->success([],
-            'Success',
+            'Customer deleted successfully.',
             201);
     }
 

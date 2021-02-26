@@ -361,13 +361,26 @@ trait StockServices
      * @param array $productId
      * @return void
      */
-    public function mailOnLowStock(array $productIds)
+    public function mailOnLowStock(array $productIds = NULL, array $stockIds = NULL)
     {
-        $products = Product::with('stock')->whereHas('stock', fn ($q) => $q->whereIn('product_id', $productIds))->get();
+        $products = Product::with('stock')
+            ->whereHas('stock', function($whereHas) use ($productIds, $stockIds) {
+                return $whereHas
+                    ->when($productIds, function ($when, $productIds) {
+                        return $when->whereIn('product_id', $productIds);
+                    })
+                    ->when($stockIds, function ($when, $stockIds) {
+                        return $when->whereIn('id', $stockIds);
+                    });
+            })
+            ->get();
 
-        $products = $products->filter(fn ($p) => $p->stock->minimum_reorder_level >= $p->stock->in_stock);
+        $products = $products
+            ->filter(function($product) {
+                return $product->stock->minimum_reorder_level >= $product->stock->in_stock;
+            });
 
-        if (!empty($products->count()))
+        if ($products->count())
         {
             $fileName = 'low-stock-' . now()->toDateString() . '-' . time() . '.pdf';
 

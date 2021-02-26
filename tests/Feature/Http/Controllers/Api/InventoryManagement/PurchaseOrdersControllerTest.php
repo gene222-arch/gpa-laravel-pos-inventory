@@ -26,8 +26,8 @@ class PurchaseOrdersControllerTest extends TestCase
 
 
 
-        /**
-     * @test
+    /**
+     * test
      */
     public function user_can_get_filtered_purchase_orders()
     {
@@ -178,22 +178,22 @@ class PurchaseOrdersControllerTest extends TestCase
 
 
     /**
-     * test
+     * @test
      */
     public function user_can_receive_purchase_order()
     {
         $data = [
             'supplier_id' => 3,
-            'purchase_order_id' => 29,
+            'purchase_order_id' => 34,
             'items_received_quantities' =>
             [
                 [
-                    'purchase_order_details_id' => 50,
+                    'purchase_order_details_id' => 63,
                     'product_id' => 23,
                     'received_quantity' => 20,
                 ],
                 [
-                    'purchase_order_details_id' => 51,
+                    'purchase_order_details_id' => 64,
                     'product_id' => 24,
                     'received_quantity' => 20,
                 ],

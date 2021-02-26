@@ -55,7 +55,7 @@ class ProductsController extends Controller
     {
         $this->authorize('viewAny', $this->product);
 
-        return $this->success($this->product->loadProductsWithStocks(
+        return $this->success($this->product->getAll(
             $request->category_id,
             $request->productName
         ),
@@ -74,7 +74,7 @@ class ProductsController extends Controller
     {
         $this->authorize('view', $this->product);
 
-        $product = $this->product->getProductWithStock(
+        $product = $this->product->getProductForPurchaseOrder(
             $request->product_id
         );
 
@@ -129,7 +129,7 @@ class ProductsController extends Controller
         }
 
         return $this->success([],
-        'Product created successfully',
+        'Product created successfully.',
         201
         );
     }
@@ -165,7 +165,7 @@ class ProductsController extends Controller
         }
 
         return $this->success([],
-        'Product updated successfully',
+        'Product updated successfully.',
         201
         );
     }
@@ -186,7 +186,7 @@ class ProductsController extends Controller
         return ( !$isProductsDeleted )
             ? $this->serverError()
             : $this->success([],
-            'Product deleted successfully',
+            'Product deleted successfully.',
             200
         );
     }

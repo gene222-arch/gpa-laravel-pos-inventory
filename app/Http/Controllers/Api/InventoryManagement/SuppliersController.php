@@ -76,7 +76,7 @@ class SuppliersController extends Controller
         return (! $isSupplierCreated )
             ? $this->serverError()
             : $this->success([],
-            'Supplier created successfully',
+            'Supplier created successfully.',
             201
         );
     }
@@ -100,7 +100,7 @@ class SuppliersController extends Controller
             ? $this->serverError()
             : $this->success(
             [],
-            'Supplier updated successfully',
+            'Supplier updated successfully.',
             201
         );
     }
@@ -121,7 +121,7 @@ class SuppliersController extends Controller
         return ( !$isDeleted )
             ? $this->serverError()
             : $this->success([],
-            'Supplier deleted successfully',
+            'Supplier deleted successfully.',
             200
         );
     }

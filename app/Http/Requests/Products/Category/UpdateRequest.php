@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Products\Category;
 use App\Http\Requests\BaseRequest;
-use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRequest extends BaseRequest
 {
@@ -16,7 +15,7 @@ class UpdateRequest extends BaseRequest
     {
         return [
             'id' => ['required', 'integer', 'exists:categories,id'],
-            'name' => ['required', 'string', 'unique:categories,name']
+            'name' => ['required', 'string', 'unique:categories,name,' . $this->id]
         ];
     }
 }

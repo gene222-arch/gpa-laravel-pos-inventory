@@ -14,14 +14,23 @@ class StoreRequest extends BaseRequest
     public function rules()
     {
         return [
-            'purchase_order_id' => ['required', 'integer', 'exists:purchase_order,id', 'unique:bad_orders,purchase_order_id'],
+            'purchase_order_id' => ['required', 'integer', 'exists:purchase_order,id'],
+            'badOrderDetails' => ['required'],
             'badOrderDetails.*.purchase_order_details_id' => ['required', 'integer', 'distinct', 'exists:purchase_order_details,id', 'unique:bad_order_details,purchase_order_details_id'],
             'badOrderDetails.*.product_id' => ['required', 'integer', 'distinct', 'exists:products,id', 'unique:bad_order_details,product_id'],
-            'badOrderDetails.*.defect' => ['required', 'string'],
+            'badOrderDetails.*.defect' => ['required', 'string', 'regex:/^[a-zA-Z\s]*$/'],
             'badOrderDetails.*.quantity' => ['required', 'integer'],
             'badOrderDetails.*.price' => ['required', 'integer', 'min:1'],
             'badOrderDetails.*.unit_of_measurement' => ['required', 'string'],
             'badOrderDetails.*.amount' => ['required', 'integer', 'min:1'],
+        ];
+    }
+
+
+    public function messages()
+    {
+        return [
+            'badOrderDetails.*.defect.regex' => 'Letters and spaces only',
         ];
     }
 

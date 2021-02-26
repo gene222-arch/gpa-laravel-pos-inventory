@@ -55,7 +55,7 @@ class SalesReturnController extends Controller
         return ($result !== true)
                 ? $this->error($result)
                 : $this->success([],
-                    'Success',
+                    'Sales return form created successfully.',
                     201);
     }
 
@@ -113,7 +113,7 @@ class SalesReturnController extends Controller
         return (!$result)
                 ? $this->serverError()
                 : $this->success([],
-                    'Success',
+                    'Sales return form deleted successfully.',
                     200);
     }
 
@@ -136,7 +136,7 @@ class SalesReturnController extends Controller
         return (!$result)
                 ? $this->serverError()
                 : $this->success([],
-                    'Success',
+                    'Items removed successfully.',
                     200);
     }
 }

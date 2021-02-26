@@ -43,6 +43,24 @@ trait PurchaseOrderServices
     }
 
 
+    public function getAllPurchaseOrdersToBadOrders(): array
+    {
+        DB::statement('SET sql_mode = "" ');
+
+        return DB::table('purchase_order')
+            ->selectRaw('
+                purchase_order.id as id,
+                SUM(purchase_order_details.received_quantity) as received_quantity
+            ')
+            ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
+            ->where('received_quantity', '>', 0)
+            ->groupBy('id')
+            ->orderBy('purchase_order.created_at', 'desc')
+            ->get()
+            ->toArray();
+    }
+
+
     /**
      * Undocumented function
      *
@@ -71,20 +89,24 @@ trait PurchaseOrderServices
 
     public function getPurchaseOrder(int $purchaseOrderId)
     {
-        return DB::table('purchase_order')
+        $result = DB::table('purchase_order')
             ->selectRaw('
                 purchase_order.id,
+                purchase_order.status,
                 purchase_order.ordered_by,
                 suppliers.name as supplier,
                 suppliers.id as supplier_id,
                 DATE_FORMAT(purchase_order.purchase_order_date, "%M %d, %Y") as purchase_order_date,
                 DATE_FORMAT(purchase_order.expected_delivery_date, "%M %d, %Y") as expected_delivery_date,
                 purchase_order.total_received_quantity,
-                purchase_order.total_ordered_quantity
+                purchase_order.total_ordered_quantity,
+                purchase_order.total_remaining_ordered_quantity
             ')
             ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
             ->where('purchase_order.id', '=', $purchaseOrderId)
             ->first();
+
+        return $result ? $result : [];
     }
 
 
@@ -112,13 +134,14 @@ trait PurchaseOrderServices
     {
         DB::statement('SET sql_mode= "" ');
 
-        return DB::table('purchase_order')
+        $result = DB::table('purchase_order')
             ->selectRaw('
                 purchase_order_details.id as id,
                 products.id as product_id,
                 products.name as product_description,
                 stocks.in_stock as in_stock,
                 purchase_order_details.ordered_quantity as ordered_quantity,
+                purchase_order.status as status,
                 purchase_order_details.purchase_cost as purchase_cost,
                 stocks.incoming as incoming,
                 purchase_order_details.amount
@@ -131,6 +154,8 @@ trait PurchaseOrderServices
             ->groupBy('purchase_order_details.id')
             ->get()
             ->toArray();
+
+        return $result ? $result : [];
     }
 
 
@@ -145,7 +170,11 @@ trait PurchaseOrderServices
     {
         DB::statement('SET sql_mode= "" ');
 
-        $result = DB::table('purchase_order')
+        $purchaseOrder = $this->getPurchaseOrder(
+            $purchaseOrderId
+        );
+
+        $items = DB::table('purchase_order_details')
             ->selectRaw('
                 purchase_order_details.id as id,
                 products.id as product_id,
@@ -155,21 +184,32 @@ trait PurchaseOrderServices
                 purchase_order_details.received_quantity as received_quantity,
                 purchase_order_details.purchase_cost as purchase_cost
             ')
-            ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
-            ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
             ->join('products', 'products.id', '=', 'purchase_order_details.product_id')
             ->join('stocks', 'stocks.product_id', '=', 'products.id')
-            ->where('purchase_order.id', '=', $purchaseOrderId)
+            ->leftJoin('bad_order_details', 'bad_order_details.purchase_order_details_id', '=', 'purchase_order_details.id')
+            ->where('purchase_order_details.purchase_order_id', '=', $purchaseOrderId)
+            ->whereRaw('bad_order_details.purchase_order_details_id IS NULL')
+            ->whereRaw('bad_order_details.product_id IS NULL')
+            ->where('purchase_order_details.received_quantity', '>', 0)
             ->get()
             ->toArray();
 
-        foreach ($result as $val) {
-            $val->quantity = 0;
-            $val->amount = 0;
-            $val->defect = '';
+        if ($purchaseOrder && count($items))
+        {
+            foreach ($items as $item)
+            {
+                $item->quantity = 0;
+                $item->amount = 0;
+                $item->defect = '';
+            }
+
+            return [
+                'purchaseOrder' => $purchaseOrder,
+                'items' => $items
+            ];
         }
 
-        return $result;
+        return [];
     }
 
 
@@ -184,7 +224,7 @@ trait PurchaseOrderServices
     {
         DB::statement('SET sql_mode= "" ');
 
-        return DB::table('received_stocks')
+        $result = DB::table('received_stocks')
             ->selectRaw('
                 received_stock_details.id as id,
                 products.name as product_description,
@@ -198,10 +238,12 @@ trait PurchaseOrderServices
             ->join('received_stock_details', 'received_stock_details.received_stock_id', '=', 'received_stocks.id')
             ->join('stocks', 'stocks.product_id', '=', 'received_stock_details.product_id')
             ->join('products', 'products.id', '=', 'stocks.product_id')
-            ->rightJoin('purchase_order_details', 'purchase_order_details.id', '=', 'received_stock_details.purchase_order_details_id')
+            ->join('purchase_order_details', 'purchase_order_details.id', '=', 'received_stock_details.purchase_order_details_id')
             ->where('purchase_order_details.purchase_order_id', '=', $purchaseOrderId)
             ->get()
             ->toArray();
+
+        return $result ? $result : [];
     }
 
 
@@ -300,37 +342,62 @@ trait PurchaseOrderServices
      * @param integer $purchaseOrderId
      * @param string $expectedDeliveryDate
      * @param array $purchaseOrderDetails
-     * @return boolean
+     * @return mixed
      */
     public function upsertPurchaseOrderDetails(
         int $purchaseOrderId,
+        int $supplierId,
         string $purchaseOrderDate,
         string $expectedDeliveryDate,
-        array $purchaseOrderDetails): bool
+        array $purchaseOrderDetails): mixed
     {
         try {
-            DB::transaction(function () use($purchaseOrderId, $purchaseOrderDetails, $purchaseOrderDate, $expectedDeliveryDate)
+            DB::transaction(function () use($purchaseOrderId, $supplierId, $purchaseOrderDetails, $purchaseOrderDate, $expectedDeliveryDate)
             {
-                # append a purchase_order_id in the array
-                $purchaseOrderDetails = preparePrepend([
-                        'purchase_order_id' => $purchaseOrderId
-                    ],
-                    $purchaseOrderDetails
+                $totalOrderedQuantity = prepareMultiArraySum('ordered_quantity',
+                $purchaseOrderDetails
                 );
 
-                # update or insert new data in `purchase_order_details`
-                DB::table('purchase_order_details')->upsert(
-                    $purchaseOrderDetails,
-                    $this->purchaseOrderDetailUniqueFields(),
-                    $this->purchaseOrderDetailAssignableFields()
-                );
+                $poData = [
+                    'supplier_id' => $supplierId,
+                    'total_ordered_quantity' => $totalOrderedQuantity,
+                    'total_remaining_ordered_quantity' => $totalOrderedQuantity,
+                    'purchase_order_date' => $purchaseOrderDate,
+                    'expected_delivery_date' => $expectedDeliveryDate,
+                ];
 
-                # update `purchase_order` table
-                $this->updatePurchaseOrder(
-                    $purchaseOrderId,
-                $expectedDeliveryDate,
-                    $purchaseOrderDate
-                );
+                # Insert new data in `purchase_order` table
+                 PurchaseOrder::where('id', '=', $purchaseOrderId)
+                    ->update($poData);
+
+                # Insert new data in `purchase_order_details` table
+
+                $data = [];
+
+                foreach ($purchaseOrderDetails as $purchaseOrder)
+                {
+                   $data[] = [
+                        'purchase_order_id' => $purchaseOrderId,
+                        'product_id' => $purchaseOrder['product_id'],
+                        'ordered_quantity' => $purchaseOrder['ordered_quantity'],
+                        'remaining_ordered_quantity' => $purchaseOrder['remaining_ordered_quantity'],
+                        'purchase_cost' => $purchaseOrder['purchase_cost'],
+                        'amount' => $purchaseOrder['amount'],
+                   ];
+                }
+
+                DB::table('purchase_order_details')
+                    ->upsert(
+                        $data,
+                        'product_id',
+                        [
+                            'purchase_order_id',
+
+                            'ordered_quantity',
+                            'remaining_ordered_quantity',
+                            'purchase_cost',
+                            'amount'
+                    ]);
 
                 $productIds = array_map(fn($ar) => $ar['product_id'], $purchaseOrderDetails);
 
@@ -338,7 +405,7 @@ trait PurchaseOrderServices
                 (new Stock())->updateIncomingStocksOf($productIds);
             });
         } catch (\Throwable $th) {
-            return false;
+            return $th->getMessage();
         }
 
         return true;
@@ -380,7 +447,7 @@ trait PurchaseOrderServices
                 $poData = [
                     'status' => $status,
                     'total_received_quantity' => $totalReceivedQuantity,
-                    'total_ordered_quantity' => $totalRemainingOrderedQuantity + $totalReceivedQuantity,
+                    'total_ordered_quantity' => $totalOrderedQuantity,
                     'total_remaining_ordered_quantity' => $totalRemainingOrderedQuantity,
                     'purchase_order_date' => $purchaseOrderDate ?? DB::raw('purchase_order_date'),
                     'expected_delivery_date' => $expectedDeliveryDate ?? DB::raw('expected_delivery_date')
@@ -477,24 +544,32 @@ trait PurchaseOrderServices
         try {
             DB::transaction(function () use($supplierId, $purchaseOrderId, $purchaseOrderDetails)
             {
-                # Update purchase order details
-                $this->createPurchaseOrderDetails($purchaseOrderId,
+
+                $receivedQuantity = array_reduce($purchaseOrderDetails, function($total, $current) {
+                    return $total + $current['received_quantity'];
+                }, 0);
+
+                if ($receivedQuantity)
+                {
+                    # Update purchase order details
+                    $this->createPurchaseOrderDetails($purchaseOrderId,
                     $purchaseOrderDetails
-                );
+                    );
 
-                # insert new `received_stocks`
-                $stockReceived = (new ReceivedStock())->receiveStocks($purchaseOrderId,
-                    $supplierId
-                );
+                    # insert new `received_stocks`
+                    $stockReceived = (new ReceivedStock())->receiveStocks($purchaseOrderId,
+                        $supplierId
+                    );
 
-                # attach `stock_received_details`
-                $stockReceived->receiveStockDetails()->attach($purchaseOrderDetails);
+                    # attach `stock_received_details`
+                    $stockReceived->receiveStockDetails()->attach($purchaseOrderDetails);
 
-                # update stocks
-                $stockIn = (new Stock())->stockIn($purchaseOrderDetails);
+                    # update stocks
+                    (new Stock())->stockIn($purchaseOrderDetails);
 
-                # Update purchase order table
-                $this->updatePurchaseOrder($purchaseOrderId);
+                    # Update purchase order table
+                    $this->updatePurchaseOrder($purchaseOrderId);
+                }
             });
 
         } catch (\Throwable $th) {
@@ -534,10 +609,11 @@ trait PurchaseOrderServices
            {
                 DB::table('purchase_order_details')
                     ->where('purchase_order_id', '=', $purchaseOrderId)
-                    ->where('product_id', '=', $productIds)
+                    ->whereIn('product_id', $productIds)
                     ->delete();
 
                 $this->updatePurchaseOrder($purchaseOrderId);
+
                 (new Stock())->updateIncomingStocksOf($productIds);
            });
        } catch (\Throwable $th) {

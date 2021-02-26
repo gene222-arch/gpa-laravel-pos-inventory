@@ -157,6 +157,7 @@ Route::prefix('stocks')->group(function ()
 Route::group(['prefix' => 'purchase-orders'], function ()
 {
     Route::get('/', [PurchaseOrdersController::class, 'index']);
+    Route::get('/request-bad-orders', [PurchaseOrdersController::class, 'purchaseOrdersToBadOrder']);
     Route::post('/filtered', [PurchaseOrdersController::class, 'filteredIndex']);
     Route::post('/purchase-order-details', [PurchaseOrdersController::class, 'show']);
     Route::post('/purchase-order-details/to-bad-orders', [PurchaseOrdersController::class, 'showForBadOrdersRequest']);

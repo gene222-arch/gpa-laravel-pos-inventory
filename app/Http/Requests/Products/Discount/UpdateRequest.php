@@ -16,7 +16,7 @@ class UpdateRequest extends BaseRequest
         return [
             'discount_id' => ['required', 'integer', 'exists:discounts,id'],
             'name' => ['required', 'string', 'min:3', 'unique:discounts,name,' . $this->discount_id],
-            'percentage' => ['required', 'numeric', 'min:1']
+            'percentage' => ['required', 'numeric', 'min:1', 'max:100']
         ];
     }
 }

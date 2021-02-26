@@ -21,13 +21,13 @@ class DashboardController extends Controller
 
     public function index(DashboardDataRequest $request)
     {
+
         return $this->success([
             'salesSummary' => $this->getSalesSummary(),
             'monthlySales' => $this->getMonthlySales($request->year),
             'pendingInvoices' => $this->getPendingInvoices(),
             'inProcessPurchaseOrders' => $this->getInProcessPurchaseOrders()
-        ],
-            'Success');
+        ],'Success');
     }
 
 }

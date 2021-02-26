@@ -32,7 +32,15 @@ class DiscountsController extends Controller
     {
         $this->authorize('viewAny', $this->discount);
 
-        return $this->success($this->discount->latest()->get(), 'Success');
+        $result = $this->discount->latest()->get();
+
+        return !$result
+            ? $this->success([],
+                'No Content',
+                204)
+            : $this->success($result,
+            'Fetched successfully',
+            200);
     }
 
 
@@ -56,7 +64,7 @@ class DiscountsController extends Controller
         return (!$isDiscountCreated)
             ? $this->serverError()
             : $this->success([],
-                'Success',
+                'Discount created successfully.',
                 201);
     }
 
@@ -72,13 +80,15 @@ class DiscountsController extends Controller
     {
         $this->authorize('view', $this->discount);
 
-        $discount = $this->discount->find($request->discount_id);
+        $result = $this->discount->find($request->discount_id);
 
-        return (!$discount)
-            ? $this->serverError()
-            : $this->success($discount,
-                'Success',
-                201);
+        return !$result
+            ? $this->success([],
+                'No Content',
+                204)
+            : $this->success($result,
+            'Fetched successfully',
+            200);
     }
 
 
@@ -104,7 +114,7 @@ class DiscountsController extends Controller
         return (!$isDiscountUpdated)
             ? $this->serverError()
             : $this->success([],
-                'Success',
+                'Discount updated successfully.',
                 201);
     }
 
@@ -126,7 +136,7 @@ class DiscountsController extends Controller
         return (!$isDiscountsDeleted)
             ? $this->serverError()
             : $this->success([],
-                'Success',
+                'Discount deleted successfully.',
                 200);
     }
 }

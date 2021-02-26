@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 trait StockAdjustmentServices
 {
 
+    use StockServices;
 
     /**
      * Undocumented function
@@ -31,6 +32,7 @@ trait StockAdjustmentServices
             ")
             ->join('stock_adjustment_details', 'stock_adjustment_details.stock_adjustment_id', '=', 'stock_adjustments.id')
             ->groupBy('stock_adjustments.id')
+            ->orderBy('stock_adjustments.created_at', 'desc')
             ->get()
             ->toArray();
     }
@@ -43,6 +45,7 @@ trait StockAdjustmentServices
             ->selectRaw('
                 stocks.id as id,
                 stocks.id as stock_id,
+                stocks.product_id as product_id,
                 products.name as product_description,
                 stocks.in_stock
             ')
@@ -142,6 +145,10 @@ trait StockAdjustmentServices
                 ];
 
                 DB::table('stocks')->upsert($data, $uniqueBy, $update);
+
+                $stockIds = \prepareGetKeyInMultiArray('stock_id', $stockAdjustmentDetails);
+
+                $this->mailOnLowStock(NULL, $stockIds);
             });
         } catch (\Throwable $th) {
             return $th->getMessage();

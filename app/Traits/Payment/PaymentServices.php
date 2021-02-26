@@ -154,7 +154,7 @@ trait PaymentServices
                 }
 
                 # select customer order list in `pos_details`
-                $customerPosDetails = $customerPos->posDetails->map->pivot;
+                $customerOrderDetails = $customerPos->posDetails->map->pivot;
 
                 switch ($paymentMethod)
                 {
@@ -187,7 +187,7 @@ trait PaymentServices
                     case 'invoice':
                         $this->payWithInvoice(
                             $customerId,
-                            $customerPosDetails,
+                            $customerOrderDetails,
                             $numberOfDays,
                             $customerEmail
                         );
@@ -199,7 +199,7 @@ trait PaymentServices
                 $customerPos->save();
 
                 # update stocks
-                (new Stock())->stockOutMany($customerPosDetails);
+                (new Stock())->stockOutMany($customerOrderDetails);
             });
         } catch (\Throwable $th) {
             return $th->getMessage();
@@ -273,12 +273,13 @@ trait PaymentServices
 
         if (!$result)
         {
-            throw new \Exception("Error Processing Payment in Cash" . $customerId);
+            throw new \Exception("Error Processing Payment in Cash");
         }
 
         if ($shouldMail)
         {
-            $this->paymentMail($customerId,
+            $this->paymentMail(
+                $customerId,
                 $result->id,
                 'cash',
                 $customerId !== 1,

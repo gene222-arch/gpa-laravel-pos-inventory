@@ -45,11 +45,6 @@ class CreatePurchaseOrderTable extends Migration
 
             $table->unique(['purchase_order_id', 'product_id']);
 
-            $table->foreign('purchase_order_id')
-                    ->references('id')
-                    ->on('purchase_order')
-                    ->onDelete('cascade');
-
             $table->foreign('product_id')
                     ->references('id')
                     ->on('products')

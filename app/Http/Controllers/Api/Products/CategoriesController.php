@@ -36,10 +36,15 @@ class CategoriesController extends Controller
     {
         $this->authorize('view', $this->category);
 
-        return $this->success($this->category->latest()->get(),
+        $result = $this->category->latest()->get();
+
+        return !$result
+            ? $this->success([],
+                'No Content',
+                204)
+            : $this->success($result,
             'Fetched successfully',
-            200
-        );
+            200);
     }
 
     /**
@@ -52,10 +57,15 @@ class CategoriesController extends Controller
     {
         $this->authorize('view', $this->category);
 
-        return $this->success($this->category->find($request->category_id),
-            'Fetched Successfully',
-            200
-        );
+        $result = $this->category->find($request->category_id);
+
+        return !$result
+            ? $this->success([],
+                'No Content',
+                204)
+            : $this->success($result,
+            'Fetched successfully',
+            200);
     }
 
 
@@ -120,7 +130,7 @@ class CategoriesController extends Controller
         return ( !$isCategoriesDeleted )
             ? $this->serverError()
             : $this->success([],
-            'Product/s deleted successfully',
+            'Categories deleted successfully',
             200
         );
     }

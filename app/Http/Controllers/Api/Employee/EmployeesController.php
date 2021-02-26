@@ -33,8 +33,11 @@ class EmployeesController extends Controller
     {
         $this->authorize('viewAny', $this->employee);
 
-        return $this->success($this->employee->getEmployees(),
-            'Success');
+        $result = $this->employee->getEmployees();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
     }
 
 
@@ -61,18 +64,17 @@ class EmployeesController extends Controller
     {
         $this->authorize('create', $this->employee);
 
-        $result = $this->employee->insertEmployee(
-            $request->name,
-            $request->email,
-            $request->phone,
-            $request->role
-        );
+        $result = $this->employee
+            ->insertEmployee(
+                $request->name,
+                $request->email,
+                $request->phone,
+                $request->role
+            );
 
         return ($result !== true)
             ? $this->error($result)
-            : $this->success([],
-                'Success',
-                201);
+            : $this->success([], 'Employee created successfully.', 201);
     }
 
     /**
@@ -88,9 +90,8 @@ class EmployeesController extends Controller
         $employee = $this->employee->getEmployee($request->employee_id);
 
         return (!$employee)
-            ? $this->serverError()
-            : $this->success($employee,
-                'Success');
+            ? $this->success([], 'No Content', 204)
+            : $this->success($employee, 'Success');
     }
 
     /**
@@ -115,7 +116,7 @@ class EmployeesController extends Controller
         return ($result !== true)
             ? $this->error($result)
             : $this->success([],
-                'Success',
+                'Employee updated successfully.',
                 201);
     }
 
@@ -133,7 +134,6 @@ class EmployeesController extends Controller
 
         return (!$isDeleted)
             ? $this->serverError()
-            : $this->success([],
-                'Success');
+            : $this->success([], 'Employee deleted successfully.');
     }
 }

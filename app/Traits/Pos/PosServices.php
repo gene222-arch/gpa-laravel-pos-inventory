@@ -180,27 +180,32 @@ trait PosServices
 
         $orderDetails = [];
 
-        foreach ($posDetails as $posDetail)
+        if ($posDetails)
         {
-            $orderDetails[] = [
-                'id' => $posDetail->id,
-                'pos_details_id' => $posDetail->id,
-                'product_id' => $posDetail->pivot->product_id,
-                'discount_id' => $posDetail->pivot->discount_id,
-                'product_description' => $posDetail->name,
-                'quantity' => $posDetail->pivot->quantity,
-                'price' => \number_format($posDetail->pivot->price, 2),
-                'discount' => \number_format($posDetail->pivot->discount, 2)
+            foreach ($posDetails as $posDetail)
+            {
+                $orderDetails[] = [
+                    'id' => $posDetail->id,
+                    'pos_details_id' => $posDetail->id,
+                    'product_id' => $posDetail->pivot->product_id,
+                    'discount_id' => $posDetail->pivot->discount_id,
+                    'product_description' => $posDetail->name,
+                    'quantity' => $posDetail->pivot->quantity,
+                    'price' => \number_format($posDetail->pivot->price, 2),
+                    'discount' => \number_format($posDetail->pivot->discount, 2)
+                ];
+            }
+
+            return [
+                'orderDetails' => $orderDetails,
+                'subTotal' => $subTotal,
+                'discount' => $discount,
+                'tax' => $tax,
+                'total' => $total
             ];
         }
 
-        return [
-            'orderDetails' => $orderDetails,
-            'subTotal' => $subTotal,
-            'discount' => $discount,
-            'tax' => $tax,
-            'total' => $total
-        ];
+        return [];
     }
 
 
@@ -632,10 +637,10 @@ trait PosServices
     }
 
 
-    public function applyDiscountWithQuantity(int $customerId, int $productId, int $discountId, int $quantity): mixed
+    public function applyDiscountWithQuantity(int $customerId, int $productId, bool $hasDiscount, int $quantity, $discountId = NULL): mixed
     {
         try {
-            DB::transaction(function () use($customerId, $productId, $discountId, $quantity)
+            DB::transaction(function () use($customerId, $productId, $hasDiscount, $quantity, $discountId,)
             {
                 $customerPos = $this->findCustomerPos($customerId);
 
@@ -645,18 +650,36 @@ trait PosServices
                 }
 
                 # select discount
-                $discount = ((new Discount())->getDiscount($discountId)->percentage / 100);
+                if ($hasDiscount)
+                {
+                    $discount = ((new Discount())->getDiscount($discountId)->percentage / 100);
 
-                $result = \boolval($customerPos->posDetails()
+                    $result = \boolval($customerPos->posDetails()
+                            ->updateExistingPivot($productId,[
+                                'quantity' => $quantity,
+                                'sub_total' => DB::raw('price * quantity'),
+                                'discount_id' => $discountId,
+                                'discount' => DB::raw('sub_total * ' . $discount),
+                                'tax' => DB::raw('sub_total * 0.12' ),
+                                'total' => DB::raw('sub_total + tax - discount'),
+                                'updated_at' => now()
+                            ])
+                    );
+                }
+                else
+                {
+                    $result = \boolval($customerPos->posDetails()
                         ->updateExistingPivot($productId,[
                             'quantity' => $quantity,
                             'sub_total' => DB::raw('price * quantity'),
-                            'discount' => DB::raw('sub_total * ' . $discount),
-                            'tax' => DB::raw('sub_total * 0.12' ),
+                            'discount_id' => NULL,
+                            'discount' => 0.00,
+                            'tax' => DB::raw('sub_total * 0.12'),
                             'total' => DB::raw('sub_total + tax - discount'),
                             'updated_at' => now()
                         ])
-                );
+            );
+                }
 
                 if (!$result)
                 {

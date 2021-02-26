@@ -15,7 +15,7 @@ class StoreRequest extends BaseRequest
     {
         return [
             'name' => ['required', 'string'],
-            'email' => ['required', 'email', 'unique:customers,email', 'unique:users,email'],
+            'email' => ['required', 'email', 'unique:customers,email', 'unique:users,email', 'unique:suppliers,email'],
             'phone' => ['required', 'string', 'min:11', 'max:15', 'unique:customers,phone'],
             'address' => ['required', 'string'],
             'city' => ['required', 'string'],

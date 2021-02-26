@@ -23,8 +23,8 @@ class UpdateRequest extends BaseRequest
     {
         return [
             'product.product_id' => ['required', 'integer', 'exists:products,id'],
-            'product.data.sku' => ['required', 'alpha_num', 'min:8', 'max:13', 'unique:products,sku,' . $this->id],
-            'product.data.barcode' => ['required', 'alpha_num', 'min:8', 'max:13', 'unique:products,barcode,' . $this->id],
+            'product.data.sku' => ['required', 'alpha_num', 'min:8', 'max:13', 'unique:products,sku,' . $this->product['product_id']],
+            'product.data.barcode' => ['required', 'alpha_num', 'min:8', 'max:13', 'unique:products,barcode,' . $this->product['product_id']],
             'product.data.name' => ['required', 'string'],
             'product.data.image' => ['image', 'mimes:jpeg,png', 'max:2048', 'nullable'],
             'product.data.category' => ['required', 'integer', 'exists:categories,id'],
@@ -44,6 +44,28 @@ class UpdateRequest extends BaseRequest
             'stock.data.stock_out' => ['required', 'integer', 'min:0'],
             'stock.data.minimum_reorder_level' => ['required', 'integer', 'min:1'],
             'stock.data.default_purchase_costs' => ['required', 'numeric', 'min:0'],
+        ];
+    }
+
+
+    public function attributes()
+    {
+        return [
+            'product.product_id' => 'product id',
+            'product.data.sku' => 'sku',
+            'product.data.barcode' => 'barcode',
+            'product.data.name' => 'name',
+            'product.data.image' => 'image',
+            'product.data.category' => 'category',
+            'product.data.sold_by' => 'sold by',
+            'product.data.price'  => 'price',
+            'product.data.cost' => 'cost',
+            'stock.data.supplier_id' => 'supplier id',
+            'stock.data.in_stock' => 'in stock',
+            'stock.data.stock_in' => 'stock in',
+            'stock.data.stock_out' => 'stock out',
+            'stock.data.minimum_reorder_level' => 'minimum reorder level',
+            'stock.data.default_purchase_costs' => 'default purchase costs',
         ];
     }
 }

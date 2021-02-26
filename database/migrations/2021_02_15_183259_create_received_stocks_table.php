@@ -58,7 +58,7 @@ class CreateReceivedStocksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('stock_received_details');
-        Schema::dropIfExists('stock_received');
+        Schema::dropIfExists('received_stock_details');
+        Schema::dropIfExists('received_stocks');
     }
 }

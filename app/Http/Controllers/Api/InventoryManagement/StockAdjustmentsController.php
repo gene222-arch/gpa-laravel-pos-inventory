@@ -83,7 +83,7 @@ class StockAdjustmentsController extends Controller
         return ($result !== true)
             ? $this->error($result)
             : $this->success([],
-                'Success',
+                'Stock adjusted successfully.',
                 201);
     }
 

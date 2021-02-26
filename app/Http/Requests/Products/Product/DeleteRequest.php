@@ -18,4 +18,11 @@ class DeleteRequest extends BaseRequest
             'product_ids.*' => ['required', 'integer', 'distinct', 'exists:products,id']
         ];
     }
+
+    public function attributes()
+    {
+        return [
+            'product.ids.*' => 'product id',
+        ];
+    }
 }

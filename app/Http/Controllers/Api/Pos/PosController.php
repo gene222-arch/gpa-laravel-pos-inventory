@@ -99,7 +99,7 @@ class PosController extends Controller
         $result = $this->pos->findCustomerOrderForSalesReturn($request->pos_id);
 
         return !$result
-            ? $this->error('Fail', 204)
+            ? $this->success([], 'No Content', 204)
             : $this->success($result, 'Success');
     }
 
@@ -115,10 +115,12 @@ class PosController extends Controller
    {
        $this->authorize('view', $this->pos);
 
-       $result = $this->pos->getCustomerCartDetails($request->customer_id);
+       $result = $this->pos
+        ->getCustomerCartDetails($request->customer_id);
 
-       return $this->success($result,
-        'Success');
+       return !$result
+            ? $this->success($result,'No Content', 204)
+            : $this->success($result, 'Success');
    }
 
 
@@ -143,7 +145,7 @@ class PosController extends Controller
         );
 
         return ($result !== true)
-                ? $this->error($result)
+                ? $this->error($result, 400)
                 : $this->success([],
                 'Success',
                 201);
@@ -306,8 +308,9 @@ class PosController extends Controller
         $result = $this->pos->applyDiscountWithQuantity(
                 $request->customer_id,
                 $request->product_id,
+                $request->hasDiscount,
+                $request->quantity,
                 $request->discount_id,
-                $request->quantity
             );
 
         return ($result !== true)
@@ -333,7 +336,7 @@ class PosController extends Controller
         );
 
         return ($result !== true)
-            ? $this->error($result)
+            ? $this->error($result, 400)
             : $this->success([],
                 'Success',
                 201);

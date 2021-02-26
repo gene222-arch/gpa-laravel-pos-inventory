@@ -15,7 +15,7 @@ class StoreRequest extends BaseRequest
     {
         return [
             'pos_id' => ['required', 'integer', 'exists:pos,id'],
-
+            'posSalesReturnDetails' => ['required'],
             'posSalesReturnDetails.*.pos_details_id' => ['required', 'integer', 'exists:pos_details,id'],
             'posSalesReturnDetails.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'posSalesReturnDetails.*.defect' => ['required', 'string'],
@@ -29,4 +29,15 @@ class StoreRequest extends BaseRequest
 
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'posSalesReturnDetails.required' => ['Please add at least one item.']
+        ];
+    }
+
 }
+
+
+

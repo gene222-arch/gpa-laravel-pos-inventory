@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 trait DashboardServices
 {
 
-       /**
+    /**
      * Undocumented function
      *
      */
@@ -15,7 +15,7 @@ trait DashboardServices
     {
         DB::statement('SET sql_mode="" ');
 
-        return DB::table('users')
+        $result = DB::table('users')
         ->selectRaw('
             (
                 SELECT
@@ -98,14 +98,28 @@ trait DashboardServices
             AS sales_return,
             (
                 SELECT
-                    SUM(bad_order_details.amount)
+                    CASE
+                        WHEN
+                            SUM(bad_order_details.amount) IS NULL
+                        THEN
+                            0.00
+                        ELSE
+                            SUM(bad_order_details.amount)
+                    END
                 FROM
                     `bad_order_details`
             )
             AS purchase_return,
             (
                 SELECT
-                    SUM(pos_details.discount)
+                    CASE
+                        WHEN
+                            SUM(pos_details.discount) IS NULL
+                        THEN
+                            0.00
+                        ELSE
+                            SUM(pos_details.discount)
+                    END
                 FROM
                     pos
                 INNER JOIN
@@ -119,7 +133,14 @@ trait DashboardServices
             AS discounts,
             (
                 SELECT
-                    SUM(pos_details.quantity * products.cost)
+                    CASE
+                        WHEN
+                            SUM(pos_details.quantity * products.cost) IS NULL
+                        THEN
+                            0.00
+                        ELSE
+                            SUM(pos_details.quantity * products.cost)
+                    END
                 FROM
                     pos
                 INNER JOIN
@@ -137,13 +158,26 @@ trait DashboardServices
             AS total_cost_of_goods_sold,
             (
                 SELECT
-                    ROUND(
-                        (
-                            SUM(pos_details.sub_total + pos_details.tax) -
-                            SUM(pos_details.quantity * products.cost)
-                        )
-                    / SUM(pos_details.sub_total + pos_details.tax) * 100
-                    ,2)
+                    CASE
+                        WHEN
+                            ROUND(
+                                (
+                                    SUM(pos_details.sub_total + pos_details.tax) -
+                                    SUM(pos_details.quantity * products.cost)
+                                )
+                            / SUM(pos_details.sub_total + pos_details.tax) * 100
+                            ,2) IS NULL
+                        THEN
+                            0.00
+                        ELSE
+                        ROUND(
+                            (
+                                SUM(pos_details.sub_total + pos_details.tax) -
+                                SUM(pos_details.quantity * products.cost)
+                            )
+                        / SUM(pos_details.sub_total + pos_details.tax) * 100
+                        ,2)
+                    END
                 FROM
                     pos
                 INNER JOIN
@@ -161,10 +195,20 @@ trait DashboardServices
             AS margin_percentage,
             (
                 SELECT
-                    ROUND((
-                        SUM(pos_details.sub_total + pos_details.tax) -
-                        SUM(pos_details.quantity * products.cost))
-                    , 2)
+                    CASE
+                        WHEN
+                            ROUND((
+                                SUM(pos_details.sub_total + pos_details.tax) -
+                                SUM(pos_details.quantity * products.cost))
+                            , 2) IS NULL
+                        THEN
+                            0.00
+                        ELSE
+                            ROUND((
+                                SUM(pos_details.sub_total + pos_details.tax) -
+                                SUM(pos_details.quantity * products.cost))
+                            , 2)
+                        END
                 FROM
                     pos
                 INNER JOIN
@@ -218,6 +262,12 @@ trait DashboardServices
         ')
         ->first();
 
+        if (!$result)
+        {
+            return [];
+        }
+
+        return $result;
     }
 
     public function getMonthlySales(int $year = null): array
@@ -230,6 +280,7 @@ trait DashboardServices
                     SUM(pos_details.sub_total + pos_details.tax) as sales
             ')
             ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
+            ->whereNotIn('pos.status', ['Pending', 'Cancelled'])
             ->whereYear('pos.created_at', date('Y'))
             ->when(!is_null($year), function ($q, $year) {
                 return $q->whereYear('pos.created_at', $year);
@@ -239,6 +290,11 @@ trait DashboardServices
             ->toArray();
 
             $data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+            if (!$result)
+            {
+                return [];
+            }
 
             foreach ($result as $value)
             {
@@ -252,24 +308,31 @@ trait DashboardServices
 
     public function getPendingInvoices(): array
     {
-        return DB::table('invoices')
+        $result = DB::table('invoices')
             ->selectRaw('
                 customers.name as name,
                 DATE_FORMAT(invoices.created_at, "%M %d %Y") as invoice_date
             ')
             ->join('invoice_details', 'invoice_details.invoice_id', '=', 'invoices.id')
             ->join('customers', 'customers.id', '=', 'invoices.customer_id')
-            ->whereNotIn('invoices.status', ['Payment in process', 'Partially Paid'])
+            ->whereIn('invoices.status', ['Payment in process'])
             ->where('customers.name', '!=', 'walk-in')
             ->limit(10)
             ->get()
             ->toArray();
+
+        if (!$result)
+        {
+            return [];
+        }
+
+        return $result;
     }
 
 
     public function getInProcessPurchaseOrders(): array
     {
-        return DB::table('purchase_order')
+        $result = DB::table('purchase_order')
             ->selectRaw('
                 DATE_FORMAT(purchase_order.purchase_order_date, "%M %d, %Y") as po_date,
                 suppliers.name as supplier
@@ -280,6 +343,21 @@ trait DashboardServices
             ->limit(10)
             ->get()
             ->toArray();
+
+
+        if (!$result)
+        {
+            return [];
+        }
+
+        return $result;
+    }
+
+
+
+    public function getNotifications()
+    {
+
     }
 
 }

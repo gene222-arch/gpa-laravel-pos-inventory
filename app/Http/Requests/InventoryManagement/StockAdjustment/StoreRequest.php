@@ -19,6 +19,7 @@ class StoreRequest extends BaseRequest
             'stockAdjustmentDetails.*.added_stock' => ['integer', 'min:0'],
             'stockAdjustmentDetails.*.removed_stock' => ['integer', 'min:0'],
             'stockAdjustmentDetails.*.counted_stock' => ['integer', 'min:0'],
+            'stockAdjustmentDetails' => ['required']
         ];
     }
 }

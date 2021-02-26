@@ -16,10 +16,10 @@ class StoreRequest extends BaseRequest
     {
         return [
             'name' => ['required', 'string'],
-            'contact' => ['required', 'string', 'min:10', 'max:15'],
+            'contact' => ['required', 'string', 'min:10', 'max:15', 'unique:suppliers,contact'],
             'email' => ['required', 'email', 'string', 'unique:suppliers,email'],
             'phone' => ['required', 'string', 'min:10', 'max:15'],
-            'website' => ['required', 'url', 'string'],
+            'website' => ['nullable', 'url', 'string'],
             'main_address' => ['required', 'string'],
             'optional_address' => ['nullable', 'string'],
             'city' => ['required', 'string'],

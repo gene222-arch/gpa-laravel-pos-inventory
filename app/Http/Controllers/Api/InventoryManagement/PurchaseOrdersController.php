@@ -50,8 +50,28 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('viewAny', $this->purchaseOrder);
 
-        return $this->success($this->purchaseOrder->getAllPurchaseOrders(),
-        'Success');
+        $result = $this->purchaseOrder->getAllPurchaseOrders();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
+    }
+
+
+    /**
+     * * Get resources of purchase order details for bad orders request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function purchaseOrdersToBadOrder()
+    {
+        $this->authorize('viewAny', $this->purchaseOrder);
+
+        $result = $this->purchaseOrder->getAllPurchaseOrdersToBadOrders();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
     }
 
 
@@ -94,11 +114,16 @@ class PurchaseOrdersController extends Controller
         $purchaseOrderDetails = $this->purchaseOrder
             ->findPurchaseOrderDetails($request->purchase_order_id);
 
-        return $this->success([
-            'purchaseOrder' => $purchaseOrder,
-            'items' => $purchaseOrderDetails
-        ],
-        'Success');
+        return !$purchaseOrder || !$purchaseOrderDetails
+            ? $this->success([
+                'purchaseOrder' => [],
+                'items' => []
+            ],
+            'Success')
+            : $this->success([
+                'purchaseOrder' => $purchaseOrder,
+                'items' => $purchaseOrderDetails
+            ], 'Success');
     }
 
 
@@ -112,12 +137,13 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('view', $this->purchaseOrder);
 
-        $receivedStocks = $this->purchaseOrder->findStockReceiveDetails(
+        $result = $this->purchaseOrder->findStockReceiveDetails(
             $request->purchase_order_id
         );
 
-        return $this->success($receivedStocks,
-        'Success');
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
     }
 
 
@@ -131,16 +157,13 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('view', $this->purchaseOrder);
 
-        $purchaseOrder = $this->purchaseOrder->getPurchaseOrder($request->purchase_order_id);
-        $items = $this->purchaseOrder->findPurchaseOrderForBadOrders(
+        $result = $this->purchaseOrder->findPurchaseOrderForBadOrders(
             $request->purchase_order_id
         );
 
-        return $this->success([
-            'purchaseOrder' => $purchaseOrder,
-            'items' => $items
-        ],
-        'Success');
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
     }
 
 
@@ -214,19 +237,20 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('update', $this->purchaseOrder);
 
-        $isPurchaseOrderUpserted = $this->purchaseOrder
+        $result = $this->purchaseOrder
             ->upsertPurchaseOrderDetails(
             $request->purchase_order_id,
+            $request->supplier_id,
             $request->purchase_order_date,
             $request->expected_delivery_date,
             $request->items
             );
 
-        return (!$isPurchaseOrderUpserted)
-            ? $this->serverError()
+        return ($result !== true)
+            ? $this->error($result, 422)
             : $this->success(
-            'Purchase Order updated successfully',
-            'Success',
+            [],
+            'Purchase order updated successfully.',
             201
         );
     }
@@ -320,7 +344,7 @@ class PurchaseOrdersController extends Controller
 
         return $result !== true
             ? $this->error($result)
-            : $this->success($result, 'Success');
+            : $this->success($result, 'Purchase order cancelled sucessfully.');
     }
 
 
@@ -357,37 +381,16 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('deletePurchaseOrderPerProduct', $this->purchaseOrder);
 
-        try {
-            DB::transaction(function () use($request)
-            {
-                $purchaseOrderDetailsCount = $this->purchaseOrder
-                                ->prepareGetTotalPurchaseOrderDetails($request->purchase_order_id);
-                $purchaseOrderTotalReceivedItems = $this->purchaseOrder
-                                ->prepareGetTotalItemsReceivedOf($request->purchase_order_id);
+        $result = $this->purchaseOrder
+            ->deleteProducts(
+                $request->purchase_order_id,
+                $request->product_ids
+            );
 
-                if (
-                    ($purchaseOrderDetailsCount > 1) &&
-                    ($purchaseOrderTotalReceivedItems > 0))
-                {
-                    $result = $this->purchaseOrder
-                        ->deleteProducts(
-                            $request->purchase_order_id,
-                            $request->product_ids
-                        );
-
-                    return ($result !== true)
-                        ? $this->error($result)
-                        : $this->success([],
-                        'Product deleted successfully');
-                }
-                else
-                {
-                    throw new \ErrorException('Error found');
-                }
-            });
-        } catch (\Throwable $th) {
-            return $this->error('Please add at least one item to the purchase order.');
-        }
+        return ($result !== true)
+            ? $this->error($result)
+            : $this->success([],
+            'Product deleted successfully');
 
     }
 

@@ -21,7 +21,7 @@ trait ReportsSummaryServices
     {
         DB::statement("SET sql_mode = '' ");
 
-        $result = DB::table('pos')
+        $monthlySales = DB::table('pos')
             ->selectRaw('
                 products.id as id,
                 categories.name as category,
@@ -49,7 +49,7 @@ trait ReportsSummaryServices
             ')
             ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
             ->leftJoin('sales_returns', 'sales_returns.pos_id', '=', 'pos.id')
-            ->leftJoin('sales_return_details', 'sales_return_details.product_id', '=', 'pos_details.product_id')
+            ->leftJoin('sales_return_details', 'sales_return_details.sales_return_id', '=', 'sales_returns.id')
             ->join('products', 'products.id', '=', 'pos_details.product_id')
             ->join('categories', 'categories.id', '=', 'products.category')
             ->when($startDate, function ($q, $startDate) {
@@ -60,21 +60,31 @@ trait ReportsSummaryServices
             })
             ->whereNotIn('pos.status', ['Cancelled', 'Pending'])
             ->groupBy('id')
-            ->orderByDesc('net_sales')
-            ->get()
-            ->toArray();
+            ->orderByDesc('net_sales');
 
-            $data = [0, 0, 0, 0, 0];
+            $monthlySales_ = $monthlySales->get()->toArray();
+            $chartSales = $monthlySales->limit(5)->get()->toArray();
+            $topFiveItems = $monthlySales->limit(5)->get()->toArray();
+
+            $chartData = [0, 0, 0, 0, 0];
             $index = 0;
-            foreach ($result as $value)
+
+            foreach ($chartSales as $value)
             {
-                $data[$index] = $value->net_sales;
+                $chartData[$index] = $value->net_sales;
                 $index++;
             }
 
-            return [
-                'tableData' => $result,
-                'chartData' => $data
+            return $monthlySales
+            ? [
+                'tableData' => $monthlySales_,
+                'topFiveItems' => $topFiveItems,
+                'chartData' => $chartData
+            ]
+            : [
+                'tableData' => [],
+                'topFiveItems' => [],
+                'chartData' => []
             ];
 
     }
@@ -92,7 +102,7 @@ trait ReportsSummaryServices
     {
         DB::statement("SET sql_mode = '' ");
 
-        return DB::table('pos')
+        $result = DB::table('pos')
             ->selectRaw('
                 categories.id as id,
                 categories.name as category,
@@ -118,7 +128,7 @@ trait ReportsSummaryServices
             ')
             ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
             ->leftJoin('sales_returns', 'sales_returns.pos_id', '=', 'pos.id')
-            ->leftJoin('sales_return_details', 'sales_return_details.product_id', '=', 'pos_details.product_id')
+            ->leftJoin('sales_return_details', 'sales_return_details.sales_return_id', '=', 'sales_returns.id')
             ->join('products', 'products.id', '=', 'pos_details.product_id')
             ->join('categories', 'categories.id', '=', 'products.category')
             ->when($startDate, function($q, $startDate) {
@@ -132,6 +142,8 @@ trait ReportsSummaryServices
             ->orderByDesc('net_sales')
             ->get()
             ->toArray();
+
+        return $result ? $result : [];
     }
 
 
@@ -150,10 +162,11 @@ trait ReportsSummaryServices
         $result = DB::table('pos')
             ->selectRaw('
                 pos.status as payment_type,
-                SUM(pos_details.discount) as discount,
+                SUM(pos_details.discount) as discounts,
                 SUM(pos_details.sub_total + pos_details.tax) as gross_sales,
                 CASE
-                    WHEN pos.id = sales_returns.pos_id
+                    WHEN
+                        pos.id = sales_returns.pos_id
                     THEN
                         (
                             SELECT
@@ -182,7 +195,7 @@ trait ReportsSummaryServices
             ')
             ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
             ->leftJoin('sales_returns', 'sales_returns.pos_id', '=', 'pos.id')
-            ->leftJoin('sales_return_details', 'sales_return_details.product_id', '=', 'pos_details.product_id')
+            ->leftJoin('sales_return_details', 'sales_return_details.sales_return_id', '=', 'sales_returns.id')
             ->when($startDate, function($q, $startDate) {
                 return $q->whereDate('pos_details.created_at', '>=', $startDate);
             })
@@ -198,7 +211,7 @@ trait ReportsSummaryServices
                 $value->id = uniqid('');
             }
 
-            return $result;
+            return $result ? $result : [];
     }
 
 
@@ -214,11 +227,11 @@ trait ReportsSummaryServices
     {
         DB::statement("SET sql_mode = '' ");
 
-        return DB::table('pos')
+        $result = DB::table('pos')
             ->selectRaw('
                 users.id as id,
                 pos.cashier as cashier,
-                SUM(pos_details.discount) as discount,
+                SUM(pos_details.discount) as discounts,
                 SUM(pos_details.sub_total + pos_details.tax) as gross_sales,
                 CASE
                     WHEN pos.id = sales_returns.pos_id
@@ -248,10 +261,10 @@ trait ReportsSummaryServices
                     ELSE 0
                 END as net_sales
             ')
-            ->join('users', 'users.name', '=', 'pos.cashier')
             ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
+            ->join('users', 'users.name', '=', 'pos.cashier')
             ->leftJoin('sales_returns', 'sales_returns.pos_id', '=', 'pos.id')
-            ->leftJoin('sales_return_details', 'sales_return_details.product_id', '=', 'pos_details.product_id')
+            ->leftJoin('sales_return_details', 'sales_return_details.sales_return_id', '=', 'sales_returns.id')
             ->when($startDate, function($q, $startDate) {
                 return $q->whereDate('pos_details.created_at', '>=', $startDate);
             })
@@ -263,6 +276,8 @@ trait ReportsSummaryServices
             ->orderByDesc('net_sales')
             ->get()
             ->toArray();
+
+        return $result ? $result : [];
     }
 
 
