@@ -38,7 +38,10 @@ class ImportProductsController extends Controller
         }
         catch (ValidationException $e)
         {
-            return $this->error($e->failures(), 422);
+            return $this->error([
+                'errors' => $e->failures(),
+                'errorHeader' => 'Errors found in the file, refreshing selected file in order to apply upcoming changes.'
+            ], 422);
         }
 
         return $this->success([],

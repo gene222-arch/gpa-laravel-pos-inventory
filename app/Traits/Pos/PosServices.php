@@ -43,6 +43,7 @@ trait PosServices
                 DATE_FORMAT(pos.created_at, "%M %d, %Y") as purchased_at
             ')
             ->where('id', '=', $posId)
+            ->where('status', '!=', 'Cancelled')
             ->first();
 
         $orderDetails = DB::table('pos_details')
@@ -66,7 +67,7 @@ trait PosServices
             ->get()
             ->toArray();
 
-        if ($order && $orderDetails)
+        if ($order && count($orderDetails))
         {
             foreach ($orderDetails as $val)
             {

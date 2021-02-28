@@ -88,6 +88,7 @@ trait ProductServices
                 return $q->where('products.name', 'like', "%$productName%");
             })
             ->where('is_for_sale', '=', true)
+            ->where('stocks.in_stock', '>', 0)
             ->orderByDesc('products.created_at')
             ->get()
             ->toArray();

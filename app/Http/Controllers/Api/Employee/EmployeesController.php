@@ -20,7 +20,7 @@ class EmployeesController extends Controller
     public function __construct(Employee $employee)
     {
         $this->employee = $employee;
-        $this->middleware(['auth:api', 'role:admin']);
+        $this->middleware(['auth:api', 'role:super_admin|admin']);
     }
 
 

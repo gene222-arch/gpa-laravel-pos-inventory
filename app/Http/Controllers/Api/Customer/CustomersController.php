@@ -21,7 +21,7 @@ class CustomersController extends Controller
     public function __construct(Customer $customer)
     {
         $this->customer = $customer;
-        $this->middleware(['auth:api', 'role:admin|manager']);
+        $this->middleware(['auth:api']);
     }
 
 
@@ -52,6 +52,25 @@ class CustomersController extends Controller
         $this->authorize('viewAny', $this->customer);
 
         $result = $this->customer->loadCustomerForPos();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
+    }
+
+
+
+
+        /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexWithOrders()
+    {
+        $this->authorize('viewAny', $this->customer);
+
+        $result = $this->customer->getCustomersWithOrders();
 
         return !$result
             ? $this->success([], 'No Content', 204)

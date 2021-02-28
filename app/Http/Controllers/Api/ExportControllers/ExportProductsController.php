@@ -8,6 +8,7 @@ use Excel;
 
 class ExportProductsController extends Controller
 {
+
     public function toExcel()
     {
         $fileName = 'products-' . now()->toDateString() . time() .  '.xlsx';

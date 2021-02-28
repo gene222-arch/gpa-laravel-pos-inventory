@@ -12,6 +12,7 @@ use Excel;
 
 class ExportPurchaseOrdersController extends Controller
 {
+
     use ApiResponser, PDFGeneratorServices;
 
     public function toPDF(PurchaseOrder $purchaseOrder)

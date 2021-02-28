@@ -21,6 +21,7 @@ trait PurchaseOrderDetailsServices
         foreach ($purchaseOrderDetails as $purchaseOrderDetail)
         {
             $data[] = [
+                'purchase_order_id' => $purchaseOrderId,
                 'id' => $purchaseOrderDetail['purchase_order_details_id'],
                 'product_id' => $purchaseOrderDetail['product_id'],
                 'received_quantity' => $purchaseOrderDetail['received_quantity'],

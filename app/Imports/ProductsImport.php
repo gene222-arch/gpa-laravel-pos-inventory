@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Stock;
 use Maatwebsite\Excel\Concerns\Importable;
@@ -65,7 +66,7 @@ class ProductsImport implements ToModel, WithHeadingRow, WithUpserts, WithValida
             'sku' => $row['sku'],
             'barcode' => $row['barcode'],
             'name' => $row['product_description'],
-            'category' => $row['category'],
+            'category' => Category::where('name', '=', $row['category'])->first()->id,
             'sold_by' => $row['sold_by'],
             'price' => $row['price'],
             'cost' => $row['cost'],

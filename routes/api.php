@@ -32,6 +32,7 @@ use App\Http\Controllers\Api\ExportControllers\ExportPaymentsController;
 use App\Http\Controllers\Api\ExportControllers\ExportProductsController;
 use App\Http\Controllers\Api\ExportControllers\ExportBadOrdersController;
 use App\Http\Controllers\Api\ExportControllers\ExportCustomersController;
+use App\Http\Controllers\Api\RolesPermission\PermissionsController;
 use App\Http\Controllers\Api\RolesPermission\RolesController;
 
 /*
@@ -65,7 +66,6 @@ Route::group(['middleware' => 'api'], function ()
 
 
 Route::get('/roles', [RolesController::class, 'index']);
-
 
 
 /**
@@ -199,6 +199,7 @@ Route::group(['prefix' => 'customers'], function ()
 {
     Route::get('/', [CustomersController::class, 'index']);
     Route::get('/pos', [CustomersController::class, 'indexForPos']);
+    Route::get('/with-orders', [CustomersController::class, 'indexWithOrders']);
     Route::post('/details', [CustomersController::class, 'show']);
     Route::post('/', [CustomersController::class, 'store']);
     Route::put('/', [CustomersController::class, 'update']);
@@ -247,11 +248,9 @@ Route::group(['prefix' => 'pos'], function ()
     Route::post('/add-to-cart', [PosController::class, 'store']);
     Route::post('/to-pay', [PosController::class, 'showAmountToPay']);
     Route::post('/process-payment', [PosController::class, 'processPayment']);
-    Route::post('/invoice', [PosController::class, 'invoice']);
     Route::put('/discount-all', [PosController::class, 'assignDiscountToAll']);
     Route::put('/discount/item-quantity', [PosController::class, 'applyDiscountAddQuantity']);
     Route::put('/cancel-orders', [PosController::class, 'cancelOrders']);
-    Route::delete('/discount', [PosController::class, 'removeDiscount']);
     Route::delete('/discount-all', [PosController::class, 'removeDiscountToAll']);
     Route::delete('/items', [PosController::class, 'removeItems']);
 });
@@ -300,11 +299,20 @@ Route::prefix('transactions')->group(function ()
 
 
 /**
- * Export or Import
+ * * Summary Reports
  */
-Route::group(['middleware' => ['auth:api']], function ()
+Route::group(['prefix' => 'reports'], function ()
 {
+    Route::get('/general', [ReportsController::class, 'generalAnalytics']);
+    Route::post('/sales-by-item', [ReportsController::class, 'getSalesByItemReports']);
+    Route::post('/sales-by-category', [ReportsController::class, 'getSalesByCategory']);
+    Route::post('/sales-by-payment-type', [ReportsController::class, 'getSalesByPaymentType']);
+    Route::post('/sales-by-employee', [ReportsController::class, 'getSalesByEmployee']);
+});
 
+
+
+Route::group(['middleware' => []], function () {
    /**
      * PDF Export
      */
@@ -337,7 +345,7 @@ Route::group(['middleware' => ['auth:api']], function ()
     {
         Route::get('/invoices', [ExportInvoiceController::class, 'toCSV']);
         Route::get('/purchase-orders', [ExportPurchaseOrdersController::class, 'toCSV']);
-        Route::get('/purchase-orders/{purchaseOrder}', [ExportPurchaseOrdersController::class, 'purchaseOrderToCSV']);
+        Route::get('/purchase-order/{purchaseOrder}', [ExportPurchaseOrdersController::class, 'purchaseOrderToCSV']);
         Route::get('/payments', [ExportPaymentsController::class, 'toCSV']);
         Route::get('/customers', [ExportCustomersController::class, 'toCSV']);
         Route::get('/products', [ExportProductsController::class, 'toCSV']);
@@ -351,20 +359,6 @@ Route::group(['middleware' => ['auth:api']], function ()
      */
     Route::post('import/products', [ImportProductsController::class, 'import']);
 
-});
-
-
-
-/**
- * * Summary Reports
- */
-Route::group(['prefix' => 'reports'], function ()
-{
-    Route::get('/general', [ReportsController::class, 'generalAnalytics']);
-    Route::post('/sales-by-item', [ReportsController::class, 'getSalesByItemReports']);
-    Route::post('/sales-by-category', [ReportsController::class, 'getSalesByCategory']);
-    Route::post('/sales-by-payment-type', [ReportsController::class, 'getSalesByPaymentType']);
-    Route::post('/sales-by-employee', [ReportsController::class, 'getSalesByEmployee']);
 });
 
 

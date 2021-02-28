@@ -8,13 +8,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Pos\AddDiscountQuantity;
 use App\Http\Requests\Pos\ShowRequest;
 use App\Http\Requests\Pos\StoreRequest;
-use App\Http\Requests\Pos\UpdateRequest;
 use App\Http\Requests\Pos\RemoveItemRequest;
 use App\Http\Requests\Pos\CancelOrdersRequest;
-use App\Http\Requests\Pos\AssignDiscountRequest;
 use App\Http\Requests\Pos\ProcessPaymentRequest;
-use App\Http\Requests\Pos\RemoveDiscountRequest;
-use App\Http\Requests\Pos\DecrementItemQtyRequest;
 use App\Http\Requests\Pos\IncrementItemQtyRequest;
 use App\Http\Requests\Pos\AssignDiscountToAllRequest;
 use App\Http\Requests\Pos\ForSalesReturnRequest;
@@ -31,7 +27,7 @@ class PosController extends Controller
     public function __construct(Pos $pos)
     {
         $this->pos = $pos;
-        $this->middleware(['auth:api', 'role:admin|manager']);
+        $this->middleware(['auth:api']);
     }
 
 
@@ -176,101 +172,6 @@ class PosController extends Controller
     }
 
 
-   /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function updateProductQty(UpdateRequest $request)
-    {
-        $this->authorize('update', $this->pos);
-
-        $result = $this->pos->updateOrderQty(
-            $request->customer_id,
-            $request->product_id,
-            $request->quantity
-        );
-
-        return ($result !== true)
-            ? $this->error($result)
-            : $this->success([],
-                'Success',
-                201);
-    }
-
-
-
-    /**
-     * Undocumented function
-     *
-     * @param IncrementItemQtyRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function incrementQuantity(IncrementItemQtyRequest $request)
-    {
-        $this->authorize('update', $this->pos);
-
-        $result = $this->pos->incrementItemQuantity(
-            $request->customer_id,
-            $request->product_id
-        );
-
-        return ($result !== true)
-            ? $this->error($result)
-            : $this->success([],
-                'Success',
-                201);
-    }
-
-
-    /**
-     * Undocumented function
-     *
-     * @param IncrementItemQtyRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function decrementQuantity(DecrementItemQtyRequest $request)
-    {
-        $this->authorize('update', $this->pos);
-
-        $result = $this->pos->decrementItemQuantity(
-            $request->customer_id,
-            $request->product_id
-        );
-
-        return ($result !== true)
-            ? $this->error($result)
-            : $this->success([],
-                'Success',
-                201);
-    }
-
-
-    /**
-     * Undocumented function
-     *
-     * @param IncrementItemQtyRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function assignDiscount(AssignDiscountRequest $request)
-    {
-        $this->authorize('assignDiscount', $this->pos);
-
-        $result = $this->pos->assignDiscountTo(
-            $request->customer_id,
-            $request->product_id,
-            $request->discount_id
-        );
-
-        return ($result !== true)
-            ? $this->error($result)
-            : $this->success([],
-                'Success',
-                201);
-    }
-
-
 
     /**
      * Undocumented function
@@ -342,29 +243,6 @@ class PosController extends Controller
                 201);
     }
 
-
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function removeDiscount(RemoveDiscountRequest $request)
-    {
-        $this->authorize('removeDiscount', $this->pos);
-
-        $result = $this->pos->removeDiscountTo(
-            $request->customer_id,
-            $request->product_id
-        );
-
-        return ($result !== true)
-            ? $this->error($result)
-            : $this->success([],
-                'Success',
-        );
-    }
 
 
     /**

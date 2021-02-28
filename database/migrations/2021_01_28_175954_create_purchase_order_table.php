@@ -38,6 +38,7 @@ class CreatePurchaseOrderTable extends Migration
             $table->unsignedInteger('received_quantity')->default(0);
             $table->unsignedInteger('ordered_quantity')->default(1);
             $table->unsignedInteger('remaining_ordered_quantity')->default(1);
+            $table->unsignedInteger('cancelled_quantity')->default(0);
             $table->unsignedDouble('purchase_cost', 10, 2)->default(0.00);
             $table->unsignedDouble('amount', 10, 2)->default(0.00);
 

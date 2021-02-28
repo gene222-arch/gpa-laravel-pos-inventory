@@ -21,7 +21,7 @@ class BadOrdersController extends Controller
     public function __construct(BadOrder $badOrder)
     {
         $this->badOrder = $badOrder;
-        $this->middleware(['auth:api, role:admin|manager']);
+        $this->middleware(['auth:api']);
     }
 
 

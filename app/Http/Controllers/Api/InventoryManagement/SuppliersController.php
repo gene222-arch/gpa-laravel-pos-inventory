@@ -20,7 +20,7 @@ class SuppliersController extends Controller
     public function __construct(Supplier $supplier)
     {
         $this->supplier = $supplier;
-        $this->middleware(['auth:api', 'role:admin|manager']);
+        $this->middleware(['auth:api']);
     }
 
 

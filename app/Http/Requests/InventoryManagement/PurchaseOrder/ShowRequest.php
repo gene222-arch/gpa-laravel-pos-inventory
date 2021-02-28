@@ -14,7 +14,12 @@ class ShowRequest extends BaseRequest
     public function rules()
     {
         return [
-            'purchase_order_id' => ['required', 'integer', 'exists:purchase_order,id']
+            'purchase_order_id' => ['required', 'integer', 'exists:purchase_order,id'],
+            'do_filter' => ['nullable', 'boolean'],
+            'table_to_filter' => ['nullable', 'string'],
+            'filter_by' => ['nullable', 'string'],
+            'operator' => ['nullable', 'string'],
+            'filter' => ['nullable', 'alpha_num']
         ];
     }
 }

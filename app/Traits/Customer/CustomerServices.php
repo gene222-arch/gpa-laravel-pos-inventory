@@ -58,4 +58,29 @@ trait CustomerServices
             ->toArray();
     }
 
+
+
+
+
+        /**
+     *
+     * @return array
+     */
+    public function getCustomersWithOrders(): array
+    {
+        DB::statement('SET sql_mode = "" ');
+
+        return DB::table('customers')
+            ->join('pos', 'pos.customer_id', '=', 'customers.id')
+            ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
+            ->selectRaw('
+                customers.id as id,
+                COUNT(pos_details.id) as number_of_orders
+            ')
+            ->where('pos.status', '!=', 'Cancelled')
+            ->groupByRaw('customers.id')
+            ->havingRaw('COUNT(pos_details.id) > 0')
+            ->get()
+            ->toArray();
+    }
 }

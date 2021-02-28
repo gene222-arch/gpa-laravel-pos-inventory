@@ -19,7 +19,7 @@ class StockAdjustmentsController extends Controller
     public function __construct(StockAdjustment $stockAdjustment)
     {
         $this->stockAdjustment = $stockAdjustment;
-        $this->middleware(['auth:api', 'role:admin|manager']);
+        $this->middleware(['auth:api']);
     }
 
 

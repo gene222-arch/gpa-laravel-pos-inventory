@@ -18,7 +18,7 @@ class AccessRightsController extends Controller
     public function __construct(AccessRights $accessRights)
     {
         $this->accessRights = $accessRights;
-        $this->middleware(['auth:api', 'role:admin']);
+        $this->middleware(['auth:api', 'role:super_admin|admin']);
     }
 
 

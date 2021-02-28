@@ -162,7 +162,7 @@ trait PurchaseOrderServices
      * @param integer $purchaseOrderId
      * @return \App\Modles\Product
      */
-    public function findPurchaseOrderDetails(int $purchaseOrderId)
+    public function findPurchaseOrderDetails(int $purchaseOrderId, $doFilter = null, $tableToFilter = null, $filterBy = null, $operator = null, $filter = null)
     {
         DB::statement('SET sql_mode= "" ');
 
@@ -172,8 +172,8 @@ trait PurchaseOrderServices
                 products.id as product_id,
                 products.name as product_description,
                 stocks.in_stock as in_stock,
+                purchase_order_details.cancelled_quantity as cancelled_quantity,
                 purchase_order_details.ordered_quantity as ordered_quantity,
-                purchase_order.status as status,
                 purchase_order_details.purchase_cost as purchase_cost,
                 stocks.incoming as incoming,
                 purchase_order_details.amount
@@ -183,6 +183,12 @@ trait PurchaseOrderServices
             ->join('products', 'products.id', '=', 'purchase_order_details.product_id')
             ->join('stocks', 'stocks.product_id', '=', 'products.id')
             ->where('purchase_order.id', '=', $purchaseOrderId)
+            ->when($doFilter, function ($q) use ( $filterBy, $operator, $filter) {
+                return $q->where($filterBy, $operator, $filter);
+            })
+            ->when($doFilter && $tableToFilter, function ($q) use ($tableToFilter, $filterBy, $operator, $filter) {
+                return $q->where("$tableToFilter.$filterBy", $operator, $filter);
+            })
             ->groupBy('purchase_order_details.id')
             ->get()
             ->toArray();
@@ -272,6 +278,7 @@ trait PurchaseOrderServices
             ->join('products', 'products.id', '=', 'stocks.product_id')
             ->join('purchase_order_details', 'purchase_order_details.id', '=', 'received_stock_details.purchase_order_details_id')
             ->where('purchase_order_details.purchase_order_id', '=', $purchaseOrderId)
+            ->where('received_stock_details.received_quantity', '>', 0)
             ->get()
             ->toArray();
 
@@ -299,6 +306,7 @@ trait PurchaseOrderServices
                 products.id as product_id,
                 products.name as product_description,
                 purchase_order_details.ordered_quantity as total_ordered_quantity,
+                purchase_order_details.remaining_ordered_quantity as remaining_total_ordered_quantity,
                 purchase_order_details.received_quantity as total_received_quantity
             ')
             ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
@@ -306,7 +314,7 @@ trait PurchaseOrderServices
             ->join('products', 'products.id', '=', 'purchase_order_details.product_id')
             ->join('stocks', 'stocks.product_id', '=', 'products.id')
             ->where('purchase_order.id', '=', $purchaseOrderId)
-            ->where('purchase_order_details.remaining_ordered_quantity', '!=', 0)
+            ->where('purchase_order_details.remaining_ordered_quantity', '>', 0)
             ->groupBy('purchase_order_details.id')
             ->get()
             ->toArray();
@@ -424,7 +432,6 @@ trait PurchaseOrderServices
                         'product_id',
                         [
                             'purchase_order_id',
-
                             'ordered_quantity',
                             'remaining_ordered_quantity',
                             'purchase_cost',
@@ -576,12 +583,11 @@ trait PurchaseOrderServices
         try {
             DB::transaction(function () use($supplierId, $purchaseOrderId, $purchaseOrderDetails)
             {
+                $purchaseOrderDetails = array_filter($purchaseOrderDetails, function ($po) {
+                    return $po['received_quantity'] > 0;
+                });
 
-                $receivedQuantity = array_reduce($purchaseOrderDetails, function($total, $current) {
-                    return $total + $current['received_quantity'];
-                }, 0);
-
-                if ($receivedQuantity)
+                if ($purchaseOrderDetails)
                 {
                     # Update purchase order details
                     $this->createPurchaseOrderDetails($purchaseOrderId,
@@ -671,8 +677,8 @@ trait PurchaseOrderServices
                 PurchaseOrder::find($purchaseOrderId)
                     ->where('status', '!=', 'Closed')
                     ->update([
-                        'status' => 'Closed',
-                        'total_remaining_ordered_quantity' => 0
+                        'status' => 'Cancelled',
+                        'total_remaining_ordered_quantity' => 0,
                 ]);
 
                 (new Stock())->outGoingStocks($purchaseOrderId, $productIds);
@@ -680,7 +686,8 @@ trait PurchaseOrderServices
                 DB::table('purchase_order_details')
                     ->where('purchase_order_id', '=', $purchaseOrderId)
                     ->updateTs([
-                        'remaining_ordered_quantity' => 0
+                        'cancelled_quantity' => DB::raw('remaining_ordered_quantity'),
+                        'remaining_ordered_quantity' => 0,
                     ]);
 
 

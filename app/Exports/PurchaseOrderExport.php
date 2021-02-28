@@ -20,7 +20,7 @@ class PurchaseOrderExport implements FromView
 
     public function view(): View
     {
-        return view('exports.EXCEL-CSVs.purchase-orders', [
+        return view('exports.EXCEL-CSVs.purchase-order', [
             'purchaseOrders' => (new PurchaseOrder())->getPurchaseOrderDetails($this->id)
         ]);
     }

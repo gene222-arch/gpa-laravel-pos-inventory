@@ -100,7 +100,7 @@
             <tr>
                 <th><strong>Product Description</strong></th>
                 <th><strong>Quantity</strong></th>
-                <th><strong>Price</strong></th>
+                <th><strong>Purchase cost</strong></th>
                 <th><strong>Amount</strong></th>
             </tr>
         </thead>

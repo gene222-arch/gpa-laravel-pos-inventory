@@ -9,6 +9,7 @@ use Excel;
 
 class ExportSalesReturnController extends Controller
 {
+
     public function toExcel()
     {
         $fileName = 'sales-returns-' . now()->toDateString() . time() .  '.xlsx';

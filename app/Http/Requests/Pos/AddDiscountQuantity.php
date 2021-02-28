@@ -7,6 +7,9 @@ use App\Http\Requests\BaseRequest;
 
 class AddDiscountQuantity extends BaseRequest
 {
+    private int $inStock;
+
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -30,6 +33,8 @@ class AddDiscountQuantity extends BaseRequest
 
         $productInStock = Stock::where('product_id', '=', $productId)->first()->in_stock;
 
+        $this->inStock = $productInStock;
+
         return ['numeric', 'min:1',  "max:$productInStock"];
     }
 
@@ -38,7 +43,7 @@ class AddDiscountQuantity extends BaseRequest
     {
         return [
             'quantity.min' => 'Item quantity must be at least 1',
-            'quantity.max' => 'Item quantity exceeded the product in stock',
+            'quantity.max' => 'Item stock is not enough, remaining: ' . $this->inStock,
         ];
     }
 }

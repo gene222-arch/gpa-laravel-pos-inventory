@@ -14,7 +14,7 @@ class ImportProductRequest extends BaseRequest
     public function rules()
     {
         return [
-            'file.*' => ['required', 'file', 'mimes:csv,xlsx']
+            'files.*' => ['required', 'file', 'mimes:csv,xlsx']
         ];
     }
 }

@@ -28,7 +28,7 @@ class ProductsController extends Controller
     {
         $this->product = $product;
         $this->stock = $stock;
-        $this->middleware(['auth:api', 'role:admin|manager']);
+        $this->middleware(['auth:api']);
     }
 
     /**

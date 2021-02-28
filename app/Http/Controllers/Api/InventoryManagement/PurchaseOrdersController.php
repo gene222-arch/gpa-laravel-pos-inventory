@@ -36,7 +36,7 @@ class PurchaseOrdersController extends Controller
         $this->supplier = $supplier;
         $this->product = $product;
         $this->stock = $stock;
-        $this->middleware(['auth:api', 'role:admin|manager']);
+        $this->middleware(['auth:api']);
     }
 
 
@@ -112,7 +112,14 @@ class PurchaseOrdersController extends Controller
             ->getPurchaseOrder($request->purchase_order_id);
 
         $purchaseOrderDetails = $this->purchaseOrder
-            ->findPurchaseOrderDetails($request->purchase_order_id);
+            ->findPurchaseOrderDetails(
+                $request->purchase_order_id,
+                $request->do_filter,
+                $request->table_to_filter,
+                $request->filter_by,
+                $request->operator,
+                $request->filter
+        );
 
         return !$purchaseOrder || !$purchaseOrderDetails
             ? $this->success([

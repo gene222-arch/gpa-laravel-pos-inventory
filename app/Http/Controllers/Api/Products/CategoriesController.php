@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Products;
 use App\Models\User;
 use App\Models\Category;
 use App\Traits\ApiResponser;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Products\Category\ShowRequest;
 use App\Http\Requests\Products\Category\StoreRequest;
@@ -24,7 +23,7 @@ class CategoriesController extends Controller
     {
         $this->user = $user;
         $this->category = $category;
-        $this->middleware(['auth:api', 'role:admin|manager']);
+        $this->middleware(['auth:api']);
     }
 
     /**

@@ -19,7 +19,7 @@ class DiscountsController extends Controller
     public function __construct(Discount $discount)
     {
         $this->discount = $discount;
-        $this->middleware(['auth:api', 'role:admin|manager']);
+        $this->middleware(['auth:api']);
     }
 
 
