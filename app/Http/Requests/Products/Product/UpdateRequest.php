@@ -26,11 +26,12 @@ class UpdateRequest extends BaseRequest
             'product.data.sku' => ['required', 'alpha_num', 'min:8', 'max:13', 'unique:products,sku,' . $this->product['product_id']],
             'product.data.barcode' => ['required', 'alpha_num', 'min:8', 'max:13', 'unique:products,barcode,' . $this->product['product_id']],
             'product.data.name' => ['required', 'string'],
-            'product.data.image' => ['image', 'mimes:jpeg,png', 'max:2048', 'nullable'],
+            'product.data.image' => ['nullable', 'string'],
             'product.data.category' => ['required', 'integer', 'exists:categories,id'],
             'product.data.sold_by' => ['required', 'in:each,weight/volume'],
-            'product.data.price' => ['numeric', 'nullable'],
+            'product.data.price' => ['nullable', 'numeric',],
             'product.data.cost' => ['required', 'numeric'],
+            'product.data.is_for_sale' => ['required', 'boolean']
         ];
     }
 
@@ -38,12 +39,10 @@ class UpdateRequest extends BaseRequest
     public function stockRules()
     {
         return [
-            'stock.data.supplier_id' => ['required', 'integer', 'exists:suppliers,id'],
-            'stock.data.in_stock' => ['required', 'integer', 'min:0'],
-            'stock.data.stock_in' => ['required', 'integer', 'min:0'],
-            'stock.data.stock_out' => ['required', 'integer', 'min:0'],
+            'stock.data.supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
+            'stock.data.in_stock' => ['nullable', 'integer', 'min:0'],
             'stock.data.minimum_reorder_level' => ['required', 'integer', 'min:1'],
-            'stock.data.default_purchase_costs' => ['required', 'numeric', 'min:0'],
+            'stock.data.default_purchase_costs' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 

@@ -18,7 +18,7 @@ class CreateProductsTable extends Migration
             $table->char('sku', 16);
             $table->char('barcode', 13);
             $table->string('name')->unique();
-            $table->string('image')->nullable();
+            $table->string('image')->nullable()->default('no_image.svg');
             $table->string('category_id')->nullable();
             $table->char('sold_by', 13);
             $table->unsignedDouble('price', 10, 2);

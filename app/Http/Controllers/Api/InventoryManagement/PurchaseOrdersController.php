@@ -219,8 +219,8 @@ class PurchaseOrdersController extends Controller
         return ($result !== true)
             ? $this->error($result)
             : $this->success(
+            [],
             'Purchase ordered successfully',
-            'Success',
             201
         );
     }

@@ -18,23 +18,20 @@ use App\Http\Controllers\Api\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\Dashboard\DashboardController;
 use App\Http\Controllers\Api\Products\CategoriesController;
 use App\Http\Controllers\Api\Employee\AccessRightsController;
-use App\Http\Controllers\Api\Employee\AccessRightsControllers;
 use App\Http\Controllers\Api\Imports\ImportProductsController;
 use App\Http\Controllers\Api\SalesReturn\SalesReturnController;
 use App\Http\Controllers\Api\Transactions\TransactionsController;
 use App\Http\Controllers\Api\InventoryManagement\BadOrdersController;
 use App\Http\Controllers\Api\InventoryManagement\SuppliersController;
+use App\Http\Controllers\Api\InventoryManagement\PurchaseOrdersController;
+use App\Http\Controllers\Api\InventoryManagement\StockAdjustmentsController;
+use App\Http\Controllers\Api\ExportControllers\ExportSalesReturnController;
+use App\Http\Controllers\Api\ExportControllers\ExportPurchaseOrdersController;
 use App\Http\Controllers\Api\ExportControllers\ExportInvoiceController;
-use App\Http\Controllers\Api\ExportControllers\ExportLowStockController;
 use App\Http\Controllers\Api\ExportControllers\ExportPaymentsController;
 use App\Http\Controllers\Api\ExportControllers\ExportProductsController;
 use App\Http\Controllers\Api\ExportControllers\ExportBadOrdersController;
 use App\Http\Controllers\Api\ExportControllers\ExportCustomersController;
-use App\Http\Controllers\Api\InventoryManagement\PurchaseOrdersController;
-use App\Http\Controllers\Api\InventoryManagement\ReceivedStocksController;
-use App\Http\Controllers\Api\ExportControllers\ExportSalesReturnController;
-use App\Http\Controllers\Api\InventoryManagement\StockAdjustmentsController;
-use App\Http\Controllers\Api\ExportControllers\ExportPurchaseOrdersController;
 use App\Http\Controllers\Api\RolesPermission\RolesController;
 
 /*
@@ -54,7 +51,7 @@ use App\Http\Controllers\Api\RolesPermission\RolesController;
 Route::group(['middleware' => 'api'], function ()
 {
     Route::post('/auth/register', [ RegisterController::class, 'register' ]);
-    Route::post('/auth/login', [ LoginController::class, 'login' ]);
+    Route::post('/auth/login', [ LoginController::class, 'login' ])->name('login');
     Route::post('/forgot-password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
     Route::post('/forgot-password/reset', [ResetPasswordController::class, 'reset']);
 
@@ -89,6 +86,7 @@ Route::group(['prefix' => 'products'], function ()
 {
     Route::get('/', [ProductsController::class, 'index']);
     Route::post('/details', [ProductsController::class, 'show']);
+    Route::post('/image-upload', [ProductsController::class, 'upload']);
     Route::post('/to-purchase', [ProductsController::class, 'showProductToPurchase']);
     Route::post('/filter', [ProductsController::class, 'showFilteredProducts']);
     Route::post('/', [ProductsController::class, 'store']);
@@ -200,6 +198,7 @@ Route::group(['prefix' => 'bad-orders'], function ()
 Route::group(['prefix' => 'customers'], function ()
 {
     Route::get('/', [CustomersController::class, 'index']);
+    Route::get('/pos', [CustomersController::class, 'indexForPos']);
     Route::post('/details', [CustomersController::class, 'show']);
     Route::post('/', [CustomersController::class, 'store']);
     Route::put('/', [CustomersController::class, 'update']);
@@ -303,16 +302,17 @@ Route::prefix('transactions')->group(function ()
 /**
  * Export or Import
  */
-Route::group(['middleware' => ['auth:api', 'role:admin|manager']], function ()
+Route::group(['middleware' => ['auth:api']], function ()
 {
-    /**
+
+   /**
      * PDF Export
      */
     Route::group(['prefix' => 'pdf-export'], function ()
     {
-        Route::get('/invoices', [ExportInvoiceController::class, 'toPDF']);
-        Route::get('/purchase-order', [ExportPurchaseOrdersController::class, 'toPDF']);
-        Route::get('/pos-payment', [ExportPaymentsController::class, 'toPDF']);
+        Route::get('/invoices/{invoice}', [ExportInvoiceController::class, 'toPDF']);
+        Route::get('/purchase-order/{purchaseOrder}', [ExportPurchaseOrdersController::class, 'toPDF']);
+        Route::get('/pos-payment/{payment}', [ExportPaymentsController::class, 'toPDF']);
     });
 
 
@@ -322,6 +322,7 @@ Route::group(['middleware' => ['auth:api', 'role:admin|manager']], function ()
     Route::group(['prefix' => 'excel-export'], function ()
     {
         Route::get('/invoices', [ExportInvoiceController::class, 'toExcel']);
+        Route::get('/purchase-orders', [ExportPurchaseOrdersController::class, 'toExcel']);
         Route::get('/payments', [ExportPaymentsController::class, 'toExcel']);
         Route::get('/customers', [ExportCustomersController::class, 'toExcel']);
         Route::get('/products', [ExportProductsController::class, 'toExcel']);
@@ -329,13 +330,14 @@ Route::group(['middleware' => ['auth:api', 'role:admin|manager']], function ()
         Route::get('/sales-returns', [ExportSalesReturnController::class, 'toExcel']);
     });
 
-
     /**
      * CSV Export
      */
     Route::group(['prefix' => 'csv-export'], function ()
     {
         Route::get('/invoices', [ExportInvoiceController::class, 'toCSV']);
+        Route::get('/purchase-orders', [ExportPurchaseOrdersController::class, 'toCSV']);
+        Route::get('/purchase-orders/{purchaseOrder}', [ExportPurchaseOrdersController::class, 'purchaseOrderToCSV']);
         Route::get('/payments', [ExportPaymentsController::class, 'toCSV']);
         Route::get('/customers', [ExportCustomersController::class, 'toCSV']);
         Route::get('/products', [ExportProductsController::class, 'toCSV']);
@@ -358,30 +360,10 @@ Route::group(['middleware' => ['auth:api', 'role:admin|manager']], function ()
  */
 Route::group(['prefix' => 'reports'], function ()
 {
-    /**
-     * General
-     */
     Route::get('/general', [ReportsController::class, 'generalAnalytics']);
-
-    /**
-     * Item
-     */
     Route::post('/sales-by-item', [ReportsController::class, 'getSalesByItemReports']);
-
-
-    /**
-     * Category
-     */
     Route::post('/sales-by-category', [ReportsController::class, 'getSalesByCategory']);
-
-    /**
-     * Payment Type
-     */
     Route::post('/sales-by-payment-type', [ReportsController::class, 'getSalesByPaymentType']);
-
-    /**
-     * Employee
-     */
     Route::post('/sales-by-employee', [ReportsController::class, 'getSalesByEmployee']);
 });
 

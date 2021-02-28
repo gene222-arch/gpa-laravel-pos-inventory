@@ -119,7 +119,7 @@ class PosController extends Controller
         ->getCustomerCartDetails($request->customer_id);
 
        return !$result
-            ? $this->success($result,'No Content', 204)
+            ? $this->success([],'No Content', 204)
             : $this->success($result, 'Success');
    }
 
@@ -145,9 +145,9 @@ class PosController extends Controller
         );
 
         return ($result !== true)
-                ? $this->error($result, 400)
+                ? $this->error($result, 500)
                 : $this->success([],
-                'Success',
+                'Payment successful.',
                 201);
     }
 
@@ -169,7 +169,7 @@ class PosController extends Controller
         );
 
         return ($result !== true)
-            ? $this->error($result)
+            ? $this->error($result, 422)
             : $this->success([],
                 'Success',
                 201);
@@ -288,9 +288,9 @@ class PosController extends Controller
         );
 
         return ($result !== true)
-            ? $this->error($result)
+            ? $this->error($result, 422)
             : $this->success([],
-                'Success',
+                'Discount successfully applied.',
                 201);
     }
 
@@ -316,7 +316,7 @@ class PosController extends Controller
         return ($result !== true)
             ? $this->error($result)
             : $this->success([],
-                'Success',
+                'Changes applied sucessfully.',
                 201);
     }
 
@@ -338,7 +338,7 @@ class PosController extends Controller
         return ($result !== true)
             ? $this->error($result, 400)
             : $this->success([],
-                'Success',
+                'Customer\'s order successfully cancelled.',
                 201);
     }
 
@@ -382,9 +382,9 @@ class PosController extends Controller
         );
 
         return ($result !== true)
-            ? $this->error($result)
+            ? $this->error($result, 500)
             : $this->success([],
-                'Success',
+                'Discount successfully removed.',
                 201);
     }
 

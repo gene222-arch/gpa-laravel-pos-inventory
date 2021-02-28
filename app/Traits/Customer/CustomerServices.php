@@ -33,8 +33,27 @@ trait CustomerServices
                 END as total_spent
             ')
             ->where('customers.name', '!=', 'walk-in')
-            ->groupBy('customers.id')
+            ->groupByRaw('pos.customer_id')
             ->orderByDesc('customers.created_at')
+            ->get()
+            ->toArray();
+    }
+
+
+
+        /**
+     *
+     * @return array
+     */
+    public function loadCustomerForPos(): array
+    {
+        DB::statement('SET sql_mode = "" ');
+
+        return DB::table('customers')
+            ->selectRaw('
+                customers.id as id,
+                customers.name as customer
+            ')
             ->get()
             ->toArray();
     }

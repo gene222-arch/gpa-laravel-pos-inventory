@@ -4,9 +4,7 @@ namespace App\Http\Requests\Products\Product;
 
 use App\Http\Requests\BaseRequest;
 use App\Traits\ApiResponser;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Http\Exceptions\HttpResponseException;
+
 
 class StoreRequest extends BaseRequest
 {
@@ -29,11 +27,12 @@ class StoreRequest extends BaseRequest
             'product.sku' => ['required', 'alpha_num', 'min:8', 'max:13', 'unique:products,sku'],
             'product.barcode' => ['required', 'alpha_num', 'min:8', 'max:13', 'unique:products,barcode'],
             'product.name' => ['required', 'string', 'unique:products,name'],
-            'product.image' => ['image', 'mimes:jpeg,png', 'max:2048', 'nullable'],
+            'product.image' => ['nullable', 'string'],
             'product.category' => ['required', 'integer', 'exists:categories,id'],
             'product.sold_by' => ['required', 'in:each,weight/volume'],
-            'product.price' => [ 'required', 'numeric', 'nullable'],
-            'product.cost' => ['required', 'numeric'],
+            'product.price' => [ 'nullable', 'numeric', 'min:1'],
+            'product.cost' => ['required', 'numeric', 'min:1'],
+            'product.is_for_sale' => ['required', 'boolean']
         ];
     }
 
@@ -41,10 +40,10 @@ class StoreRequest extends BaseRequest
     public function stockRules()
     {
         return [
-            'stock.supplier_id' => ['required', 'integer', 'exists:suppliers,id'],
-            'stock.in_stock' => ['required', 'integer', 'min:0'],
+            'stock.supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
+            'stock.in_stock' => ['nullable', 'integer', 'min:0'],
             'stock.minimum_reorder_level' => ['required', 'integer', 'min:1'],
-            'stock.default_purchase_costs' => ['required', 'numeric', 'min:0'],
+            'stock.default_purchase_costs' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 
@@ -64,6 +63,7 @@ class StoreRequest extends BaseRequest
             'stock.in_stock' => 'in stock',
             'stock.minimum_reorder_level' => 'minimum reorder level',
             'stock.default_purchase_costs' => 'default purchase costs',
+            'product.is_for_sale' => 'is for sale'
         ];
     }
 

@@ -24,6 +24,8 @@ trait PaymentServices
      */
     public function loadPayments(): array
     {
+        DB::statement("SET sql_mode='' ");
+
         return DB::table('pos_payments')
             ->join('pos', 'pos.id', '=', 'pos_payments.pos_id')
             ->join('customers', 'customers.id', '=', 'pos.customer_id')
@@ -35,17 +37,9 @@ trait PaymentServices
                 pos_payments.total,
                 pos_payments.cash,
                 pos_payments.change,
-                pos_payments.created_at as date_ordered
+                DATE_FORMAT(pos_payments.created_at, "%M %d, %Y") as date_ordered
             ')
-            ->groupBy(
-                'pos_payment_id',
-                'customer_name',
-                'cashier',
-                'payment_method',
-                'total',
-                'cash',
-                'change',
-                'date_ordered'
+            ->groupBy('pos_payment_id'
             )
             ->get()
             ->toArray();

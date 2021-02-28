@@ -1,0 +1,5 @@
+"#","Customer","","Cashier","","Payment Method","","Total","","Cash","","Change","","Date Ordered"
+"1","walk-in","","Administrator","","cash","","30","","50","","20","","February 27, 2021"
+"2","walk-in","","Administrator","","cash","","16.8","","100","","83.2","","February 27, 2021"
+"3","walk-in","","Administrator","","credit","","16.8","","16.8","","0","","February 27, 2021"
+"4","McDo","","Administrator","","cash","","45","","100","","55","","February 27, 2021"

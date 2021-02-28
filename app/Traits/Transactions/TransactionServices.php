@@ -14,7 +14,7 @@ trait TransactionServices
         return DB::table('pos')
             ->selectRaw("
                 pos.id,
-                DATE_FORMAT(pos.created_at, '%M %d, %Y %h:%i %p') as ordered_at,
+                DATE_FORMAT(pos.created_at, '%M %d, %Y') as ordered_at,
                 customers.name as customer,
                 CASE
                     WHEN

@@ -37,7 +37,24 @@ class CustomersController extends Controller
         $result = $this->customer->loadCustomers();
 
         return !$result
-            ? $this->success($result, 'Success')
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
+    }
+
+
+        /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexForPos()
+    {
+        $this->authorize('viewAny', $this->customer);
+
+        $result = $this->customer->loadCustomerForPos();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
             : $this->success($result, 'Success');
     }
 

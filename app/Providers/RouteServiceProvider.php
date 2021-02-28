@@ -26,7 +26,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string|null
      */
-    // protected $namespace = 'App\\Http\\Controllers';
+    // protected $namespace = 'App\Http\Controllers\Api';
 
     /**
      * Define your route model bindings, pattern filters, etc.
@@ -36,13 +36,6 @@ class RouteServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->configureRateLimiting();
-
-        Route::bind('category', function ($value) {
-            return \App\Models\Category::find($value) ?? response()->json([
-                'message' => 'Data does not exists',
-                422
-            ]);
-        });
 
         $this->routes(function () {
             Route::prefix('api')

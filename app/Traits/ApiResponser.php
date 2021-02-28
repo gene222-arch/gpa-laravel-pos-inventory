@@ -14,12 +14,13 @@ trait ApiResponser
      * @param integer $code
      * @return \Illuminate\Http\JsonResponse
      */
-	public function token($personalAccessToken, $message = null, $code = 200)
+	public function token($personalAccessToken, $message = null, $code = 200, $data = NULL)
 	{
 		$tokenData = [
 			'access_token' => $personalAccessToken->accessToken,
             'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse($personalAccessToken->token->expires_at)->toDateTimeString()
+            'expires_at' => Carbon::parse($personalAccessToken->token->expires_at)->toDateTimeString(),
+            'data' => $data
 		];
 
 		return $this->success($tokenData, $message, $code);

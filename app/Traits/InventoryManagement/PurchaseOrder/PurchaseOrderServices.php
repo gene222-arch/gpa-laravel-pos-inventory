@@ -42,6 +42,37 @@ trait PurchaseOrderServices
             ->toArray();
     }
 
+      /**
+     * * Get record from `purchase_order_details`  via ['purchase_order_id']
+     *
+     * @param integer $purchaseOrderId
+     */
+    public function getPurchaseOrderDetails(int $purchaseOrderId)
+    {
+        DB::statement('SET sql_mode= "" ');
+
+        $result = DB::table('purchase_order')
+            ->selectRaw('
+                purchase_order_details.id as id,
+                products.name as product_description,
+                purchase_order_details.received_quantity as received_quantity,
+                purchase_order_details.ordered_quantity as ordered_quantity,
+                purchase_order_details.remaining_ordered_quantity as remaining_ordered_quantity,
+                purchase_order_details.purchase_cost as purchase_cost,
+                purchase_order_details.amount as amount
+            ')
+            ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
+            ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
+            ->join('products', 'products.id', '=', 'purchase_order_details.product_id')
+            ->join('stocks', 'stocks.product_id', '=', 'products.id')
+            ->where('purchase_order.id', '=', $purchaseOrderId)
+            ->groupBy('purchase_order_details.id')
+            ->get()
+            ->toArray();
+
+        return $result ? $result : [];
+    }
+
 
     public function getAllPurchaseOrdersToBadOrders(): array
     {
@@ -96,8 +127,9 @@ trait PurchaseOrderServices
                 purchase_order.ordered_by,
                 suppliers.name as supplier,
                 suppliers.id as supplier_id,
-                DATE_FORMAT(purchase_order.purchase_order_date, "%M %d, %Y") as purchase_order_date,
-                DATE_FORMAT(purchase_order.expected_delivery_date, "%M %d, %Y") as expected_delivery_date,
+                DATE_FORMAT(purchase_order.purchase_order_date, "%Y-%m-%d") as purchase_order_date,
+                DATE_FORMAT(purchase_order.purchase_order_date, "%Y-%m-%d") as purchase_order_date,
+                purchase_order.expected_delivery_date as expected_delivery_date,
                 purchase_order.total_received_quantity,
                 purchase_order.total_ordered_quantity,
                 purchase_order.total_remaining_ordered_quantity

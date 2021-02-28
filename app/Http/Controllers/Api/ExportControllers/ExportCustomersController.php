@@ -13,7 +13,7 @@ class ExportCustomersController extends Controller
         $fileName = 'customers-' . now()->toDateString() . time() .  '.xlsx';
 
         $this->storeExcel($fileName);
-        return Excel::download(new CustomersExport(), $fileName);
+        return (new CustomersExport())->download($fileName);
     }
 
 
@@ -22,7 +22,7 @@ class ExportCustomersController extends Controller
         $fileName = 'customers-' . now()->toDateString() . time() .  '.csv';
 
         $this->storeCSV($fileName);
-        return Excel::download(new CustomersExport(), $fileName);
+        return (new CustomersExport())->download($fileName);
     }
 
 

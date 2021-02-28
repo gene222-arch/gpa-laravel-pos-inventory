@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\PDFRequest;
+namespace App\Http\Requests\Products\Product;
 
 use App\Http\Requests\BaseRequest;
 
-class GeneratePaymentRequest extends BaseRequest
+class ImageUploadRequest extends BaseRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -14,7 +14,7 @@ class GeneratePaymentRequest extends BaseRequest
     public function rules()
     {
         return [
-            'payment_id' => ['required', 'integer', 'exists:payments,id']
+            'product_image' => ['nullable', 'image', 'mimes:jpeg,png,svg', 'max:1999']
         ];
     }
 }

@@ -15,11 +15,11 @@ class ExportInvoiceController extends Controller
 {
     use PDFGeneratorServices;
 
-    public function toPDF(GenerateInvoiceRequest $request)
+    public function toPDF(Invoice $invoice)
     {
-        $fileName = 'invoice-' . now()->toDateString() . '-' . time() . '-' . $request->invoice_id . '.pdf';
+        $fileName = 'invoice-' . now()->toDateString() . '-' . time() . '-' . $invoice->id . '.pdf';
 
-        return $this->generateInvoicePDF($request->invoice_id, $fileName);
+        return $this->generateInvoicePDF($invoice->id, $fileName);
     }
 
 
@@ -28,7 +28,7 @@ class ExportInvoiceController extends Controller
         $fileName = 'invoice-' . now()->toDateString() . '-' . time() . '.xlsx';
         $this->storeExcel($fileName);
 
-        return Excel::download(new InvoicesExport(), $fileName);
+        return (new InvoicesExport())->download($fileName);
     }
 
 
@@ -37,7 +37,7 @@ class ExportInvoiceController extends Controller
         $fileName = 'invoice-' . now()->toDateString() . '-' . time() . '.csv';
         $this->storeCSV($fileName);
 
-        return Excel::download(new InvoicesExport(), $fileName);
+        return (new InvoicesExport())->download($fileName);
     }
 
 

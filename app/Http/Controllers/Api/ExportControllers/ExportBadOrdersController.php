@@ -14,7 +14,7 @@ class ExportBadOrdersController extends Controller
         $fileName = 'bad-orders-' . now()->toDateString() . time() .  '.xlsx';
         $this->storeExcel($fileName);
 
-        return Excel::download(new BadOrdersExport(), $fileName);
+        return (new BadOrdersExport())->download($fileName);
     }
 
     public function toCSV()
@@ -22,7 +22,7 @@ class ExportBadOrdersController extends Controller
         $fileName = 'bad-orders-' . now()->toDateString() . time() .  '.csv';
 
         $this->storeCSV($fileName);
-        return Excel::download(new BadOrdersExport(),  $fileName);
+        return (new BadOrdersExport())->download($fileName);
     }
 
 

@@ -3,8 +3,8 @@
 namespace App\Traits\Products;
 
 use App\Models\Product;
-use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 trait ProductServices
 {
@@ -14,7 +14,47 @@ trait ProductServices
      *
      * @return array
      */
-    public function getAll($categoryId = 0, $productName = null): array
+    public function getAll(): array
+    {
+        return DB::table('products')
+            ->join('stocks', 'stocks.product_id', '=', 'products.id')
+            ->join('categories', 'categories.id', '=', 'products.category')
+            ->selectRaw('
+                stocks.supplier_id as supplier_id,
+                stocks.bad_order_stock as bad_order_stock,
+                stocks.stock_in as stock_in,
+                stocks.stock_out as stock_out,
+                stocks.incoming as incoming,
+                stocks.default_purchase_costs,
+                stocks.in_stock,
+                stocks.minimum_reorder_level as minimum_reorder_level,
+                categories.id as category_id,
+                categories.name as category,
+                products.id,
+                products.sku,
+                products.barcode,
+                products.name,
+                products.image,
+                products.price,
+                products.sold_by,
+                products.cost,
+                (products.price - products.cost) * .100 as margin
+            '
+            )
+            ->orderByDesc('products.created_at')
+            ->get()
+            ->toArray();
+    }
+
+
+
+
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function getAllForPos($categoryId = 0, $productName = null): array
     {
         return DB::table('products')
             ->join('stocks', 'stocks.product_id', '=', 'products.id')
@@ -30,6 +70,7 @@ trait ProductServices
                 products.sku,
                 products.barcode,
                 products.name,
+                products.image,
                 categories.id as category_id,
                 categories.name as category,
                 products.price,
@@ -46,6 +87,7 @@ trait ProductServices
             ->when($productName, function ($q, $productName) {
                 return $q->where('products.name', 'like', "%$productName%");
             })
+            ->where('is_for_sale', '=', true)
             ->orderByDesc('products.created_at')
             ->get()
             ->toArray();
@@ -129,10 +171,9 @@ trait ProductServices
      */
     public function updateProduct(int $productId, array $data): bool
     {
-        return \boolval(Product::where('id', '=', $productId)
-                                    ->update($data)
-        );
+        return \boolval(Product::where('id', '=', $productId)->update($data));
     }
+
 
     /**
      * Delete multiple records in the products table
@@ -144,5 +185,32 @@ trait ProductServices
     {
         return Product::whereIn('id', $productIds)->delete();
     }
+
+
+
+    public function uploadImage($request): string
+    {
+        $path = '';
+
+        if ($request->hasFile('product_image'))
+        {
+            $file = $request->product_image;
+
+            $fileNameWithExt = $file->getClientOriginalName();
+            $fileExt = $file->getClientOriginalExtension();
+
+            $fileName = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
+            $fileNameToStore = $fileName . '_' . time() . '.' . $fileExt;
+
+            $path = $file->storeAs('images/Products', $fileNameToStore, 'public');
+        }
+        else
+        {
+            $path = 'no_image.svg';
+        }
+
+        return Storage::disk('public')->url($path);
+    }
+
 
 }

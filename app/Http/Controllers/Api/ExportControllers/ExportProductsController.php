@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\ExportControllers;
 
 use App\Exports\ProductsExport;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Excel;
 
 class ExportProductsController extends Controller
@@ -14,7 +13,7 @@ class ExportProductsController extends Controller
         $fileName = 'products-' . now()->toDateString() . time() .  '.xlsx';
 
         $this->storeExcel($fileName);
-        return Excel::download(new ProductsExport(), $fileName);
+        return (new ProductsExport())->download($fileName);
     }
 
     public function storeExcel($fileName)
@@ -29,7 +28,7 @@ class ExportProductsController extends Controller
         $fileName = 'products-' . now()->toDateString() . time() .  '.csv';
 
         $this->storeCSV($fileName);
-        return Excel::download(new ProductsExport(), $fileName);
+        return (new ProductsExport())->download($fileName);
     }
 
 

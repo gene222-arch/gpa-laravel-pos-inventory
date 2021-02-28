@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Products\Product\StoreRequest;
 use App\Http\Requests\Products\Product\DeleteRequest;
 use App\Http\Requests\Products\Product\FilterProductsRequest;
+use App\Http\Requests\Products\Product\ImageUploadRequest;
 use App\Http\Requests\Products\Product\ShowRequest;
 use App\Http\Requests\Products\Product\UpdateRequest;
 
@@ -39,10 +40,11 @@ class ProductsController extends Controller
     {
         $this->authorize('viewAny', $this->product);
 
-        return $this->success($this->product->getAll(),
-            'Fetched Successfully',
-            200
-        );
+        $result = $this->product->getAll();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Fetched Successfully');
     }
 
 
@@ -55,13 +57,15 @@ class ProductsController extends Controller
     {
         $this->authorize('viewAny', $this->product);
 
-        return $this->success($this->product->getAll(
-            $request->category_id,
-            $request->productName
-        ),
-            'Fetched Successfully',
-            200
-        );
+        $result = $this->product
+            ->getAllForPos(
+                $request->category_id,
+                $request->productName
+            );
+
+        return !$result
+            ? $this->success([], 'No Content',204)
+            : $this->success($result, 'Success');
     }
 
 
@@ -78,10 +82,9 @@ class ProductsController extends Controller
             $request->product_id
         );
 
-        return $this->success($product,
-        'Fetched Successfully',
-        200
-        );
+        return !$product
+            ? $this->success([], 'No Content', 204)
+            : $this->success($product, 'Fetched Successfully', 200);
     }
 
 
@@ -99,10 +102,9 @@ class ProductsController extends Controller
             ->with('stock')
             ->first();
 
-        return $this->success($product,
-            'Fetched Successfully',
-            200
-        );
+        return !$product
+            ? $this->success([], 'No Content', 204)
+            : $this->success($product, 'Fetched Successfully', 200);
     }
 
 
@@ -169,6 +171,23 @@ class ProductsController extends Controller
         201
         );
     }
+
+
+    /**
+     * * Create new resource of products and stocks
+     *
+     * @param StoreRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function upload(ImageUploadRequest $request)
+    {
+        $this->authorize('create', $this->product);
+
+        $file = $this->product->uploadImage($request);
+
+        return $this->success($file, 'Success');
+    }
+
 
 
     /**

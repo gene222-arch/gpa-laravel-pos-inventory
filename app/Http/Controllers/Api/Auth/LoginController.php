@@ -58,8 +58,12 @@ class LoginController extends Controller
 
         return $this->token(
             $this->getPersonalAccessToken($request),
-            auth()->user()->with('roles')->get(),
-            201
+            'User login successfully.',
+            201,
+            [
+                'user' => auth()->user(),
+                'permissions' => auth()->user()->permissions->map->name
+            ]
         );
     }
 

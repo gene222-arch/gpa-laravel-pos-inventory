@@ -23,16 +23,18 @@
                 <th colspan="2" align="center"><strong>First visit</strong></th>
                 <th colspan="2" align="center"><strong>Last visit</strong></th>
                 <th colspan="2" align="center"><strong>Total visits</strong></th>
+                <th colspan="2" align="center"><strong>Total spent</strong></th>
             </tr>
         </thead>
         <tbody>
             @foreach ($customers as $customer)
                 <tr>
-                    <td align="center">{{ $customer->customer_id }}</td>
-                    <td colspan="2" align="center">{{ $customer->customer_name }}</td>
+                    <td align="center">{{ $customer->id }}</td>
+                    <td colspan="2" align="center">{{ $customer->customer }}</td>
                     <td colspan="2" align="center">{{ $customer->first_visit }}</td>
-                    <td colspan="2" align="center">{{ $customer->last_visited }}</td>
+                    <td colspan="2" align="center">{{ $customer->last_visit }}</td>
                     <td colspan="2" align="center">{{ $customer->total_visits }}</td>
+                    <td colspan="2" align="center">{{ $customer->total_spent }}</td>
                 </tr>
             @endforeach
         </tbody>

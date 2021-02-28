@@ -31,7 +31,7 @@
         <tbody>
             @foreach ($invoices as $invoice)
                 <tr>
-                    <td align="center">{{ $invoice->invoice_id }}</td>
+                    <td align="center">{{ $invoice->id }}</td>
 
                     <td colspan="2" align="center">{{ $invoice->invoice_date }}</td>
                     <td colspan="2" align="center">{{ $invoice->customer_name }}</td>

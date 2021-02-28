@@ -67,8 +67,10 @@ class InvoiceController extends Controller
 
         $invoiceDetails = $this->invoice->updateStatus($request->invoice_ids);
 
-        return $this->success($invoiceDetails,
-        'Success',
+        return !$invoiceDetails
+            ? $this->error('Invoice status is not updated', 400)
+            : $this->success($invoiceDetails,
+        'Invoice status updated.',
         201);
     }
 
@@ -90,7 +92,7 @@ class InvoiceController extends Controller
         return (!$isSalesInvoiceDeleted)
             ? $this->serverError()
             : $this->success([],
-            'Success');
+            'Invoices deleted successfully.');
     }
 
 }

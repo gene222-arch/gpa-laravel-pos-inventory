@@ -7,7 +7,6 @@ use PDF;
 use App\Models\PosPayment;
 use App\Exports\PaymentsExport;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PDFRequest\GeneratePaymentRequest;
 use App\Traits\PDF\PDFGeneratorServices;
 
 class ExportPaymentsController extends Controller
@@ -15,12 +14,11 @@ class ExportPaymentsController extends Controller
 
     use PDFGeneratorServices;
 
-    public function toPDF()
+    public function toPDF(PosPayment $payment)
     {
-        $paymentId = 1;
-        $fileName = 'payment-' . now()->toDateString() . '-' . time() . '-' . $paymentId . '.pdf';
+        $fileName = 'payment-' . now()->toDateString() . '-' . time() . '-' . $payment->id . '.pdf';
 
-        return $this->generatePaymentsPDF($paymentId, $fileName);
+        return $this->generatePaymentsPDF($payment->id, $fileName);
     }
 
 
@@ -29,7 +27,7 @@ class ExportPaymentsController extends Controller
         $fileName = 'payment-' . now()->toDateString() . '-' . time() . '.xlsx';
 
         $this->storeExcel($fileName);
-        return Excel::download(new PaymentsExport(), 'payments.xlsx');
+        return (new PaymentsExport())->download($fileName);
     }
 
 
@@ -38,7 +36,7 @@ class ExportPaymentsController extends Controller
         $fileName = 'payment-' . now()->toDateString() . '-' . time() . '.csv';
 
         $this->storeCSV($fileName);
-        return Excel::download(new PaymentsExport(), 'payments.csv');
+        return (new PaymentsExport())->download($fileName);
     }
 
 

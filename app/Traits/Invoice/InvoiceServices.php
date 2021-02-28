@@ -42,6 +42,36 @@ trait InvoiceServices
 
 
 
+        /**
+     * Undocumented function
+     *
+     * @param integer $invoiceId
+     * @return array
+     */
+    public function invoiceDetailstoExcel(): array
+    {
+        DB::statement('SET sql_mode=""');
+
+        return DB::table('invoices')
+                    ->join('invoice_details', 'invoice_details.invoice_id', '=', 'invoices.id')
+                    ->join('customers', 'customers.id', '=', 'invoices.customer_id')
+                    ->selectRaw('
+                        invoices.id,
+                        DATE_FORMAT(invoices.created_at, "%M %d, %Y") as invoice_date,
+                        customers.name as customer_name,
+                        SUM(invoice_details.quantity) as number_of_items,
+                        SUM(invoice_details.sub_total) as sub_total,
+                        SUM(invoice_details.tax) as tax,
+                        SUM(invoice_details.total) as total,
+                        DATE_FORMAT(invoices.payment_date, "%M %d, %Y") as payment_date
+                    ')
+                    ->groupBy('invoices.id')
+                    ->get()
+                    ->toArray();
+    }
+
+
+
     /**
      * Undocumented function
      *
