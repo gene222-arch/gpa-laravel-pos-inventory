@@ -8,7 +8,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class PasswordResetNotification extends Notification
+class PasswordResetNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -43,7 +43,7 @@ class PasswordResetNotification extends Notification
      */
     public function toMail($notifiable)
     {
-        $url = '/pos/reset-password-form/?token=' . $this->token;
+        $url = 'http://localhost:3000/forgot-password/reset?email=' . $notifiable->email . '&token=' . $this->token;
 
         return (new MailMessage)
             ->subject(Lang::get('Reset Password Notification'))

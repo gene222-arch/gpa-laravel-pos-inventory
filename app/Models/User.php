@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\QueuePasswordResetNotification;
 use App\Notifications\LowStockNotification;
 use App\Notifications\PasswordResetNotification;
 use App\Traits\Admin\AdminServices;
@@ -76,7 +77,8 @@ class User extends Authenticatable
      */
     public function sendPasswordResetNotification($token)
     {
-        $this->notify(new PasswordResetNotification($token));
+        dispatch(new QueuePasswordResetNotification($this, $token))
+            ->delay(now()->addSeconds(10));
     }
 
 
