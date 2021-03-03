@@ -17,6 +17,10 @@ class ImportProductsController extends Controller
 
     use ApiResponser;
 
+    public function __construct()
+    {
+        $this->middleware(['auth:api', 'permission:Import Products']);
+    }
 
     /**
      * Undocumented function

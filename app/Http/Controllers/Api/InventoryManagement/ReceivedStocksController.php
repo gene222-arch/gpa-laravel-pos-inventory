@@ -15,6 +15,7 @@ class ReceivedStocksController extends Controller
     public function __construct(ReceivedStock $receivedStocks)
     {
         $this->receivedStocks = $receivedStocks;
+        $this->middleware(['auth:api', 'View Received Stocks']);
     }
 
 
@@ -25,8 +26,10 @@ class ReceivedStocksController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', $this->receivedStocks);
+        $result = $this->receivedStocks->all();
 
-        return $this->success($this->receivedStocks->all());
+        return !$result 
+            ? $this->success([])
+            : $this->success($this->receivedStocks->all());
     }
 }

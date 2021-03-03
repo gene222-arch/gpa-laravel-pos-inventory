@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Stock;
+use App\Models\Supplier;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
@@ -21,12 +22,30 @@ class StocksImport implements ToModel, WithHeadingRow, WithUpserts, WithValidati
     public function rules(): array
     {
         return [
-            '*.supplier_id' => ['required', 'integer', 'exists:suppliers,id'],
+            'id' => ['required', 'integer'],
+            '*.supplier' => ['required', 'string', 'exists:suppliers,name'],
             '*.in_stock' => ['required', 'integer', 'min:0'],
             '*.stock_in' => ['required', 'integer', 'min:0'],
             '*.stock_out' => ['required', 'integer', 'min:0'],
             '*.minimum_reorder_level' => ['required', 'integer', 'min:1'],
             '*.default_purchase_costs' => ['required', 'numeric', 'min:0'],
+        ];
+    }
+
+    
+    /**
+     * @return array
+     */
+    public function customValidationAttributes()
+    {
+        return [
+            '*.id' => 'product id',
+            '*.supplier' => 'supplier',
+            '*.in_stock' => 'in stock',
+            '*.stock_in' => 'stock in',
+            '*.stock_out' => 'stock out',
+            '*.minimum_reorder_level' => 'minimum reorder level',
+            '*.default_purchase_costs' => 'default purchase costs',
         ];
     }
 
@@ -59,7 +78,7 @@ class StocksImport implements ToModel, WithHeadingRow, WithUpserts, WithValidati
     {
         return new Stock([
             'product_id' => $row['id'],
-            'supplier_id' => $row['supplier_id'],
+            'supplier_id' => Supplier::where('name', '=', $row['supplier'])->first()->id,
             'in_stock' => $row['in_stock'],
             'bad_order_stock' => $row['bad_order_stock'],
             'stock_in' => $row['stock_in'],

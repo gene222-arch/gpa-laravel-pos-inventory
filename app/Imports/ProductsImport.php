@@ -22,13 +22,27 @@ class ProductsImport implements ToModel, WithHeadingRow, WithUpserts, WithValida
     public function rules(): array
     {
         return [
-            '*.sku' => ['required', 'alpha_num', 'min:1', 'max:13'],
-            '*.barcode' => ['required', 'alpha_num', 'min:1', 'max:13'],
-            '*.product_description' => ['required', 'string'],
+            'id' => ['required', 'integer'],
+            '*.sku' => ['required', 'alpha_num', 'min:1', 'max:13', 'unique:products,sku,' . $this->id],
+            '*.barcode' => ['required', 'alpha_num', 'min:1', 'max:13', 'unique:products,barcode,' . $this->id],
+            '*.product_description' => ['required', 'string', 'unique:products,name'],
             '*.category' => ['required', 'exists:categories,name'],
             '*.sold_by' => ['required', 'in:each,weight/volume'],
             '*.price' => ['numeric', 'nullable'],
             '*.cost' => ['required', 'numeric'],
+        ];
+    }
+
+
+    /**
+     * @return array
+     */
+    public function customValidationAttributes()
+    {
+        return [
+            'id' => 'product id',
+            '*.product_description' => 'product description',
+            '*.sold_by' => 'sold by',
         ];
     }
 
@@ -66,10 +80,12 @@ class ProductsImport implements ToModel, WithHeadingRow, WithUpserts, WithValida
             'sku' => $row['sku'],
             'barcode' => $row['barcode'],
             'name' => $row['product_description'],
+            'image' => 'http://127.0.0.1:8000/storage/images/Products/product_default_img_1614450024.svg',
             'category' => Category::where('name', '=', $row['category'])->first()->id,
             'sold_by' => $row['sold_by'],
             'price' => $row['price'],
             'cost' => $row['cost'],
         ]);
     }
+    
 }

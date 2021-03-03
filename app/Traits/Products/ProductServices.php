@@ -18,8 +18,10 @@ trait ProductServices
     {
         return DB::table('products')
             ->join('stocks', 'stocks.product_id', '=', 'products.id')
+            ->join('suppliers', 'suppliers.id', '=', 'stocks.supplier_id')
             ->join('categories', 'categories.id', '=', 'products.category')
             ->selectRaw('
+                suppliers.name as supplier,
                 stocks.supplier_id as supplier_id,
                 stocks.bad_order_stock as bad_order_stock,
                 stocks.stock_in as stock_in,

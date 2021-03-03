@@ -65,7 +65,16 @@ Route::group(['middleware' => 'api'], function ()
 
 
 
+/**
+ * Roles and Permissions
+ */
 Route::get('/roles', [RolesController::class, 'index']);
+
+Route::prefix('permissions')->group(function () 
+{
+    Route::get('/', [PermissionsController::class, 'index']);
+    Route::get('/names', [PermissionsController::class, 'indexNames']);
+});
 
 
 /**

@@ -257,7 +257,31 @@ trait DashboardServices
                     END
                 FROM
                 sales_return_details
-            ) as net_sales
+            ) as net_sales,
+            (
+
+                SELECT 	
+                    COUNT(id)
+                FROM 
+                    purchase_order
+                WHERE 
+                    status 
+                NOT IN ("Cancelled", "Closed") 
+            ) as pending_purchase_orders,
+            (
+                SELECT 	
+                    COUNT(id)
+                FROM 
+                    invoices
+                WHERE 
+                    status = "Payment in process"
+            ) as pending_invoices,
+            (
+                SELECT 	
+                    COUNT(id)
+                FROM 
+                    customers
+            ) as total_no_of_customers
 
         ')
         ->first();
@@ -339,7 +363,7 @@ trait DashboardServices
             ')
             ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
             ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
-            ->where('purchase_order.status', '!=', 'Closed')
+            ->whereNotIn('purchase_order.status', ['Cancelled', 'Closed'])
             ->limit(10)
             ->get()
             ->toArray();
@@ -357,7 +381,7 @@ trait DashboardServices
 
     public function getNotifications()
     {
-
+        
     }
 
 }

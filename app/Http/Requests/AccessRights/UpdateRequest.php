@@ -17,7 +17,8 @@ class UpdateRequest extends BaseRequest
             'role_id' => ['required', 'integer', 'exists:roles,id'],
             'role_name' => ['required', 'string'],
             'back_office' => ['required', 'boolean'],
-            'pos' => ['required', 'boolean']
+            'pos' => ['required', 'boolean'],
+            'permissions.*' => ['required', 'string', 'exists:permissions,id']
         ];
     }
 }

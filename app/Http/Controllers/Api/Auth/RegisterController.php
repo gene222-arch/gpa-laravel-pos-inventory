@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Models\User;
 use App\Traits\ApiResponser;
-use Illuminate\Http\Request;
 use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Models\Employee;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 
 class RegisterController extends Controller
@@ -39,22 +39,6 @@ class RegisterController extends Controller
     }
 
     /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
-    protected function validator($data)
-    {
-        return Validator::make($data, [
-            'role' => ['required', 'string', 'exists:roles,name'],
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-    }
-
-    /**
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
@@ -64,13 +48,22 @@ class RegisterController extends Controller
     {
         $user = new User();
 
-        $user->create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
-
-        $user->assignRole($data['role']);
+        try {
+            DB::transaction(function () use ($user, $data)
+            {
+                $user->create([
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'password' => Hash::make($data['password']),
+                ]);
+        
+                $employeeRole = Employee::where('email', '=', $data['email'])->first()->role;
+        
+                $user->assignRole($employeeRole);
+            });
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
 
         return $user;
     }
@@ -78,14 +71,12 @@ class RegisterController extends Controller
     /**
      * Undocumented function
      *
-     * @param Request $request
+     * @param RegisterRequest $request
      * @return JsonResponse
      */
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $this->validator($request->all())->validate();
-
-        $this->create($request->all());
+        $this->create($request->validated());
 
         if (!$this->guard()->attempt($request->only('email', 'password')))
         {

@@ -3,6 +3,7 @@
 namespace App\Traits\Employee;
 
 use App\Models\Employee;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
@@ -30,60 +31,20 @@ trait EmployeeServices
             ->get();
     }
 
-    public function getEmployees()
-    {
-        DB::statement('SET sql_mode="" ');
-
-        return DB::table('employees')
-            ->selectRaw('
-                employees.id as id,
-                employees.name,
-                employees.email,
-                employees.phone,
-                roles.name as role
-            ')
-            ->join('model_has_roles', 'model_has_roles.model_id', '=', 'employees.id')
-            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
-            ->groupBy('id')
-            ->get()
-            ->toArray();
-    }
-
 
     public function getEmployee(int $employeeId)
     {
         $emp = Employee::find($employeeId);
-        $role = $emp->roles->first()->name;
 
         return [
             'employee_id' => $emp->id,
             'name' => $emp->name,
             'email' => $emp->email,
             'phone' => $emp->phone,
-            'role' => $role
+            'role' => $emp->role
         ];
     }
 
-
-    public function insertEmployee(string $name, string $email, string $phone, string $role)
-    {
-        try {
-            DB::transaction(function () use ($name, $email, $phone, $role)
-            {
-                $employee = Employee::create([
-                    'name' => $name,
-                    'email' => $email,
-                    'phone' => $phone
-                ]);
-
-                $employee->assignRole($role);
-            });
-        } catch (\Throwable $th) {
-            return $th->getMessage();
-        }
-
-        return true;
-    }
 
 
     public function updateEmployee(int $employeeId, string $name, string $email, string $phone, string $role)
@@ -91,21 +52,19 @@ trait EmployeeServices
         try {
             DB::transaction(function () use ($employeeId, $name, $email, $phone, $role)
             {
-                $employee = tap(Employee::where('id', '=', $employeeId))
+                $user = new User();
+
+                tap(Employee::where('id', '=', $employeeId))
                     ->update([
                         'name' => $name,
                         'email' => $email,
-                        'phone' => $phone
+                        'phone' => $phone,
+                        'role' => $role
                     ])
                     ->first();
 
-                $role = Role::where('name', '=', $role)->first();
-
-                DB::table('model_has_roles')
-                    ->where('model_id', '=', $employeeId)
-                    ->update([
-                        'role_id' => $role->id
-                    ]);
+                $user->where('email', '=', $email)
+                    ->syncRoles([$role]);
             });
         } catch (\Throwable $th) {
             return $th->getMessage();

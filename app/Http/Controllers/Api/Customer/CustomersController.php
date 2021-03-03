@@ -21,7 +21,7 @@ class CustomersController extends Controller
     public function __construct(Customer $customer)
     {
         $this->customer = $customer;
-        $this->middleware(['auth:api']);
+        $this->middleware(['auth:api', 'permission:Manage Customers']);
     }
 
 
@@ -32,8 +32,6 @@ class CustomersController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', $this->customer);
-
         $result = $this->customer->loadCustomers();
 
         return !$result
@@ -49,8 +47,6 @@ class CustomersController extends Controller
      */
     public function indexForPos()
     {
-        $this->authorize('viewAny', $this->customer);
-
         $result = $this->customer->loadCustomerForPos();
 
         return !$result
@@ -68,8 +64,6 @@ class CustomersController extends Controller
      */
     public function indexWithOrders()
     {
-        $this->authorize('viewAny', $this->customer);
-
         $result = $this->customer->getCustomersWithOrders();
 
         return !$result
@@ -87,8 +81,6 @@ class CustomersController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->authorize('create', $this->customer);
-
         $isCustomerCreated = $this->customer->insertTs($request->validated());
 
         return (!$isCustomerCreated)
@@ -108,8 +100,6 @@ class CustomersController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $this->authorize('view', $this->customer);
-
         $customer = $this->customer->find($request->customer_id);
 
         return !$customer
@@ -128,8 +118,6 @@ class CustomersController extends Controller
      */
     public function update(UpdateRequest $request)
     {
-        $this->authorize('update', $this->customer);
-
         $isCustomerUpdated = $this->customer
                                     ->where('id', '=', $request->customer_id)
                                     ->update($request->customer_data);
@@ -151,8 +139,6 @@ class CustomersController extends Controller
      */
     public function destroy(DeleteRequest $request)
     {
-        $this->authorize('delete', $this->customer);
-
         $isCustomerDeleted = $this->customer
                                     ->whereIn('id', $request->customer_ids)
                                     ->delete();

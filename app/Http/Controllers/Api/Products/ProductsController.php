@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Products;
 use App\Models\Stock;
 use App\Models\Product;
 use App\Traits\ApiResponser;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Products\Product\StoreRequest;
@@ -14,6 +13,7 @@ use App\Http\Requests\Products\Product\FilterProductsRequest;
 use App\Http\Requests\Products\Product\ImageUploadRequest;
 use App\Http\Requests\Products\Product\ShowRequest;
 use App\Http\Requests\Products\Product\UpdateRequest;
+
 
 class ProductsController extends Controller
 {
@@ -28,7 +28,7 @@ class ProductsController extends Controller
     {
         $this->product = $product;
         $this->stock = $stock;
-        $this->middleware(['auth:api']);
+        $this->middleware(['auth:api', 'permission:Manage Products']);
     }
 
     /**
@@ -38,8 +38,6 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', $this->product);
-
         $result = $this->product->getAll();
 
         return !$result
@@ -55,8 +53,6 @@ class ProductsController extends Controller
      */
     public function showFilteredProducts(FilterProductsRequest $request)
     {
-        $this->authorize('viewAny', $this->product);
-
         $result = $this->product
             ->getAllForPos(
                 $request->category_id,
@@ -76,8 +72,6 @@ class ProductsController extends Controller
      */
     public function showProductToPurchase(ShowRequest $request)
     {
-        $this->authorize('view', $this->product);
-
         $product = $this->product->getProductForPurchaseOrder(
             $request->product_id
         );
@@ -95,8 +89,6 @@ class ProductsController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $this->authorize('view', $this->product);
-
         $product = $this->product
             ->where('id', '=', $request->product_id)
             ->with('stock')
@@ -116,8 +108,6 @@ class ProductsController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->authorize('create', $this->product);
-
         try {
             DB::transaction(function () use($request)
             {
@@ -145,8 +135,6 @@ class ProductsController extends Controller
      */
     public function update(UpdateRequest $request)
     {
-        $this->authorize('update', $this->product);
-
         try {
             DB::transaction(function () use($request)
             {
@@ -181,8 +169,6 @@ class ProductsController extends Controller
      */
     public function upload(ImageUploadRequest $request)
     {
-        $this->authorize('create', $this->product);
-
         $file = $this->product->uploadImage($request);
 
         return $this->success($file, 'Success');
@@ -198,8 +184,6 @@ class ProductsController extends Controller
      */
     public function destroy(DeleteRequest $request)
     {
-        $this->authorize('delete', $this->product);
-
         $isProductsDeleted = $this->product->deleteMany($request->product_ids);
 
         return ( !$isProductsDeleted )

@@ -18,7 +18,7 @@ class ReportsController extends Controller
 
     public function __construct()
     {
-        $this->middleware(['auth:api', 'role:admin|manager']);
+        $this->middleware(['auth:api', 'permission:View Reports']);
     }
 
 

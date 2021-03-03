@@ -19,7 +19,7 @@ class StockAdjustmentsController extends Controller
     public function __construct(StockAdjustment $stockAdjustment)
     {
         $this->stockAdjustment = $stockAdjustment;
-        $this->middleware(['auth:api']);
+        $this->middleware(['auth:api', 'Manage Stock Adjustments']);
     }
 
 
@@ -30,9 +30,11 @@ class StockAdjustmentsController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', $this->stockAdjustment);
+        $result = $this->stockAdjustment->getStockAdjustments();
 
-        return $this->success($this->stockAdjustment->getStockAdjustments(), 'Success');
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($this->stockAdjustment->getStockAdjustments(), 'Success');
     }
 
 
@@ -44,23 +46,25 @@ class StockAdjustmentsController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $this->authorize('view', $this->stockAdjustment);
-
-        $data = $this->stockAdjustment->getStockAdjustment(
+        $result = $this->stockAdjustment->getStockAdjustment(
             $request->stock_adjustment_id
         );
 
-        return $this->success($data, 'Success');
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
     }
 
 
     public function showStockToAdjust(ShowStockToAdjust $request)
     {
-        $this->authorize('view', $this->stockAdjustment);
-
-        return $this->success($this->stockAdjustment->getStockToAdjust(
+        $result = $this->stockAdjustment->getStockToAdjust(
             $request->product_id
-        ));
+        );
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result);
     }
 
 
@@ -73,8 +77,6 @@ class StockAdjustmentsController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->authorize('create', $this->stockAdjustment);
-
         $result = $this->stockAdjustment->adjustStocks(
             $request->reason,
             $request->stockAdjustmentDetails

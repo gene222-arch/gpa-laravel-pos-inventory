@@ -26,7 +26,7 @@
                 <th align="center"><strong>Sold by</strong></th>
                 <th align="center"><strong>Price</strong></th>
                 <th align="center"><strong>Cost</strong></th>
-                <th align="center"><strong>Supplier id</strong></th>
+                <th align="center"><strong>Supplier</strong></th>
                 <th align="center"><strong>In stock</strong></th>
                 <th align="center"><strong>Bad order stock</strong></th>
                 <th align="center"><strong>Stock in</strong></th>
@@ -47,7 +47,7 @@
                     <td align="center">{{ $product->sold_by }}</td>
                     <td align="center">{{ number_format($product->price, 2) }}</td>
                     <td align="center">{{ number_format($product->cost, 2) }}</td>
-                    <td align="center">{{ $product->supplier_id }}</td>
+                    <td align="center">{{ $product->supplier }}</td>
                     <td align="center">{{ $product->in_stock }}</td>
                     <td align="center">{{ $product->bad_order_stock }}</td>
                     <td align="center">{{ $product->stock_in }}</td>

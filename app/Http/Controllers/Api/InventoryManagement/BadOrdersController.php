@@ -21,7 +21,7 @@ class BadOrdersController extends Controller
     public function __construct(BadOrder $badOrder)
     {
         $this->badOrder = $badOrder;
-        $this->middleware(['auth:api']);
+        $this->middleware(['auth:api', 'permission:Manage Bad Orders']);
     }
 
 
@@ -32,8 +32,6 @@ class BadOrdersController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', $this->badOrder);
-
         return $this->success($this->badOrder->getBadOrders(),
         'Success'
         );
@@ -47,8 +45,6 @@ class BadOrdersController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $this->authorize('view', $this->badOrder);
-
         $badOrderDetails = $this->badOrder
                                 ->getBadOrderWithDetails($request->bad_order_id);
 
@@ -65,8 +61,6 @@ class BadOrdersController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->authorize('create', $this->badOrder);
-
         $isRequestFormCreated = $this->badOrder->createRequestForm(
             $request->purchase_order_id,
             $request->badOrderDetails
@@ -91,8 +85,6 @@ class BadOrdersController extends Controller
      */
     public function update(UpdateRequest $request)
     {
-        $this->authorize('update', $this->badOrder);
-
         $isRequestFormUpdated = $this->badOrder->updateRequestForm(
             $request->bad_order_id,
             $request->purchase_order_id,
@@ -115,8 +107,6 @@ class BadOrdersController extends Controller
      */
     public function destroy(DeleteRequest $request)
     {
-        $this->authorize('delete', $this->badOrder);
-
         $isRequestFormDeleted = $this->badOrder->deleteRequestForm($request->bad_order_ids);
 
         return (!$isRequestFormDeleted)

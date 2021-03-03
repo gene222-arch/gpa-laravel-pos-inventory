@@ -27,7 +27,7 @@ class PosController extends Controller
     public function __construct(Pos $pos)
     {
         $this->pos = $pos;
-        $this->middleware(['auth:api']);
+        $this->middleware(['auth:api', 'permission:Manage POS']);
     }
 
 
@@ -38,11 +38,24 @@ class PosController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', $this->pos);
+        $result = $this->pos->all();
 
-        $orderLists = $this->pos->all();
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
+    }
 
-        return $this->success($orderLists, 'Success');
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexReceipts()
+    {
+        $this->authorize('viewAllReceipts');
+
+        return $this->success([], 'Success');
     }
 
 
@@ -53,33 +66,11 @@ class PosController extends Controller
      */
     public function indexFiltered(IndexFilterRequest $request)
     {
-        $this->authorize('viewAny', $this->pos);
-
         $orderLists = $this->pos->all($request->filters);
 
         return $this->success($orderLists, 'Success');
     }
 
-
-    /**
-     * Undocumented function
-     *
-     * @param ShowRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function showAmountToPay(ShowRequest $request)
-    {
-        $this->authorize('view', $this->pos);
-
-        $amountToPay = $this->pos->getCustomerAmountToPay($request->customer_id);
-
-        return (!$amountToPay)
-                ? $this->serverError()
-                : $this->success([
-                    'amount' => $amountToPay
-                ],
-                'Success');
-    }
 
 
         /**
@@ -90,8 +81,6 @@ class PosController extends Controller
      */
     public function showForSalesReturn(ForSalesReturnRequest $request)
     {
-        $this->authorize('view', $this->pos);
-
         $result = $this->pos->findCustomerOrderForSalesReturn($request->pos_id);
 
         return !$result
@@ -109,8 +98,6 @@ class PosController extends Controller
      */
    public function showCartDetails(ShowRequest $request)
    {
-       $this->authorize('view', $this->pos);
-
        $result = $this->pos
         ->getCustomerCartDetails($request->customer_id);
 
@@ -128,8 +115,6 @@ class PosController extends Controller
      */
     public function processPayment(ProcessPaymentRequest $request)
     {
-        $this->authorize('processPayment', $this->pos);
-
         $result = $this->pos->processPayment(
             $request->customer_id,
             $request->payment_method,
@@ -156,8 +141,6 @@ class PosController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->authorize('create', $this->pos);
-
         $result = $this->pos->addToCart(
             $request->customer_id,
             $request->product_id,
@@ -181,8 +164,6 @@ class PosController extends Controller
      */
     public function assignDiscountToAll(AssignDiscountToAllRequest $request)
     {
-        $this->authorize('assignDiscount', $this->pos);
-
         $result = $this->pos->assignDiscountToAll(
             $request->customer_id,
             $request->discount_id
@@ -204,8 +185,6 @@ class PosController extends Controller
      */
     public function applyDiscountAddQuantity(AddDiscountQuantity $request)
     {
-        $this->authorize('applyDiscountAddQuantity', $this->pos);
-
         $result = $this->pos->applyDiscountWithQuantity(
                 $request->customer_id,
                 $request->product_id,
@@ -230,8 +209,6 @@ class PosController extends Controller
      */
     public function cancelOrders(CancelOrdersRequest $request)
     {
-        $this->authorize('cancelOrders', $this->pos);
-
         $result = $this->pos->cancelOrders(
             $request->customer_id,
         );
@@ -253,8 +230,6 @@ class PosController extends Controller
      */
     public function removeDiscountToAll(RemoveDiscountToAllRequest $request)
     {
-        $this->authorize('removeDiscount', $this->pos);
-
         $result = $this->pos->removeDiscountToAll(
             $request->customer_id
         );
@@ -275,8 +250,6 @@ class PosController extends Controller
      */
     public function removeItems(RemoveItemRequest $request)
     {
-        $this->authorize('removeItems', $this->pos);
-
         $result = $this->pos->removeItem(
             $request->customer_id,
             $request->product_ids

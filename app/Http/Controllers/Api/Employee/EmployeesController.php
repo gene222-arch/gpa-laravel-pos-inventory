@@ -9,7 +9,7 @@ use App\Http\Requests\Employee\StoreRequest;
 use App\Http\Requests\Employee\UpdateRequest;
 use App\Models\Employee;
 use App\Traits\ApiResponser;
-use Illuminate\Http\Request;
+
 
 class EmployeesController extends Controller
 {
@@ -20,7 +20,7 @@ class EmployeesController extends Controller
     public function __construct(Employee $employee)
     {
         $this->employee = $employee;
-        $this->middleware(['auth:api', 'role:super_admin|admin']);
+        $this->middleware(['auth:api', 'permission:Manage Employees']);
     }
 
 
@@ -31,9 +31,7 @@ class EmployeesController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', $this->employee);
-
-        $result = $this->employee->getEmployees();
+        $result = $this->employee->all();
 
         return !$result
             ? $this->success([], 'No Content', 204)
@@ -48,8 +46,6 @@ class EmployeesController extends Controller
      */
     public function employeeAccessRights()
     {
-        $this->authorize('viewAny', $this->employee);
-
         return $this->success($this->employee->loadEmployeeAccessRights(),
             'Success');
     }
@@ -62,17 +58,9 @@ class EmployeesController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->authorize('create', $this->employee);
+        $result = $this->employee->create($request->validated());
 
-        $result = $this->employee
-            ->insertEmployee(
-                $request->name,
-                $request->email,
-                $request->phone,
-                $request->role
-            );
-
-        return ($result !== true)
+        return (!$result)
             ? $this->error($result)
             : $this->success([], 'Employee created successfully.', 201);
     }
@@ -85,8 +73,6 @@ class EmployeesController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $this->authorize('view', $this->employee);
-
         $employee = $this->employee->getEmployee($request->employee_id);
 
         return (!$employee)
@@ -103,8 +89,6 @@ class EmployeesController extends Controller
      */
     public function update(UpdateRequest $request)
     {
-        $this->authorize('update', $this->employee);
-
         $result = $this->employee->updateEmployee(
             $request->employee_id,
             $request->name,
@@ -128,8 +112,6 @@ class EmployeesController extends Controller
      */
     public function destroy(DeleteRequest $request)
     {
-        $this->authorize('delete', $this->employee);
-
         $isDeleted = $this->employee->deleteEmployees($request->employee_ids);
 
         return (!$isDeleted)

@@ -18,7 +18,7 @@ class AccessRightsController extends Controller
     public function __construct(AccessRights $accessRights)
     {
         $this->accessRights = $accessRights;
-        $this->middleware(['auth:api', 'role:super_admin|admin']);
+        $this->middleware(['auth:api', 'role:Super admin']);
     }
 
 
@@ -29,8 +29,6 @@ class AccessRightsController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', $this->accessRights);
-
         return $this->success($this->accessRights->getAllAccessRights(),'Success');
     }
 
@@ -42,12 +40,11 @@ class AccessRightsController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->authorize('create', $this->accessRights);
-
         $isAccessRightsCreated = $this->accessRights->createAccessRights(
             $request->role_name,
             $request->back_office,
-            $request->pos
+            $request->pos,
+            $request->permissions
         );
 
         return (!$isAccessRightsCreated)
@@ -65,8 +62,6 @@ class AccessRightsController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $this->authorize('view', $this->accessRights);
-
         $getAccessRights = $this->accessRights->find($request->role_id);
 
         return $this->success($getAccessRights,
@@ -82,13 +77,12 @@ class AccessRightsController extends Controller
     */
     public function update(UpdateRequest $request)
     {
-        $this->authorize('update', $this->accessRights);
-
         $result = $this->accessRights->updateAccessRights(
             $request->role_id,
             $request->role_name,
             $request->back_office,
-            $request->pos
+            $request->pos,
+            $request->permissions
         );
 
         return ($result !== true)
@@ -106,8 +100,6 @@ class AccessRightsController extends Controller
     */
     public function destroy(DeleteRequest $request)
     {
-        $this->authorize('delete', $this->accessRights);
-
         $this->accessRights->deleteMany(
             $request->role_ids
         );

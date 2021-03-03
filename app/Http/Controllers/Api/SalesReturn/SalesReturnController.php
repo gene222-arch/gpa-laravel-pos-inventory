@@ -21,7 +21,7 @@ class SalesReturnController extends Controller
     public function __construct(SalesReturn $salesReturn)
     {
         $this->salesReturn = $salesReturn;
-        $this->middleware(['auth:api', 'role:admin|manager']);
+        $this->middleware(['auth:api', 'permission:Manage Sales Returns']);
     }
 
 
@@ -32,8 +32,6 @@ class SalesReturnController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', $this->salesReturn);
-
         return $this->success($this->salesReturn->loadSalesReturns());
     }
 
@@ -45,8 +43,6 @@ class SalesReturnController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->authorize('create', $this->salesReturn);
-
         $result = $this->salesReturn->createRequestForm(
             $request->pos_id,
             $request->posSalesReturnDetails
@@ -67,8 +63,6 @@ class SalesReturnController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $this->authorize('view', $this->salesReturn);
-
         return $this->success($this->salesReturn->getSalesReturnWithDetails(
             $request->sales_return_id
         ));
@@ -83,8 +77,6 @@ class SalesReturnController extends Controller
      */
     public function update(UpdateRequest $request)
     {
-        $this->authorize('update', $this->salesReturn);
-
         $result = $this->salesReturn->updateRequestForm(
             $request->pos_sales_return_id,
             $request->pos_id,
@@ -106,8 +98,6 @@ class SalesReturnController extends Controller
      */
     public function destroy(DeleteRequest $request)
     {
-        $this->authorize('delete', $this->salesReturn);
-
         $result = $this->salesReturn->deleteMany($request->validated());
 
         return (!$result)
@@ -126,8 +116,6 @@ class SalesReturnController extends Controller
      */
     public function removeItems(RemoveItemsRequest $request)
     {
-        $this->authorize('removeItems', $this->salesReturn);
-
         $result = $this->salesReturn->removeItems(
             $request->pos_sales_return_id,
             $request->product_ids

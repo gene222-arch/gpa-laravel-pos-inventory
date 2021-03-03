@@ -26,17 +26,11 @@ class PurchaseOrdersController extends Controller
     use ApiResponser;
 
     private $purchaseOrder;
-    private $supplier;
-    private $product;
-    private $stock;
 
-    public function __construct(PurchaseOrder $purchaseOrder, Supplier $supplier, Product $product, Stock $stock)
+    public function __construct(PurchaseOrder $purchaseOrder)
     {
         $this->purchaseOrder = $purchaseOrder;
-        $this->supplier = $supplier;
-        $this->product = $product;
-        $this->stock = $stock;
-        $this->middleware(['auth:api']);
+        $this->middleware(['auth:api', 'permission:Manage Purchase Orders']);
     }
 
 
@@ -48,8 +42,6 @@ class PurchaseOrdersController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', $this->purchaseOrder);
-
         $result = $this->purchaseOrder->getAllPurchaseOrders();
 
         return !$result
@@ -65,8 +57,6 @@ class PurchaseOrdersController extends Controller
      */
     public function purchaseOrdersToBadOrder()
     {
-        $this->authorize('viewAny', $this->purchaseOrder);
-
         $result = $this->purchaseOrder->getAllPurchaseOrdersToBadOrders();
 
         return !$result
@@ -82,8 +72,6 @@ class PurchaseOrdersController extends Controller
      */
     public function filteredIndex(IndexRequest $request)
     {
-        $this->authorize('viewAny', $this->purchaseOrder);
-
         $purchaseOrders = $this->purchaseOrder->getAllPurchaseOrders(
             true,
             $request->operator,
@@ -106,8 +94,6 @@ class PurchaseOrdersController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $this->authorize('view', $this->purchaseOrder);
-
         $purchaseOrder = $this->purchaseOrder
             ->getPurchaseOrder($request->purchase_order_id);
 
@@ -142,8 +128,6 @@ class PurchaseOrdersController extends Controller
      */
     public function showReceivedStocks(ShowRequest $request)
     {
-        $this->authorize('view', $this->purchaseOrder);
-
         $result = $this->purchaseOrder->findStockReceiveDetails(
             $request->purchase_order_id
         );
@@ -162,8 +146,6 @@ class PurchaseOrdersController extends Controller
      */
     public function showForBadOrdersRequest(ShowRequest $request)
     {
-        $this->authorize('view', $this->purchaseOrder);
-
         $result = $this->purchaseOrder->findPurchaseOrderForBadOrders(
             $request->purchase_order_id
         );
@@ -184,7 +166,6 @@ class PurchaseOrdersController extends Controller
      */
     public function editToReceive(ShowRequest $request)
     {
-        $this->authorize('view', $this->purchaseOrder);
 
         $purchaseOrder = $this->purchaseOrder
             ->getPurchaseOrderForReceive($request->purchase_order_id);
@@ -210,8 +191,6 @@ class PurchaseOrdersController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->authorize('create', $this->purchaseOrder);
-
         $purchaseOrderDates = [
             'purchaseOrderDate' => $request->purchase_order_date,
             'expectedDeliveryDate' => $request->expected_delivery_date
@@ -242,8 +221,6 @@ class PurchaseOrdersController extends Controller
      */
     public function upsert(UpsertRequest $request)
     {
-        $this->authorize('update', $this->purchaseOrder);
-
         $result = $this->purchaseOrder
             ->upsertPurchaseOrderDetails(
             $request->purchase_order_id,
@@ -271,8 +248,6 @@ class PurchaseOrdersController extends Controller
      */
     public function sendMailToSupplier(MailSupplierRequest $request)
     {
-        $this->authorize('mailSupplier', $this->purchaseOrder);
-
         $fileName = 'PO-' . now()->toDateString() . '-' . time() . '.pdf';
 
         $this->purchaseOrder->toMailSupplier(
@@ -295,8 +270,6 @@ class PurchaseOrdersController extends Controller
      */
     public function markAllPurchasedOrderAsReceived(MarkAllReceivedRequest $request)
     {
-        $this->authorize('markAllPurchaseOrderAsReceived', $this->purchaseOrder);
-
         $allPurchaseOrderIsReceived = $this->purchaseOrder
             ->markAllAsReceived($request->purchase_order_id,
             $request->product_ids
@@ -322,8 +295,6 @@ class PurchaseOrdersController extends Controller
      */
     public function toReceivePurchaseOrder(ReceiveRequest $request)
     {
-        $this->authorize('receivePurchaseOrder', $this->purchaseOrder);
-
         $result = $this->purchaseOrder
                         ->toReceive(
                         $request->supplier_id,
@@ -342,8 +313,6 @@ class PurchaseOrdersController extends Controller
 
     public function cancelOrder(CancelOrderRequest $request)
     {
-        $this->authorize('update', $this->purchaseOrder);
-
         $result = $this->purchaseOrder->cancelRemainingProducts(
             $request->purchase_order_id,
             $request->product_ids
@@ -364,8 +333,6 @@ class PurchaseOrdersController extends Controller
      */
     public function destroy(DeleteRequest $request)
     {
-        $this->authorize('delete', $this->purchaseOrder);
-
         $isPurchaseOrderDeleted = $this->purchaseOrder->deleteMany(
             $request->purchase_order_id
         );
@@ -386,8 +353,6 @@ class PurchaseOrdersController extends Controller
      */
     public function deleteProducts(DeleteProductsRequest $request)
     {
-        $this->authorize('deletePurchaseOrderPerProduct', $this->purchaseOrder);
-
         $result = $this->purchaseOrder
             ->deleteProducts(
                 $request->purchase_order_id,

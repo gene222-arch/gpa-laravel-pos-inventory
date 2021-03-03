@@ -20,7 +20,7 @@ class EmployeesControllerTest extends TestCase
 
 
     /**
-     * @test
+     * test
      */
     public function user_can_get_all_employee_access_rights()
     {
@@ -49,13 +49,13 @@ class EmployeesControllerTest extends TestCase
 
 
     /**
-     * test
+     * @test
      */
     public function user_can_create_employees()
     {
         $data = [
             'name' => 'YasRaj',
-            'email' => 'genephillip222@gmail.com',
+            'email' => 'genephidllipd22@gmail.com',
             'phone' => '09429007480',
             'role' => 'cashier'
         ];
@@ -75,7 +75,7 @@ class EmployeesControllerTest extends TestCase
         $data = [
             'employee_id' => 1,
             'name' => 'YasRaj',
-            'email' => 'unique@email.com',
+            'email' => 'uniqueemail.com',
             'phone' => '09429007480',
             'role' => 'cashier'
         ];

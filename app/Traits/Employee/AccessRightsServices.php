@@ -56,14 +56,18 @@ trait AccessRightsServices
      * @param boolean $pos
      * @return mixed
      */
-    public function createAccessRights (string $roleName, bool $back_office, bool $pos): mixed
+    public function createAccessRights (string $roleName, bool $back_office, bool $pos, array $permissions): mixed
     {
         try {
-            DB::transaction(function () use($roleName, $back_office, $pos)
+            DB::transaction(function () use($roleName, $back_office, $pos, $permissions)
             {
-                $role = (new Role())->create([
-                    'name' => $roleName
-                ]);
+                $role = tap((new Role())
+                    ->create([
+                        'name' => $roleName,
+                        'guard_name' => 'api'
+                    ]))
+                    ->givePermissionTo(...$permissions);
+
 
                 (new AccessRights())
                     ->create([
@@ -90,15 +94,18 @@ trait AccessRightsServices
      * @param boolean $pos
      * @return mixed
      */
-    public function updateAccessRights (int $roleId, string $roleName, bool $back_office, bool $pos): mixed
+    public function updateAccessRights (int $roleId, string $roleName, bool $back_office, bool $pos, array $permissions): mixed
     {
         try {
-            DB::transaction(function () use($roleId, $roleName, $back_office, $pos)
+            DB::transaction(function () use($roleId, $roleName, $back_office, $pos, $permissions)
             {
-                (new Role())->where('id', '=', $roleId)
-                    ->update([
-                        'name' => $roleName
-                    ]);
+                $role = Role::find($roleId);
+
+                $role->update([
+                    'name' => $roleName
+                ]);
+                    
+                $role->permissions()->sync($roleId, $permissions);
 
                 (new AccessRights())
                         ->where('role_id', '=', $roleId)

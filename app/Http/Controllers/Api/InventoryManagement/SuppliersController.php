@@ -20,7 +20,7 @@ class SuppliersController extends Controller
     public function __construct(Supplier $supplier)
     {
         $this->supplier = $supplier;
-        $this->middleware(['auth:api']);
+        $this->middleware(['auth:api', 'permission:Manage Suppliers']);
     }
 
 
@@ -31,8 +31,6 @@ class SuppliersController extends Controller
      */
     public function index()
     {
-        $this->authorize('view', $this->supplier);
-
         return $this->success($this->supplier->all(),
             'Suppliers Fetched Successfully',
             200
@@ -48,8 +46,6 @@ class SuppliersController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $this->authorize('view', $this->supplier);
-
         $supplier = $this->supplier->find($request->supplier_id);
 
         return (! $supplier )
@@ -69,8 +65,6 @@ class SuppliersController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->authorize('create', $this->supplier);
-
         $isSupplierCreated = $this->supplier->create($request->validated());
 
         return (! $isSupplierCreated )
@@ -90,8 +84,6 @@ class SuppliersController extends Controller
      */
     public function update(UpdateRequest $request)
     {
-        $this->authorize('update', $this->supplier);
-
         $isUpdated = $this->supplier
                           ->find($request->supplier_id)
                           ->update($request->except('supplier_id'));
@@ -114,8 +106,6 @@ class SuppliersController extends Controller
      */
     public function destroy(DeleteRequest $request)
     {
-        $this->authorize('delete', $this->supplier);
-
         $isDeleted = $this->supplier->deleteMany($request->supplier_ids);
 
         return ( !$isDeleted )

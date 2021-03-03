@@ -19,7 +19,7 @@ class InvoiceController extends Controller
     public function __construct(Invoice $invoice)
     {
         $this->invoice = $invoice;
-        $this->middleware(['auth:api', 'role:admin|manager']);
+        $this->middleware(['auth:api', 'permission:Manage Invoices']);
     }
 
 
@@ -30,10 +30,11 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', $this->invoice);
+        $result = $this->invoice->all();
 
-        return $this->success($this->invoice->all(),
-        'Success');
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
     }
 
 
@@ -45,12 +46,11 @@ class InvoiceController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $this->authorize('view', $this->invoice);
+        $result = $this->invoice->showInvoiceWithDetails($request->invoice_id);
 
-        $invoiceDetails = $this->invoice->showInvoiceWithDetails($request->invoice_id);
-
-        return $this->success($invoiceDetails,
-        'Success');
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
     }
 
 
@@ -63,13 +63,11 @@ class InvoiceController extends Controller
      */
     public function update(UpdateRequest $request)
     {
-        $this->authorize('update', $this->invoice);
+        $result = $this->invoice->updateStatus($request->invoice_ids);
 
-        $invoiceDetails = $this->invoice->updateStatus($request->invoice_ids);
-
-        return !$invoiceDetails
+        return !$result
             ? $this->error('Invoice status is not updated', 400)
-            : $this->success($invoiceDetails,
+            : $this->success($result,
         'Invoice status updated.',
         201);
     }
@@ -83,14 +81,12 @@ class InvoiceController extends Controller
      */
     public function destroy(DeleteRequest $request)
     {
-        $this->authorize('delete', $this->invoice);
-
         $isSalesInvoiceDeleted = $this->invoice->deleteSalesInvoices(
             $request->invoice_ids
         );
 
         return (!$isSalesInvoiceDeleted)
-            ? $this->serverError()
+            ? $this->error('Invoice status is not deleted', 400)
             : $this->success([],
             'Invoices deleted successfully.');
     }

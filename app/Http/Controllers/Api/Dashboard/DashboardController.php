@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\DashboardDataRequest;
 use App\Traits\ApiResponser;
 use App\Traits\Dashboard\DashboardServices;
-use Illuminate\Http\Request;
+
 
 class DashboardController extends Controller
 {
@@ -15,7 +15,7 @@ class DashboardController extends Controller
 
     public function __construct()
     {
-        $this->middleware(['auth:api', 'role:admin|manager']);
+        $this->middleware(['auth:api', 'permission:View Dashboard']);
     }
 
 

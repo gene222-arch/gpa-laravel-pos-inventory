@@ -23,7 +23,7 @@ class CategoriesController extends Controller
     {
         $this->user = $user;
         $this->category = $category;
-        $this->middleware(['auth:api']);
+        $this->middleware(['auth:api', 'permission:Manage Categories']);
     }
 
     /**
@@ -33,17 +33,11 @@ class CategoriesController extends Controller
      */
     public function index()
     {
-        $this->authorize('view', $this->category);
-
         $result = $this->category->latest()->get();
 
         return !$result
-            ? $this->success([],
-                'No Content',
-                204)
-            : $this->success($result,
-            'Fetched successfully',
-            200);
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Fetched successfully', 200);
     }
 
     /**
@@ -54,17 +48,11 @@ class CategoriesController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $this->authorize('view', $this->category);
-
         $result = $this->category->find($request->category_id);
 
         return !$result
-            ? $this->success([],
-                'No Content',
-                204)
-            : $this->success($result,
-            'Fetched successfully',
-            200);
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Fetched successfully', 200);
     }
 
 
@@ -76,16 +64,11 @@ class CategoriesController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->authorize('create', $this->category);
-
         $isCategoryStored = $this->category->create($request->validated());
 
-        return ( !$isCategoryStored )
-            ? $this->serverError()
-            : $this->success([],
-            'Category created successfully',
-            201
-        );
+        return !$isCategoryStored
+            ? $this->error('Unable to create category')
+            : $this->success([], 'Category created successfully', 201);
     }
 
 
@@ -98,19 +81,13 @@ class CategoriesController extends Controller
      */
     public function update(UpdateRequest $request)
     {
-        $this->authorize('update', $this->category);
-
         $isCategoryUpdated = $this->category
                             ->find($request->id)
                             ->update($request->validated());
 
-        return ( !$isCategoryUpdated )
-            ? $this->serverError()
-            : $this->success(
-            [],
-            'Category updated successfully',
-            201
-        );
+        return !$isCategoryUpdated
+            ? $this->error('Unable to update a category')
+            : $this->success([], 'Category updated successfully', 201);
     }
 
 
@@ -122,8 +99,6 @@ class CategoriesController extends Controller
      */
     public function destroy(DeleteRequest $request)
     {
-        $this->authorize('delete', $this->category);
-
         $isCategoriesDeleted = $this->category->deleteMany($request->category_ids);
 
         return ( !$isCategoriesDeleted )

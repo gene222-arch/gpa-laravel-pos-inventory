@@ -19,7 +19,7 @@ class DiscountsController extends Controller
     public function __construct(Discount $discount)
     {
         $this->discount = $discount;
-        $this->middleware(['auth:api']);
+        $this->middleware(['auth:api', 'permission:Manage Discounts']);
     }
 
 
@@ -30,17 +30,11 @@ class DiscountsController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', $this->discount);
-
         $result = $this->discount->latest()->get();
 
         return !$result
-            ? $this->success([],
-                'No Content',
-                204)
-            : $this->success($result,
-            'Fetched successfully',
-            200);
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Fetched successfully', 200);
     }
 
 
@@ -53,8 +47,6 @@ class DiscountsController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->authorize('create', $this->discount);
-
         $isDiscountCreated = $this->discount
             ->createDiscount(
                 $request->name,
@@ -63,9 +55,7 @@ class DiscountsController extends Controller
 
         return (!$isDiscountCreated)
             ? $this->serverError()
-            : $this->success([],
-                'Discount created successfully.',
-                201);
+            : $this->success([], 'Discount created successfully.', 201);
     }
 
 
@@ -78,17 +68,11 @@ class DiscountsController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $this->authorize('view', $this->discount);
-
         $result = $this->discount->find($request->discount_id);
 
         return !$result
-            ? $this->success([],
-                'No Content',
-                204)
-            : $this->success($result,
-            'Fetched successfully',
-            200);
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Fetched successfully', 200);
     }
 
 
@@ -102,8 +86,6 @@ class DiscountsController extends Controller
      */
     public function update(UpdateRequest $request)
     {
-        $this->authorize('update', $this->discount);
-
         $isDiscountUpdated = $this->discount
             ->updateDiscount(
                 $request->discount_id,
@@ -113,9 +95,7 @@ class DiscountsController extends Controller
 
         return (!$isDiscountUpdated)
             ? $this->serverError()
-            : $this->success([],
-                'Discount updated successfully.',
-                201);
+            : $this->success([], 'Discount updated successfully.', 201);
     }
 
 
@@ -128,15 +108,11 @@ class DiscountsController extends Controller
      */
     public function destroy(DeleteRequest $request)
     {
-        $this->authorize('delete', $this->discount);
-
         $isDiscountsDeleted = $this->discount
             ->deleteDiscounts($request->discount_ids);
 
         return (!$isDiscountsDeleted)
             ? $this->serverError()
-            : $this->success([],
-                'Discount deleted successfully.',
-                200);
+            : $this->success([], 'Discount deleted successfully.', 200);
     }
 }

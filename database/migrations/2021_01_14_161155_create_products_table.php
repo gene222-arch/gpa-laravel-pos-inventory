@@ -13,12 +13,14 @@ class CreateProductsTable extends Migration
      */
     public function up()
     {
-        Schema::create('products', function (Blueprint $table) {
+        $defaultImg = 'http://127.0.0.1:8000/storage/images/Products/product_default_img_1614450024.svg';
+
+        Schema::create('products', function (Blueprint $table) use($defaultImg) {
             $table->id();
             $table->char('sku', 16);
             $table->char('barcode', 13);
             $table->string('name')->unique();
-            $table->string('image')->nullable()->default('no_image.svg');
+            $table->string('image')->nullable()->default( $defaultImg);
             $table->string('category_id')->nullable();
             $table->char('sold_by', 13);
             $table->unsignedDouble('price', 10, 2);
