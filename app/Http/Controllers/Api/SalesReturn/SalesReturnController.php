@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Api\SalesReturn;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\SalesReturn\DeleteRequest;
-use App\Http\Requests\SalesReturn\RemoveItemsRequest;
-use App\Http\Requests\SalesReturn\ShowRequest;
-use App\Http\Requests\SalesReturn\StoreRequest;
-use App\Http\Requests\SalesReturn\UpdateRequest;
 use App\Models\SalesReturn;
 use App\Traits\ApiResponser;
-
+use App\Http\Controllers\Controller;
+use App\Http\Requests\SalesReturn\ShowRequest;
+use App\Http\Requests\SalesReturn\StoreRequest;
+use App\Http\Requests\SalesReturn\ForSalesReturnRequest;
+use App\Http\Requests\SalesReturn\DeleteRequest;
+use App\Http\Requests\SalesReturn\UpdateRequest;
+use App\Http\Requests\SalesReturn\RemoveItemsRequest;
+use App\Models\Customer;
 
 class SalesReturnController extends Controller
 {
@@ -34,6 +35,39 @@ class SalesReturnController extends Controller
     {
         return $this->success($this->salesReturn->loadSalesReturns());
     }
+
+
+    /**
+     * Display a listing of the resource for Sales return.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexWithOrders()
+    {
+        $result = $this->salesReturn->getCustomersWithOrders();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
+    }
+
+
+        /**
+     * Undocumented function
+     *
+     * @param ForSalesReturnRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showForSalesReturn(ForSalesReturnRequest $request)
+    {
+        $result = $this->salesReturn
+            ->findCustomerOrderForSalesReturn($request->pos_id);
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
+    }
+
 
     /**
      * Store a newly created resource in storage.

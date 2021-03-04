@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api\InventoryManagement;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\InventoryManagement\StockAdjustment\InventoryCountRequest;
+use App\Http\Requests\InventoryManagement\StockAdjustment\LossDamageRequest;
+use App\Http\Requests\InventoryManagement\StockAdjustment\ReceiveItemsRequest;
 use App\Http\Requests\InventoryManagement\StockAdjustment\ShowRequest;
 use App\Http\Requests\InventoryManagement\StockAdjustment\ShowStockToAdjust;
-use App\Http\Requests\InventoryManagement\StockAdjustment\StoreRequest;
+use App\Models\Product;
 use App\Models\StockAdjustment;
 use App\Traits\ApiResponser;
 
@@ -19,7 +22,7 @@ class StockAdjustmentsController extends Controller
     public function __construct(StockAdjustment $stockAdjustment)
     {
         $this->stockAdjustment = $stockAdjustment;
-        $this->middleware(['auth:api', 'Manage Stock Adjustments']);
+        $this->middleware(['auth:api', 'permission:Manage Stock Adjustments']);
     }
 
 
@@ -39,8 +42,21 @@ class StockAdjustmentsController extends Controller
 
 
     /**
+     * * Get resources from products and stocks
      *
-     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexProducts()
+    {
+        $result = (new Product())->getAll();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Fetched Successfully');
+    }
+
+    /**
+     * 
      * @param ShowRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -56,6 +72,12 @@ class StockAdjustmentsController extends Controller
     }
 
 
+
+    /**
+     *
+     * @param ShowStockToAdjust $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function showStockToAdjust(ShowStockToAdjust $request)
     {
         $result = $this->stockAdjustment->getStockToAdjust(
@@ -72,12 +94,12 @@ class StockAdjustmentsController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\ReceiveItemsRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(StoreRequest $request)
+    public function storeReceivedItems(ReceiveItemsRequest $request)
     {
-        $result = $this->stockAdjustment->adjustStocks(
+        $result = $this->stockAdjustment->receiveItems(
             $request->reason,
             $request->stockAdjustmentDetails
         );
@@ -88,5 +110,48 @@ class StockAdjustmentsController extends Controller
                 'Stock adjusted successfully.',
                 201);
     }
+
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\InventoryCountRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeInventoryCount(InventoryCountRequest $request)
+    {
+        $result = $this->stockAdjustment->inventoryCount(
+            $request->reason,
+            $request->stockAdjustmentDetails
+        );
+
+        return ($result !== true)
+            ? $this->error($result)
+            : $this->success([],
+                'Stock adjusted successfully.',
+                201);
+    }
+
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\LossDamageRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeLossDamage(LossDamageRequest $request)
+    {
+        $result = $this->stockAdjustment->lossOrDamage(
+            $request->reason,
+            $request->stockAdjustmentDetails
+        );
+
+        return ($result !== true)
+            ? $this->error($result)
+            : $this->success([],
+                'Stock adjusted successfully.',
+                201);
+    }
+
 
 }

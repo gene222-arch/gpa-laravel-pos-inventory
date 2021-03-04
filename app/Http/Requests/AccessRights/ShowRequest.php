@@ -14,7 +14,7 @@ class ShowRequest extends BaseRequest
     public function rules()
     {
         return [
-            'role_id' => ['required', 'integer', 'exists:roles,id']
+            'access_right_id' => ['required', 'integer', 'exists:access_rights,id']
         ];
     }
 }

@@ -13,14 +13,14 @@ class RolesController extends Controller
 
     public function __construct()
     {
-        $this->middleware(['auth:api', 'role:Super admin']);
+        $this->middleware(['auth:api', 'permission:Manage Access Rights|Manage Employees']);
     }
 
 
     public function index ()
     {
         return $this->success(
-            Role::all(),
+            Role::where('id', '!=', 1)->get(),
             'Success'
         );
     }

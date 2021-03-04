@@ -40,38 +40,6 @@ class CustomersController extends Controller
     }
 
 
-        /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function indexForPos()
-    {
-        $result = $this->customer->loadCustomerForPos();
-
-        return !$result
-            ? $this->success([], 'No Content', 204)
-            : $this->success($result, 'Success');
-    }
-
-
-
-
-        /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function indexWithOrders()
-    {
-        $result = $this->customer->getCustomersWithOrders();
-
-        return !$result
-            ? $this->success([], 'No Content', 204)
-            : $this->success($result, 'Success');
-    }
-
-
 
     /**
      * Store a newly created resource in storage.

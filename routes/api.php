@@ -151,9 +151,12 @@ Route::group(['prefix' => 'suppliers'], function ()
 Route::prefix('stocks')->group(function ()
 {
     Route::get('/stock-adjustments', [StockAdjustmentsController::class, 'index']);
+    Route::get('/stock-adjustments/products', [StockAdjustmentsController::class, 'indexProducts']);
     Route::post('/stock-adjustments/stock', [StockAdjustmentsController::class, 'showStockToAdjust']);
     Route::post('/stock-adjustments/details', [StockAdjustmentsController::class, 'show']);
-    Route::post('/stock-adjustment', [StockAdjustmentsController::class, 'store']);
+    Route::post('/stock-adjustment/received-items', [StockAdjustmentsController::class, 'storeReceivedItems']);
+    Route::post('/stock-adjustment/inventory-count', [StockAdjustmentsController::class, 'storeInventoryCount']);
+    Route::post('/stock-adjustment/loss-damage', [StockAdjustmentsController::class, 'storeLossDamage']);
 });
 
 
@@ -164,10 +167,11 @@ Route::prefix('stocks')->group(function ()
 Route::group(['prefix' => 'purchase-orders'], function ()
 {
     Route::get('/', [PurchaseOrdersController::class, 'index']);
-    Route::get('/request-bad-orders', [PurchaseOrdersController::class, 'purchaseOrdersToBadOrder']);
+    Route::get('/products', [PurchaseOrdersController::class, 'indexProducts']);
+    Route::get('/suppliers', [PurchaseOrdersController::class, 'indexSuppliers']);
     Route::post('/filtered', [PurchaseOrdersController::class, 'filteredIndex']);
     Route::post('/purchase-order-details', [PurchaseOrdersController::class, 'show']);
-    Route::post('/purchase-order-details/to-bad-orders', [PurchaseOrdersController::class, 'showForBadOrdersRequest']);
+    Route::post('/product', [PurchaseOrdersController::class, 'showProductToPurchase']);
     Route::post('/purchase-order-details/to-receive', [PurchaseOrdersController::class, 'editToReceive']);
     Route::post('/received-stocks-details', [PurchaseOrdersController::class, 'showReceivedStocks']);
     Route::post('/', [PurchaseOrdersController::class, 'store']);
@@ -191,6 +195,8 @@ Route::group(['prefix' => 'purchase-orders'], function ()
 Route::group(['prefix' => 'bad-orders'], function ()
 {
     Route::get('/', [BadOrdersController::class, 'index']);
+    Route::get('/purchase-orders', [BadOrdersController::class, 'indexPurchaseOrders']);
+    Route::post('/purchase-order', [BadOrdersController::class, 'showPurchaseOrder']);
     Route::post('/details', [BadOrdersController::class, 'show']);
     Route::post('/', [BadOrdersController::class, 'store']);
     Route::put('/', [BadOrdersController::class, 'update']);
@@ -207,8 +213,6 @@ Route::group(['prefix' => 'bad-orders'], function ()
 Route::group(['prefix' => 'customers'], function ()
 {
     Route::get('/', [CustomersController::class, 'index']);
-    Route::get('/pos', [CustomersController::class, 'indexForPos']);
-    Route::get('/with-orders', [CustomersController::class, 'indexWithOrders']);
     Route::post('/details', [CustomersController::class, 'show']);
     Route::post('/', [CustomersController::class, 'store']);
     Route::put('/', [CustomersController::class, 'update']);
@@ -245,14 +249,17 @@ Route::group(['prefix' => 'employees'], function ()
 
 /**
  * Pos
- * !remove {discount, incrementQty, decrementQty}
  */
 
 Route::group(['prefix' => 'pos'], function ()
 {
     Route::get('/order-lists', [PosController::class, 'index']);
+    Route::post('/categories', [PosController::class, 'categoriesIndex']);
+    Route::get('/customers', [PosController::class, 'customerIndex']);
+    Route::post('/customer', [PosController::class, 'showCustomer']);
+    Route::post('/discounts', [PosController::class, 'discountIndex']);
+    Route::post('/products', [PosController::class, 'productsIndex']);
     Route::post('/order-lists/filtered', [PosController::class, 'indexFiltered']);
-    Route::post('/customer-orders/to-sales-return', [PosController::class, 'showForSalesReturn']);
     Route::post('/cart-details', [PosController::class, 'showCartDetails']);
     Route::post('/add-to-cart', [PosController::class, 'store']);
     Route::post('/to-pay', [PosController::class, 'showAmountToPay']);
@@ -287,6 +294,8 @@ Route::group(['prefix' => 'invoices'], function ()
 Route::group(['prefix' => 'sales-returns'], function ()
 {
     Route::get('/', [SalesReturnController::class, 'index']);
+    Route::get('/customer-orders', [SalesReturnController::class, 'indexWithOrders']);
+    Route::post('/customer-order', [SalesReturnController::class, 'showForSalesReturn']);
     Route::post('/details', [SalesReturnController::class, 'show']);
     Route::post('/', [SalesReturnController::class, 'store']);
     Route::put('/', [SalesReturnController::class, 'update']);

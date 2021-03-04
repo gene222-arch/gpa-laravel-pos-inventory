@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Products\Product\StoreRequest;
 use App\Http\Requests\Products\Product\DeleteRequest;
-use App\Http\Requests\Products\Product\FilterProductsRequest;
 use App\Http\Requests\Products\Product\ImageUploadRequest;
 use App\Http\Requests\Products\Product\ShowRequest;
 use App\Http\Requests\Products\Product\UpdateRequest;
@@ -45,41 +44,6 @@ class ProductsController extends Controller
             : $this->success($result, 'Fetched Successfully');
     }
 
-
-    /**
-     * * Get resources from products and stocks
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function showFilteredProducts(FilterProductsRequest $request)
-    {
-        $result = $this->product
-            ->getAllForPos(
-                $request->category_id,
-                $request->productName
-            );
-
-        return !$result
-            ? $this->success([], 'No Content',204)
-            : $this->success($result, 'Success');
-    }
-
-
-    /**
-     * * Get resources from products and stocks
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function showProductToPurchase(ShowRequest $request)
-    {
-        $product = $this->product->getProductForPurchaseOrder(
-            $request->product_id
-        );
-
-        return !$product
-            ? $this->success([], 'No Content', 204)
-            : $this->success($product, 'Fetched Successfully', 200);
-    }
 
 
     /**

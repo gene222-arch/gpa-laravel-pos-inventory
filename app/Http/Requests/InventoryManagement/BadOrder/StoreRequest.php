@@ -14,10 +14,10 @@ class StoreRequest extends BaseRequest
     public function rules()
     {
         return [
+            'badOrderDetails' => ['required', 'array', 'min:1'],
             'purchase_order_id' => ['required', 'integer', 'exists:purchase_order,id'],
-            'badOrderDetails' => ['required'],
             'badOrderDetails.*.purchase_order_details_id' => ['required', 'integer', 'distinct', 'exists:purchase_order_details,id', 'unique:bad_order_details,purchase_order_details_id'],
-            'badOrderDetails.*.product_id' => ['required', 'integer', 'distinct', 'exists:products,id', 'unique:bad_order_details,product_id'],
+            'badOrderDetails.*.product_id' => ['required', 'integer', 'distinct', 'exists:products,id'],
             'badOrderDetails.*.defect' => ['required', 'string', 'regex:/^[a-zA-Z\s]*$/'],
             'badOrderDetails.*.quantity' => ['required', 'integer'],
             'badOrderDetails.*.price' => ['required', 'integer', 'min:1'],
@@ -30,7 +30,8 @@ class StoreRequest extends BaseRequest
     public function messages()
     {
         return [
-            'badOrderDetails.*.defect.regex' => 'Letters and spaces only',
+            'badOrderDetails.*.defect.regex' => ['Letters and spaces only'],
+            'badOrderDetails.required' => 'Please add at least one item to the purchase order'
         ];
     }
 

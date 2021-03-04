@@ -3,12 +3,14 @@
 namespace App\Traits\Employee;
 
 use App\Models\AccessRights;
+use App\Traits\Permissions\PermissionServices;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
 trait AccessRightsServices
 {
 
+    use PermissionServices;
 
     public function getAllAccessRights()
     {
@@ -45,6 +47,31 @@ trait AccessRightsServices
     {
         return (new AccessRights())->where('role_id', '=', $roleId)->get();
     }
+    
+
+
+    public function getAccessRight (int $accessRightId)
+    {
+        $accessRight = AccessRights::find($accessRightId);
+
+        $role = Role::findById($accessRight->role_id, 'api');
+
+        $rolePermissions = $role->permissions->map->name;
+
+        return ($accessRight || $rolePermissions)
+        ? [
+            'role' => $role->name,
+            'back_office' => boolval($accessRight->back_office),
+            'pos' => boolval($accessRight->pos),
+            'permissions' => $rolePermissions
+        ]
+        : [
+            'role' => '',
+            'back_office' => false,
+            'pos' => false,
+            'permissions' => []
+        ];
+    }
 
 
 
@@ -61,11 +88,11 @@ trait AccessRightsServices
         try {
             DB::transaction(function () use($roleName, $back_office, $pos, $permissions)
             {
-                $role = tap((new Role())
+                $role = (new Role())
                     ->create([
                         'name' => $roleName,
                         'guard_name' => 'api'
-                    ]))
+                    ])
                     ->givePermissionTo(...$permissions);
 
 
@@ -94,26 +121,28 @@ trait AccessRightsServices
      * @param boolean $pos
      * @return mixed
      */
-    public function updateAccessRights (int $roleId, string $roleName, bool $back_office, bool $pos, array $permissions): mixed
+    public function updateAccessRights (int $accessRightId, string $roleName, bool $back_office, bool $pos, array $permissions): mixed
     {
         try {
-            DB::transaction(function () use($roleId, $roleName, $back_office, $pos, $permissions)
+            DB::transaction(function () use($accessRightId, $roleName, $back_office, $pos, $permissions)
             {
+                $accessRight = AccessRights::find($accessRightId);
+
+                $roleId = $accessRight->role_id;
                 $role = Role::find($roleId);
+
+                (new AccessRights())
+                    ->where('role_id', '=', $roleId)
+                    ->update([
+                        'back_office' => $back_office,
+                        'pos' => $pos
+                    ]);
 
                 $role->update([
                     'name' => $roleName
                 ]);
                     
                 $role->permissions()->sync($roleId, $permissions);
-
-                (new AccessRights())
-                        ->where('role_id', '=', $roleId)
-                        ->update([
-                            'back_office' => $back_office,
-                            'pos' => $pos
-                        ]);
-
             });
         } catch (\Throwable $th) {
             return $th->getMessage();
@@ -123,8 +152,10 @@ trait AccessRightsServices
     }
 
 
-    public function deleteMany(array $roleIds)
+    public function deleteMany(array $accessRightIds)
     {
+        $roleIds = AccessRights::whereIn('id', $accessRightIds)->pluck('role_id');
+
         return (new Role())->whereIn('id', $roleIds)->delete();
     }
 

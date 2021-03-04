@@ -14,10 +14,10 @@ class StoreRequest extends BaseRequest
     public function rules()
     {
         return [
-            'role_name' => ['required', 'string', 'unique:roles,name'],
+            'role' => ['required', 'string', 'unique:roles,name'],
             'back_office' => ['required', 'boolean'],
             'pos' => ['required', 'boolean'],
-            'permissions.*' => ['required', 'string', 'exists:permissions,id']
+            'permissions.*' => ['required', 'string', 'exists:permissions,name']
         ];
     }
 }

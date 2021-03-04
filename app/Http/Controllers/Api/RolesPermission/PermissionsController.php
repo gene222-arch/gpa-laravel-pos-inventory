@@ -15,7 +15,7 @@ class PermissionsController extends Controller
 
     public function __construct()
     {
-        $this->middleware(['auth:api', 'role:Super admin']);
+        $this->middleware(['auth:api', 'permission:Manage Access Rights|Manage Employees']);
     }
 
    /**
@@ -25,10 +25,19 @@ class PermissionsController extends Controller
      */
     public function index()
     {
-        return $this->success(
-            $this->getPermissions(),
-            'Success'
-        );
+        $pos = $this->getPermissionsOf('POS');
+        $bo = $this->getPermissionsOf('Back office');
+
+        $result = !($pos && $bo) 
+            ? []
+            : [
+                'POS' => $pos,
+                'backOffice' => $bo 
+            ];
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result);
     }
 
 
@@ -44,4 +53,6 @@ class PermissionsController extends Controller
             'Success'
         );
     }
+
+
 }

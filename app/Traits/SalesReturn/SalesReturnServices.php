@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 trait SalesReturnServices
 {
 
+    use SalesReturnSubModelServices;
 
     /**
      * Undocumented function
@@ -33,6 +34,7 @@ trait SalesReturnServices
                 DATE_FORMAT(pos.created_at, "%M %d, %Y") as purchased_at
             ')
             ->groupBy('id')
+            ->orderByDesc('sales_returns.created_at')
             ->get()
             ->toArray();
     }

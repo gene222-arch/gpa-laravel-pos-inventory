@@ -20,6 +20,7 @@ use App\Http\Requests\InventoryManagement\PurchaseOrder\CancelOrderRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\MailSupplierRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\DeleteProductsRequest;
 use App\Http\Requests\InventoryManagement\PurchaseOrder\MarkAllReceivedRequest;
+use App\Http\Requests\InventoryManagement\PurchaseOrder\ShowToPurchaseProduct;
 
 class PurchaseOrdersController extends Controller
 {
@@ -51,18 +52,36 @@ class PurchaseOrdersController extends Controller
 
 
     /**
-     * * Get resources of purchase order details for bad orders request
+     * * Get resources of purchase order details
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function purchaseOrdersToBadOrder()
+    public function indexProducts()
     {
-        $result = $this->purchaseOrder->getAllPurchaseOrdersToBadOrders();
+        $result = (new Product())->getAll();
 
         return !$result
             ? $this->success([], 'No Content', 204)
-            : $this->success($result, 'Success');
+            : $this->success($result, 'Fetched Successfully');
     }
+
+
+
+
+    /**
+     * * Get resources of purchase order details
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexSuppliers()
+    {
+        $result = (new Supplier())->all();
+        
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success', 200) ;
+    }
+
 
 
         /**
@@ -121,6 +140,23 @@ class PurchaseOrdersController extends Controller
 
 
     /**
+     * * Get resources from products and stocks
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showProductToPurchase(ShowToPurchaseProduct $request)
+    {
+        $product = (new Product())->getProductForPurchaseOrder(
+            $request->product_id
+        );
+
+        return !$product
+            ? $this->success([], 'No Content', 204)
+            : $this->success($product, 'Fetched Successfully', 200);
+    }
+
+
+    /**
      * * Show `purchase_order` resources via ['id']
      *
      * @param ShowRequest $request
@@ -136,25 +172,6 @@ class PurchaseOrdersController extends Controller
             ? $this->success([], 'No Content', 204)
             : $this->success($result, 'Success');
     }
-
-
-    /**
-     * * Show `purchase_order` resources via ['id']
-     *
-     * @param ShowRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function showForBadOrdersRequest(ShowRequest $request)
-    {
-        $result = $this->purchaseOrder->findPurchaseOrderForBadOrders(
-            $request->purchase_order_id
-        );
-
-        return !$result
-            ? $this->success([], 'No Content', 204)
-            : $this->success($result, 'Success');
-    }
-
 
 
 

@@ -9,7 +9,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\InventoryManagement\BadOrder\ShowRequest;
 use App\Http\Requests\InventoryManagement\BadOrder\StoreRequest;
 use App\Http\Requests\InventoryManagement\BadOrder\DeleteRequest;
+use App\Http\Requests\InventoryManagement\BadOrder\ShowPurchaseOrder;
 use App\Http\Requests\InventoryManagement\BadOrder\UpdateRequest;
+use App\Models\PurchaseOrder;
 
 class BadOrdersController extends Controller
 {
@@ -36,6 +38,41 @@ class BadOrdersController extends Controller
         'Success'
         );
     }
+
+
+        /**
+     * * Get resources of purchase order details for bad orders request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexPurchaseOrders()
+    {
+        $result = (new PurchaseOrder())->getAllPurchaseOrdersToBadOrders();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
+    }
+
+
+        /**
+     * * Show `purchase_order` resources via ['id']
+     *
+     * @param ShowPurchaseOrder $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showPurchaseOrder(ShowPurchaseOrder $request)
+    {
+        $result = (new PurchaseOrder())->findPurchaseOrderForBadOrders(
+            $request->purchase_order_id
+        );
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
+    }
+    
+
 
 
     /**

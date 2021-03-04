@@ -111,7 +111,7 @@ trait StockAdjustmentServices
      * @param array $stockAdjustmentDetails
      * @return mixed
      */
-    public function adjustStocks(string $reason, array $stockAdjustmentDetails): mixed
+    public function receiveItems(string $reason, array $stockAdjustmentDetails): mixed
     {
         try {
             DB::transaction(function () use($reason, $stockAdjustmentDetails)
@@ -131,6 +131,105 @@ trait StockAdjustmentServices
                         'id' => $stockAdjustmentDetail['stock_id'],
                         'in_stock' => $stockAdjustmentDetail['stock_after'],
                         'stock_in' => $stockAdjustmentDetail['added_stock'],
+                    ];
+                }
+
+                $uniqueBy = 'id';
+
+                $update = [
+                    'product_id' => DB::raw('stocks.product_id'),
+                    'in_stock',
+                    'stock_in' => DB::raw('stocks.stock_in + values(stock_in)')
+                ];
+
+                DB::table('stocks')->upsert($data, $uniqueBy, $update);
+
+                $stockIds = \prepareGetKeyInMultiArray('stock_id', $stockAdjustmentDetails);
+
+                $this->mailOnLowStock(NULL, $stockIds);
+            });
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+
+        return true;
+    }
+
+
+
+    /**
+     * Undocumented function
+     *
+     * @param array $stockAdjustmentDetails
+     * @return mixed
+     */
+    public function inventoryCount(string $reason, array $stockAdjustmentDetails): mixed
+    {
+        try {
+            DB::transaction(function () use($reason, $stockAdjustmentDetails)
+            {
+                $stockAdjustment = StockAdjustment::create([
+                    'adjusted_by' => auth()->user()->name,
+                    'reason' => $reason
+                ]);
+
+                $stockAdjustment->stockAdjustmentDetails()->attach($stockAdjustmentDetails);
+
+                $data = [];
+
+                foreach ($stockAdjustmentDetails as $stockAdjustmentDetail)
+                {
+                    $data[] = [
+                        'id' => $stockAdjustmentDetail['stock_id'],
+                        'in_stock' => $stockAdjustmentDetail['counted_stock']
+                    ];
+                }
+
+                $uniqueBy = 'id';
+
+                $update = [
+                    'product_id' => DB::raw('stocks.product_id'),
+                    'in_stock',
+                ];
+
+                DB::table('stocks')->upsert($data, $uniqueBy, $update);
+
+                $stockIds = \prepareGetKeyInMultiArray('stock_id', $stockAdjustmentDetails);
+
+                $this->mailOnLowStock(NULL, $stockIds);
+            });
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+
+        return true;
+    }
+
+        /**
+     * Undocumented function
+     *
+     * @param array $stockAdjustmentDetails
+     * @return mixed
+     */
+    public function lossOrDamage(string $reason, array $stockAdjustmentDetails): mixed
+    {
+        try {
+            DB::transaction(function () use($reason, $stockAdjustmentDetails)
+            {
+                $stockAdjustment = StockAdjustment::create([
+                    'adjusted_by' => auth()->user()->name,
+                    'reason' => $reason
+                ]);
+
+                $stockAdjustment->stockAdjustmentDetails()->attach($stockAdjustmentDetails);
+
+                $data = [];
+
+                foreach ($stockAdjustmentDetails as $stockAdjustmentDetail)
+                {
+                    $data[] = [
+                        'id' => $stockAdjustmentDetail['stock_id'],
+                        'in_stock' =>  $stockAdjustmentDetail['stock_after'],
                         'stock_out' => $stockAdjustmentDetail['removed_stock']
                     ];
                 }
@@ -138,9 +237,8 @@ trait StockAdjustmentServices
                 $uniqueBy = 'id';
 
                 $update = [
-                    'in_stock',
                     'product_id' => DB::raw('stocks.product_id'),
-                    'stock_in' => DB::raw('stocks.stock_in + values(stock_in)'),
+                    'in_stock',
                     'stock_out' => DB::raw('stocks.stock_out + values(stock_out)')
                 ];
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Pos;
+namespace App\Http\Requests\SalesReturn;
 
 use App\Http\Requests\BaseRequest;
 

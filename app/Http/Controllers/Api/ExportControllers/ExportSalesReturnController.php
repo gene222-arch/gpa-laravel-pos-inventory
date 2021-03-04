@@ -15,7 +15,7 @@ class ExportSalesReturnController extends Controller
         $fileName = 'sales-returns-' . now()->toDateString() . time() .  '.xlsx';
 
         $this->storeExcel($fileName);
-        return Excel::download(new SalesReturnExport(),  $fileName);
+        return (new SalesReturnExport())->download($fileName);
     }
 
 
@@ -24,7 +24,7 @@ class ExportSalesReturnController extends Controller
         $fileName = 'sales-returns-' . now()->toDateString() . time() .  '.csv';
 
         $this->storeCSV($fileName);
-        return Excel::download(new SalesReturnExport(), $fileName);
+        return (new SalesReturnExport())->download($fileName);
     }
 
     public function storeExcel($fileName)

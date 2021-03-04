@@ -51,7 +51,7 @@ class RegisterController extends Controller
         try {
             DB::transaction(function () use ($user, $data)
             {
-                $user->create([
+                $user = $user->create([
                     'name' => $data['name'],
                     'email' => $data['email'],
                     'password' => Hash::make($data['password']),

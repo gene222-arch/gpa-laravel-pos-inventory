@@ -18,7 +18,7 @@ class AccessRightsController extends Controller
     public function __construct(AccessRights $accessRights)
     {
         $this->accessRights = $accessRights;
-        $this->middleware(['auth:api', 'role:Super admin']);
+        $this->middleware(['auth:api', 'permission:Manage Access Rights']);
     }
 
 
@@ -29,7 +29,11 @@ class AccessRightsController extends Controller
      */
     public function index()
     {
-        return $this->success($this->accessRights->getAllAccessRights(),'Success');
+        $result = $this->accessRights->getAllAccessRights();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result,'Success');
     }
 
     /**
@@ -40,17 +44,17 @@ class AccessRightsController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $isAccessRightsCreated = $this->accessRights->createAccessRights(
-            $request->role_name,
+        $result = $this->accessRights->createAccessRights(
+            $request->role,
             $request->back_office,
             $request->pos,
             $request->permissions
         );
 
-        return (!$isAccessRightsCreated)
-            ? $this->serverError()
+        return ($result !== true) 
+            ? $this->error($result)
             : $this->success([],
-                'Success',
+                'Role created successfully.',
                 201);
     }
 
@@ -62,11 +66,12 @@ class AccessRightsController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $getAccessRights = $this->accessRights->find($request->role_id);
+        $result = $this->accessRights
+            ->getAccessRight($request->access_right_id);
 
-        return $this->success($getAccessRights,
-        'Success',
-        200);
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
     }
 
    /**
@@ -78,17 +83,17 @@ class AccessRightsController extends Controller
     public function update(UpdateRequest $request)
     {
         $result = $this->accessRights->updateAccessRights(
-            $request->role_id,
-            $request->role_name,
+            $request->access_right_id,
+            $request->role,
             $request->back_office,
             $request->pos,
             $request->permissions
         );
 
         return ($result !== true)
-            ? $this->error($request)
+            ? $this->error($result)
             : $this->success([],
-                'Success',
+                'Access rights updated successfully.',
                 201);
     }
 
@@ -101,11 +106,9 @@ class AccessRightsController extends Controller
     public function destroy(DeleteRequest $request)
     {
         $this->accessRights->deleteMany(
-            $request->role_ids
+            $request->access_right_ids
         );
 
-        return $this->success([],
-                'Success',
-                200);
+        return $this->success([], 'Access rights deleted successfully.');
     }
 }

@@ -31,10 +31,11 @@ class SuppliersController extends Controller
      */
     public function index()
     {
-        return $this->success($this->supplier->all(),
-            'Suppliers Fetched Successfully',
-            200
-        );
+        $result = $this->supplier->all();
+        
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success', 200) ;
     }
 
 

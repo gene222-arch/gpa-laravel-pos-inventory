@@ -20,16 +20,18 @@
             <tr align="center">
                 <th align="center"><strong>#</strong></th>
                 <th colspan="2" align="center"><strong>Customer </strong></th>
+                <th colspan="2" align="center"><strong>Purchased at</strong></th>
                 <th colspan="2" align="center"><strong>Sales Return</strong></th>
                 <th colspan="2" align="center"><strong>No# of items</strong></th>
-                <th colspan="2" align="center"><strong>Date of return</strong></th>
+                <th colspan="2" align="center"><strong>Returned at</strong></th>
             </tr>
         </thead>
         <tbody>
             @foreach ($salesReturns as $salesReturn)
                 <tr>
                     <td align="center">{{ $salesReturn->id }}</td>
-                    <td colspan="2" align="center">{{ $salesReturn->customer_name }}</td>
+                    <td colspan="2" align="center">{{ $salesReturn->customer }}</td>
+                    <td colspan="2" align="center">{{ $salesReturn->purchased_at }}</td>
                     <td colspan="2" align="center">{{ number_format($salesReturn->sales_return, 2) }}</td>
                     <td colspan="2" align="center">{{ $salesReturn->no_of_items }}</td>
                     <td colspan="2" align="center">{{ $salesReturn->returned_at }}</td>

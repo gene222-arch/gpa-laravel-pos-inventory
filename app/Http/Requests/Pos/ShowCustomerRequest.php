@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\AccessRights;
+namespace App\Http\Requests\Pos;
 
 use App\Http\Requests\BaseRequest;
 
-class DeleteRequest extends BaseRequest
+class ShowCustomerRequest extends BaseRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -14,7 +14,7 @@ class DeleteRequest extends BaseRequest
     public function rules()
     {
         return [
-            'access_right_ids.*' => ['required', 'integer', 'distinct', 'exists:access_rights,id']
+            'customer_id' => ['required', 'integer', 'exists:customers,id']
         ];
     }
 }

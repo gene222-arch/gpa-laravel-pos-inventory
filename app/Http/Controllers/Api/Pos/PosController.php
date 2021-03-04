@@ -3,19 +3,24 @@
 namespace App\Http\Controllers\Api\Pos;
 
 use App\Models\Pos;
+use App\Models\Customer;
+use App\Models\Discount;
 use App\Traits\ApiResponser;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Pos\AddDiscountQuantity;
 use App\Http\Requests\Pos\ShowRequest;
 use App\Http\Requests\Pos\StoreRequest;
 use App\Http\Requests\Pos\RemoveItemRequest;
+use App\Http\Requests\Pos\IndexFilterRequest;
+use App\Http\Requests\Pos\AddDiscountQuantity;
 use App\Http\Requests\Pos\CancelOrdersRequest;
+use App\Http\Requests\Pos\ShowCustomerRequest;
+use App\Http\Requests\Pos\FilterProductsRequest;
+use App\Http\Requests\Pos\ForSalesReturnRequest;
 use App\Http\Requests\Pos\ProcessPaymentRequest;
 use App\Http\Requests\Pos\IncrementItemQtyRequest;
 use App\Http\Requests\Pos\AssignDiscountToAllRequest;
-use App\Http\Requests\Pos\ForSalesReturnRequest;
-use App\Http\Requests\Pos\IndexFilterRequest;
 use App\Http\Requests\Pos\RemoveDiscountToAllRequest;
+use App\Models\Category;
 
 class PosController extends Controller
 {
@@ -49,6 +54,73 @@ class PosController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @return \Illuminate\Http\Response
+     */
+    public function discountIndex()
+    {
+        $result = (new Discount())->latest()->get();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Fetched successfully', 200);
+    }
+
+
+
+    /**
+     * * Get resources of categories
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function categoriesIndex()
+    {
+        $result = (new Category())->latest()->get();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Fetched successfully', 200);
+    }
+
+
+
+    /**
+     * Display a listing of the resource of customers.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function customerIndex()
+    {
+        $result = $this->pos->getCustomers();
+
+        return !$result
+            ? $this->success([], 'No Content', 204)
+            : $this->success($result, 'Success');
+    }
+
+
+    /**
+     * * Get resources from products and stocks
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function productsIndex(FilterProductsRequest $request)
+    {
+        $result = $this->pos
+            ->getProducts(
+                $request->category_id,
+                $request->productName
+            );
+
+        return !$result
+            ? $this->success([], 'No Content',204)
+            : $this->success($result, 'Success');
+    }
+
+
+
+    /**
+     * Display a listing of the resource.
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function indexReceipts()
@@ -72,20 +144,19 @@ class PosController extends Controller
     }
 
 
-
-        /**
-     * Undocumented function
+     /**
+     * Display the specified resource.
      *
-     * @param ForSalesReturnRequest $request
+     * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function showForSalesReturn(ForSalesReturnRequest $request)
+    public function showCustomer(ShowCustomerRequest $request)
     {
-        $result = $this->pos->findCustomerOrderForSalesReturn($request->pos_id);
+        $customer = (new Customer())->find($request->customer_id);
 
-        return !$result
+        return !$customer
             ? $this->success([], 'No Content', 204)
-            : $this->success($result, 'Success');
+            : $this->success($customer, 'Success');
     }
 
 

@@ -146,7 +146,6 @@ trait StockServices
         $update = [
             'bad_order_stock' => DB::raw('stocks.bad_order_stock + values(bad_order_stock)'),
             'in_stock' => DB::raw('stocks.in_stock - values(bad_order_stock)'),
-            'stock_in' => DB::raw('stocks.stock_in - values(bad_order_stock)'),
             'stock_out' => DB::raw('stocks.stock_out + values(bad_order_stock)')
         ];
 
