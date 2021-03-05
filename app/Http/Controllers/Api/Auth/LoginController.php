@@ -61,7 +61,7 @@ class LoginController extends Controller
             'User login successfully.',
             201,
             [
-                'user' => auth()->user(),
+                'canViewDashboard' => auth()->user()->can('View Dashboard'),
                 'permissions' => auth()->user()->permissions->map->name
             ]
         );

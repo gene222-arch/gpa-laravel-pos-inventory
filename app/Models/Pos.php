@@ -27,6 +27,7 @@ class Pos extends Model
                     'pos_id',
                     'product_id')
                     ->withPivot([
+                        'id',
                         'pos_id',
                         'discount_id',
                         'quantity',

@@ -14,6 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    'company_name' => env('APP_NAME'),
     'company_address' => '134 Daisy St.',
     'company_contact' => '09264774547',
     'company_email' => 'posin@gmail.com',

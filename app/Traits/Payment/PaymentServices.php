@@ -7,9 +7,9 @@ use App\Models\Pos;
 use App\Models\Stock;
 use App\Models\Invoice;
 use App\Models\Customer;
+use App\Models\Sale;
 use Illuminate\Support\Facades\DB;
 use App\Traits\PDF\PDFGeneratorServices;
-use App\Notifications\PaymentNotification;
 use App\Traits\Notifications\ShouldMailServices;
 
 trait PaymentServices
@@ -221,26 +221,22 @@ trait PaymentServices
         string $customerEmail = null,
         string $customerName = null): void
     {
-        $subTotal = $customerPos->posDetails
-                                ->map
-                                ->pivot
+        $customerOrderDetails = $customerPos->posDetails->map->pivot;
+
+        $subTotal = $customerOrderDetails
                                 ->map
                                 ->sub_total
                                 ->sum();
 
-        $discount = $customerPos->posDetails
-                                ->map
-                                ->pivot
+        $discount = $customerOrderDetails
                                 ->map
                                 ->discount
                                 ->sum();
 
-        $noOfItemsBought = $customerPos->posDetails
-                                        ->map
-                                        ->pivot
-                                        ->map
-                                        ->quantity
-                                        ->sum();
+        $noOfItemsBought = $customerOrderDetails
+                                ->map
+                                ->quantity
+                                ->sum();
 
         $tax = ($subTotal * 0.12);
         $total = (($subTotal - $discount) + $tax);
@@ -250,6 +246,13 @@ trait PaymentServices
         {
             throw new \Exception("Cash is not enough, remaining fees: P" . abs($change));
         }
+
+        $this->createSales(
+            $customerId,
+            $customerPos->id,
+            'cash',
+            $customerOrderDetails 
+        );
 
         $paymentDetails = [
             'cashier' => auth()->user()->name,
@@ -298,23 +301,19 @@ trait PaymentServices
    */
     private function payWithCredit(int $customerId, Pos $customerPos, bool $shouldMail, string $customerEmail = null, string $customerName = null): void
     {
-        $subTotal = $customerPos->posDetails
-                                ->map
-                                ->pivot
+        $customerOrderDetails = $customerPos->posDetails->map->pivot;
+
+        $subTotal = $customerOrderDetails
                                 ->map
                                 ->sub_total
                                 ->sum();
 
-        $discount = $customerPos->posDetails
-                                ->map
-                                ->pivot
+        $discount = $customerOrderDetails
                                 ->map
                                 ->discount
                                 ->sum();
 
-        $noOfItemsBought = $customerPos->posDetails
-                                ->map
-                                ->pivot
+        $noOfItemsBought = $customerOrderDetails
                                 ->map
                                 ->quantity
                                 ->sum();
@@ -339,6 +338,14 @@ trait PaymentServices
         {
             throw new \Exception("Error Processing Credit Payment");
         }
+
+        $this->createSales(
+            $customerId,
+            $customerPos->id,
+            'cash',
+            $customerOrderDetails 
+        );
+
 
         if ($shouldMail)
         {
@@ -400,5 +407,43 @@ trait PaymentServices
         );
     }
 
+
+
+
+    public function createSales (int $customerId, int $posId, string $paymentType, $orderDetails)
+    {
+        # select customer
+        $sale = Sale::create([
+            'cashier_id' => auth()->user()->id,
+            'customer_id' => $customerId,
+            'pos_id' => $posId,
+            'payment_type' => $paymentType
+        ]);
+
+        foreach ($orderDetails as $orderDetail)
+        {
+            $subTotal = ($orderDetail->price * $orderDetail->quantity);
+            $tax = ($subTotal * 0.12);
+            $total = ($subTotal + $tax) - $orderDetail->discount;
+
+            $orders[] =
+            [
+                'sales_id' => $sale->id,
+                'pos_details_id' => $orderDetail->id,
+                'product_id' => $orderDetail->product_id,
+                'quantity' => $orderDetail->quantity,
+                'price' => $orderDetail->price,
+                'unit_of_measurement' => $orderDetail->unit_of_measurement,
+                'sub_total' => $subTotal,
+                'discount' => $orderDetail->discount,
+                'tax' => $tax,
+                'total' => $total,
+                'created_at' => now()
+            ];
+        }
+
+        DB::table('sales_details')->insert($orders);
+
+    } 
 
 }

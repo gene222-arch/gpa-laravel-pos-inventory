@@ -46,10 +46,10 @@ class PermissionsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexNames(User $user)
+    public function showAuthUserPermissions()
     {
         return $this->success(
-            $user->permissions->map->name,
+            auth()->user()->permissions->map->name,
             'Success'
         );
     }

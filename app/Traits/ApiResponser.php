@@ -62,6 +62,20 @@ trait ApiResponser
     }
 
 
+    /**
+     * Success Response
+     *
+     * @param [type] $message
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function noContent($message = null)
+	{
+		return response()->json([
+			'status' => 'No Content',
+			'message' => $message
+		], 204);
+	}
+
     public function serverError()
     {
         return $this->error(

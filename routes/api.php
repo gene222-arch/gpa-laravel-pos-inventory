@@ -32,6 +32,7 @@ use App\Http\Controllers\Api\ExportControllers\ExportPaymentsController;
 use App\Http\Controllers\Api\ExportControllers\ExportProductsController;
 use App\Http\Controllers\Api\ExportControllers\ExportBadOrdersController;
 use App\Http\Controllers\Api\ExportControllers\ExportCustomersController;
+use App\Http\Controllers\Api\Receipt\ReceiptsController;
 use App\Http\Controllers\Api\RolesPermission\PermissionsController;
 use App\Http\Controllers\Api\RolesPermission\RolesController;
 
@@ -59,6 +60,7 @@ Route::group(['middleware' => 'api'], function ()
 
     Route::group(['middleware' => 'auth:api'], function ()
     {
+        Route::get('/auth-user', [AuthController::class, 'showAuthenticatedUser']);
         Route::post('/logout', [ LoginController::class, 'logout' ]);
     });
 });
@@ -73,18 +75,8 @@ Route::get('/roles', [RolesController::class, 'index']);
 Route::prefix('permissions')->group(function () 
 {
     Route::get('/', [PermissionsController::class, 'index']);
-    Route::get('/names', [PermissionsController::class, 'indexNames']);
+    Route::get('/auth', [PermissionsController::class, 'showAuthUserPermissions']);
 });
-
-
-/**
- * Admin Controller
- */
-Route::group(['prefix' => 'dashboard',], function()
-{
-    Route::get('/', [DashboardController::class, 'index']);
-});
-
 
 
 /**
@@ -269,6 +261,17 @@ Route::group(['prefix' => 'pos'], function ()
     Route::put('/cancel-orders', [PosController::class, 'cancelOrders']);
     Route::delete('/discount-all', [PosController::class, 'removeDiscountToAll']);
     Route::delete('/items', [PosController::class, 'removeItems']);
+});
+
+
+
+/**
+ * Receipt
+ */
+Route::group(['prefix' => 'receipts'], function ()
+{
+    Route::post('/', [ReceiptsController::class, 'index']);
+    Route::post('/with-details', [ReceiptsController::class, 'show']);
 });
 
 

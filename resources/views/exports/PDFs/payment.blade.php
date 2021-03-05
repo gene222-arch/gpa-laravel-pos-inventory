@@ -116,7 +116,7 @@
         <tbody>
             <tr>
                 <td class="shop-name">
-                    Shop Name
+                    {{ Config::get('app.company_name', 'default') }}
                 </td>
             </tr>
             <tr>

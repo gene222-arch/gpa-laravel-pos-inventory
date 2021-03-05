@@ -86,7 +86,11 @@ class RegisterController extends Controller
         return $this->token(
             $this->getPersonalAccessToken($request),
             'Successful Registration',
-            201
+            201,
+            [
+                'canViewDashboard' => auth()->user()->can('View Dashboard'),
+                'permissions' => auth()->user()->permissions->map->name
+            ]
         );
     }
 

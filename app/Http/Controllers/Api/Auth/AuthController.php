@@ -15,16 +15,13 @@ class AuthController extends Controller
     /**
      * Get currently authenticated user data
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getAuthenticatedUser(Request $request)
+    public function showAuthenticatedUser()
     {
         return $this->success(
-            $request->user(),
-            'Success',
-            200
-        );
+            auth()->user(),
+            'Success');
     }
 
 
