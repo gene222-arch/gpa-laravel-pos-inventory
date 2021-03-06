@@ -36,7 +36,7 @@ class PermissionsController extends Controller
             ];
 
         return !$result
-            ? $this->success([], 'No Content', 204)
+            ? $this->noContent('No Content')
             : $this->success($result);
     }
 
@@ -46,12 +46,13 @@ class PermissionsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function showAuthUserPermissions()
+    public function showAuthenticatedUserPermissions()
     {
-        return $this->success(
-            auth()->user()->permissions->map->name,
-            'Success'
-        );
+        $result = auth()->user()->getPermissionsViaRoles()->map->name;
+
+        return !$result
+            ? $this->noContent('No Content')
+            : $this->success($result, 'Success');
     }
 
 

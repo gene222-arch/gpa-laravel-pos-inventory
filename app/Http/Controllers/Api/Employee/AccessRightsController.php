@@ -32,7 +32,7 @@ class AccessRightsController extends Controller
         $result = $this->accessRights->getAllAccessRights();
 
         return !$result
-            ? $this->success([], 'No Content', 204)
+            ? $this->noContent()
             : $this->success($result,'Success');
     }
 
@@ -70,7 +70,7 @@ class AccessRightsController extends Controller
             ->getAccessRight($request->access_right_id);
 
         return !$result
-            ? $this->success([], 'No Content', 204)
+            ? $this->noContent()
             : $this->success($result, 'Success');
     }
 

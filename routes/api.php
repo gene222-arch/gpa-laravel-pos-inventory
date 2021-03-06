@@ -75,8 +75,15 @@ Route::get('/roles', [RolesController::class, 'index']);
 Route::prefix('permissions')->group(function () 
 {
     Route::get('/', [PermissionsController::class, 'index']);
-    Route::get('/auth', [PermissionsController::class, 'showAuthUserPermissions']);
+    Route::get('/auth', [PermissionsController::class, 'showAuthenticatedUserPermissions']);
 });
+
+
+/**
+ * Dashboard
+ */
+
+Route::get('/dashboard', [DashboardController::class, 'index']);
 
 
 /**

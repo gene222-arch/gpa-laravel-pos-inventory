@@ -68,9 +68,10 @@ trait ApiResponser
      * @param [type] $message
      * @return \Illuminate\Http\JsonResponse
      */
-    public function noContent($message = null)
+    public function noContent($message = 'No Content', $data = null)
 	{
 		return response()->json([
+            'data' => $data,
 			'status' => 'No Content',
 			'message' => $message
 		], 204);

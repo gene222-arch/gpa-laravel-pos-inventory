@@ -28,17 +28,19 @@ trait ReportsSummaryServices
                 MONTH(pos.created_at) as month_num,
                 products.name AS product_description,
                 SUM(pos_details.quantity) AS items_sold,
-                SUM(pos_details.sub_total + pos_details.tax) AS sales,
-                SUM(pos_details.quantity * products.cost) AS cost_of_goods_sold,
-                (SUM(pos_details.sub_total + pos_details.tax) -
-                SUM(pos_details.quantity * products.cost)) AS gross_profit,
-                SUM(pos_details.total) -
+                FORMAT(SUM(pos_details.sub_total + pos_details.tax), 2) AS sales,
+                FORMAT(SUM(pos_details.quantity * products.cost), 2) AS cost_of_goods_sold,
+                FORMAT(
+                    (SUM(pos_details.sub_total + pos_details.tax) -
+                    SUM(pos_details.quantity * products.cost)
+                ), 2) AS gross_profit,
+                FORMAT(SUM(pos_details.total), 2) -
                 CASE
                     WHEN pos.id = sales_returns.pos_id AND pos_details.product_id = sales_return_details.product_id
                     THEN
                         (
                             SELECT
-                                SUM(sales_return_details.total)
+                                FORMAT(SUM(sales_return_details.total), 2)
                             FROM
                                 sales_return_details
                             WHERE
@@ -107,13 +109,16 @@ trait ReportsSummaryServices
                 categories.id as id,
                 categories.name as category,
                 SUM(pos_details.quantity) as items_sold,
-                SUM(pos_details.sub_total + pos_details.tax) as sales,
-                SUM(pos_details.quantity * products.cost) as cost_of_goods_sold,
-                SUM(pos_details.sub_total + pos_details.tax) -
-                SUM(pos_details.quantity * products.cost) as gross_profit,
-                SUM(pos_details.total) -
+                FORMAT(SUM(pos_details.sub_total + pos_details.tax), 2) as sales,
+                FORMAT(SUM(pos_details.quantity * products.cost), 2) as cost_of_goods_sold,
+                FORMAT(
+                    SUM(pos_details.sub_total + pos_details.tax) -
+                    SUM(pos_details.quantity * products.cost), 
+                2) as gross_profit,
+                FORMAT(SUM(pos_details.total) -
                 CASE
-                    WHEN pos.id = sales_returns.pos_id AND pos_details.product_id = sales_return_details.product_id
+                    WHEN 
+                        pos.id = sales_returns.pos_id AND pos_details.product_id = sales_return_details.product_id
                     THEN
                         (
                             SELECT
@@ -124,7 +129,7 @@ trait ReportsSummaryServices
                                 sales_return_details.sales_return_id = sales_returns.id
                         )
                     ELSE 0
-                END as net_sales
+                END, 2) as net_sales
             ')
             ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
             ->leftJoin('sales_returns', 'sales_returns.pos_id', '=', 'pos.id')
@@ -161,37 +166,43 @@ trait ReportsSummaryServices
 
         $result = DB::table('pos')
             ->selectRaw('
+                pos.id as id,
                 pos.status as payment_type,
-                SUM(pos_details.discount) as discounts,
-                SUM(pos_details.sub_total + pos_details.tax) as gross_sales,
+                FORMAT(SUM(pos_details.sub_total + pos_details.tax), 2) as gross_sales, 
                 CASE
-                    WHEN
-                        pos.id = sales_returns.pos_id
-                    THEN
-                        (
-                            SELECT
-                                SUM(sales_return_details.total)
-                            FROM
-                                sales_return_details
-                            WHERE
-                                sales_return_details.sales_return_id = sales_returns.id
-                        )
-                    ELSE 0
+                    WHEN 
+                        SUM(sales_return_details.discount) IS NULL 
+                    THEN 
+                        0
+                    ELSE 
+                        FORMAT(SUM(sales_return_details.discount), 2)
                 END as sales_return,
-                SUM(pos_details.total) -
+                FORMAT(SUM(pos_details.discount) - 
                 CASE
-                    WHEN pos.id = sales_returns.pos_id
-                    THEN
-                        (
-                            SELECT
-                                SUM(sales_return_details.total)
-                            FROM
-                                sales_return_details
-                            WHERE
-                                sales_return_details.sales_return_id = sales_returns.id
-                        )
-                    ELSE 0
-                END as net_sales
+                    WHEN 
+                        SUM(sales_return_details.discount) IS NULL 
+                    THEN 
+                        0
+                    ELSE 
+                        SUM(sales_return_details.discount)
+                END, 2) as discounts,
+                CASE
+                    WHEN 
+                        SUM(sales_return_details.total) IS NULL 
+                    THEN 
+                        0
+                    ELSE 
+                        FORMAT(SUM(sales_return_details.total), 2)
+                END as sales_return,
+                FORMAT(SUM(pos_details.total) - 
+                CASE
+                    WHEN 
+                        SUM(sales_return_details.total) IS NULL 
+                    THEN 
+                        0
+                    ELSE 
+                        SUM(sales_return_details.total)
+                END, 2) as net_sales 
             ')
             ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
             ->leftJoin('sales_returns', 'sales_returns.pos_id', '=', 'pos.id')
@@ -207,9 +218,6 @@ trait ReportsSummaryServices
             ->orderByDesc('net_sales')
             ->get()
             ->toArray();
-            foreach ($result as $value) {
-                $value->id = uniqid('');
-            }
 
             return $result ? $result : [];
     }
@@ -231,38 +239,36 @@ trait ReportsSummaryServices
             ->selectRaw('
                 users.id as id,
                 pos.cashier as cashier,
-                SUM(pos_details.discount) as discounts,
-                SUM(pos_details.sub_total + pos_details.tax) as gross_sales,
+                FORMAT(SUM(pos_details.sub_total + pos_details.tax), 2) as gross_sales, 
+                FORMAT(SUM(pos_details.discount) - 
                 CASE
-                    WHEN pos.id = sales_returns.pos_id
-                    THEN
-                        (
-                            SELECT
-                                SUM(sales_return_details.total)
-                            FROM
-                                sales_return_details
-                            WHERE
-                                sales_return_details.sales_return_id = sales_returns.id
-                        )
-                    ELSE 0
+                    WHEN 
+                        SUM(sales_return_details.discount) IS NULL 
+                    THEN 
+                        0
+                    ELSE 
+                        SUM(sales_return_details.discount)
+                END, 2) as discounts,
+                CASE
+                    WHEN 
+                        SUM(sales_return_details.total) IS NULL 
+                    THEN 
+                        0
+                    ELSE 
+                        FORMAT(SUM(sales_return_details.total), 2)
                 END as sales_return,
-                SUM(pos_details.total) -
+                FORMAT(SUM(pos_details.total) - 
                 CASE
-                    WHEN pos.id = sales_returns.pos_id
-                    THEN
-                        (
-                            SELECT
-                                SUM(sales_return_details.total)
-                            FROM
-                                sales_return_details
-                            WHERE
-                                sales_return_details.sales_return_id = sales_returns.id
-                        )
-                    ELSE 0
-                END as net_sales
+                    WHEN 
+                        SUM(sales_return_details.total) IS NULL 
+                    THEN 
+                        0
+                    ELSE 
+                        SUM(sales_return_details.total)
+                END, 2) as net_sales 
             ')
-            ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
             ->join('users', 'users.name', '=', 'pos.cashier')
+            ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
             ->leftJoin('sales_returns', 'sales_returns.pos_id', '=', 'pos.id')
             ->leftJoin('sales_return_details', 'sales_return_details.sales_return_id', '=', 'sales_returns.id')
             ->when($startDate, function($q, $startDate) {

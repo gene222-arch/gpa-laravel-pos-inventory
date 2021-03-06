@@ -9,12 +9,6 @@ use Excel;
 class ExportCustomersController extends Controller
 {
 
-    public function __construct()
-    {
-        $this->middleware(['auth:api']);
-    }
-
-
     public function toExcel()
     {
         $fileName = 'customers-' . now()->toDateString() . time() .  '.xlsx';

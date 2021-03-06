@@ -20,7 +20,11 @@ class AuthController extends Controller
     public function showAuthenticatedUser()
     {
         return $this->success(
-            auth()->user(),
+            [
+                'user' => auth()->user(),
+                'role' => auth()->user()->roles->map->name->first(),
+                'permissions' => auth()->user()->getPermissionsViaRoles()->map->name
+            ],
             'Success');
     }
 

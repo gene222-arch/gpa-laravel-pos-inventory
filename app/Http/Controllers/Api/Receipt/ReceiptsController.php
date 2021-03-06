@@ -15,7 +15,7 @@ class ReceiptsController extends Controller
 
     public function __construct()
     {
-        $this->middleware(['auth:api', 'permission:View Receipts']);
+        $this->middleware(['auth:api', 'permission:View All Receipts']);
     }
 
     /**

@@ -225,15 +225,15 @@ trait DashboardServices
 
             )
             AS margin_sales,
-            (
+            ((
                 SELECT
                     CASE
                         WHEN
-                            SUM(pos_details.sub_total) IS NULL
+                            SUM(pos_details.total) IS NULL
                         THEN
                             0.00
                         ELSE
-                            SUM(pos_details.sub_total)
+                            SUM(pos_details.total)
                     END
                 FROM
                     pos
@@ -257,9 +257,8 @@ trait DashboardServices
                     END
                 FROM
                 sales_return_details
-            ) as net_sales,
+            )) as net_sales,
             (
-
                 SELECT 	
                     COUNT(id)
                 FROM 
@@ -274,7 +273,7 @@ trait DashboardServices
                 FROM 
                     invoices
                 WHERE 
-                    status = "Payment in process"
+                    status != "Paid"
             ) as pending_invoices,
             (
                 SELECT 	
@@ -339,9 +338,10 @@ trait DashboardServices
             ')
             ->join('invoice_details', 'invoice_details.invoice_id', '=', 'invoices.id')
             ->join('customers', 'customers.id', '=', 'invoices.customer_id')
-            ->whereIn('invoices.status', ['Payment in process'])
+            ->where('invoices.status', '!=', 'Paid')
             ->where('customers.name', '!=', 'walk-in')
             ->limit(10)
+            ->groupBy('invoices.id')
             ->get()
             ->toArray();
 

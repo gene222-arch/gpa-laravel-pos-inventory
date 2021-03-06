@@ -17,7 +17,7 @@ class StoreRequest extends BaseRequest
             'role' => ['required', 'string', 'unique:roles,name'],
             'back_office' => ['required', 'boolean'],
             'pos' => ['required', 'boolean'],
-            'permissions.*' => ['required', 'string', 'exists:permissions,name']
+            'permissions.*' => ['string', 'exists:permissions,name']
         ];
     }
 }

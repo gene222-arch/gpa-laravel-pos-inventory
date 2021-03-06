@@ -34,10 +34,11 @@ trait AccessRightsServices
                     THEN
                         'POS'
                 END as access,
-                COUNT(roles.id) as employees
+                COUNT(model_has_roles.model_id) as employees
             ")
             ->join('roles', 'roles.id', '=', 'access_rights.role_id')
-            ->groupBy('roles.id')
+            ->join('model_has_roles', 'model_has_roles.role_id', '=', 'access_rights.role_id')
+            ->groupBy('model_has_roles.role_id')
             ->get()
             ->toArray();
     }
@@ -127,22 +128,22 @@ trait AccessRightsServices
             DB::transaction(function () use($accessRightId, $roleName, $back_office, $pos, $permissions)
             {
                 $accessRight = AccessRights::find($accessRightId);
-
                 $roleId = $accessRight->role_id;
-                $role = Role::find($roleId);
 
-                (new AccessRights())
-                    ->where('role_id', '=', $roleId)
+                $accessRight
                     ->update([
                         'back_office' => $back_office,
                         'pos' => $pos
                     ]);
 
+                $role = Role::find($roleId);
+
                 $role->update([
                     'name' => $roleName
                 ]);
                     
-                $role->permissions()->sync($roleId, $permissions);
+                $role->permissions()->detach();
+                $role->givePermissionTo(...$permissions);
             });
         } catch (\Throwable $th) {
             return $th->getMessage();
