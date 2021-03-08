@@ -3,14 +3,24 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ChangeEmailRequest;
+use App\Http\Requests\Auth\ChangeNameRequest;
+use App\Http\Requests\Auth\ChangePasswordRequest;
+use App\Http\Requests\Auth\CheckPasswordRequest;
 use App\Traits\ApiResponser;
-use Illuminate\Http\Request;
-use phpseclib\Crypt\RC2;
+use App\Traits\Auth\AuthServices;
+
 
 class AuthController extends Controller
 {
 
-    use ApiResponser;
+    use ApiResponser, AuthServices;
+
+    public function __construct()
+    {
+        $this->middleware(['auth:api']);
+    }
+
 
     /**
      * Get currently authenticated user data
@@ -30,18 +40,64 @@ class AuthController extends Controller
 
 
     /**
-     * Get currently authenticated user data with their respective roles
+     * Check if user password is correct
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getAuthenticatedUserWithRoles(Request $request)
+    public function checkPassword(CheckPasswordRequest $request)
     {
-        return $this->success(
-            $request->user()->roles->map->name,
-            'Success',
-            200
+        $result = $this->validatePassword(
+            $request->password 
         );
+        
+        return !$result 
+            ? $this->error('Incorrect password.', 400)
+            : $this->success([], 'Password verified');
+    }
+
+
+    /**
+     * Update user password
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updatePassword(ChangePasswordRequest $request)
+    {
+        $result = $this->changePassword($request->new_password);
+
+        return !$result
+            ? $this->error('Password update failed', 400)
+            : $this->success([], 'Password updated successfully');
+    }
+
+
+    /**
+     * Update user name
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateName(ChangeNameRequest $request)
+    {
+        $result = $this->changeName($request->new_name);
+
+        return !$result
+            ? $this->error('Name update failed', 400)
+            : $this->success([], 'Name updated successfully');
+    }
+
+
+    /**
+     * Update user email
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateEmail(ChangeEmailRequest $request)
+    {
+        $result = $this->changeEmail($request->new_email);
+
+        return !$result
+            ? $this->error('Email update failed', 400)
+            : $this->success([], 'Email updated successfully');
     }
 
 }

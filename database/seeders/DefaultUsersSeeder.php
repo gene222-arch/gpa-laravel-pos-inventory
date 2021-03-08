@@ -18,37 +18,16 @@ class DefaultUsersSeeder extends Seeder
     public function run()
     {
         $this->createAdminAccount();
-        $this->createManagerAccount();
-        $this->createCashierAccount();
     }
 
 
     public function createAdminAccount()
     {
-        DB::table('users')->updateOrInsert([
-            'name' => 'Administrator',
+        User::create([
+            'name' => 'admin',
             'email' => 'admin@admin.com',
-            'password' => Hash::make('admin@admin.com'),
-        ]);
+            'password' => Hash::make('admin'),
+        ])
+        ->assignRole('Super Admin');
     }
-
-    public function createManagerAccount()
-    {
-        DB::table('users')->updateOrInsert([
-            'name' => 'Manager',
-            'email' => 'manager@manager.com',
-            'password' => Hash::make('manager@manager.com'),
-        ]);
-    }
-
-    public function createCashierAccount()
-    {
-        DB::table('users')->updateOrInsert([
-            'name' => 'Cashier',
-            'email' => 'cashier@cashier.com',
-            'password' => Hash::make('cashier@cashier.com'),
-        ]);
-    }
-
-
 }

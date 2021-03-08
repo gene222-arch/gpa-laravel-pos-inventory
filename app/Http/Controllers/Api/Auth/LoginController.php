@@ -61,8 +61,9 @@ class LoginController extends Controller
             'User login successfully.',
             201,
             [
-                'canViewDashboard' => auth()->user()->can('View Dashboard'),
-                'permissions' => auth()->user()->permissions->map->name
+                'user' => Auth::user(),
+                'canViewDashboard' => Auth::user()->can('View Dashboard'),
+                'permissions' => Auth::user()->permissions->map->name
             ]
         );
     }
@@ -83,7 +84,7 @@ class LoginController extends Controller
     }
 
     /**
-     * Undocumented function
+     * Logging out
      *
      * @return json
      */
@@ -94,7 +95,7 @@ class LoginController extends Controller
             ->token()
             ->revoke();
 
-        return $this->success('User Logged Out', '', 200);
+        return $this->success([], 'User Logged Out');
     }
 
     /**

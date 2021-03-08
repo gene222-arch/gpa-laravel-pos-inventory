@@ -75,12 +75,12 @@ trait PDFGeneratorServices
     {
         $payment = PosPayment::find($paymentId);
         $customer = (new PosPayment())->paymentCustomerInfo($paymentId);
-        $paymentPosDetails = (new PosPayment())->paymentPosDetailstoPDF($paymentId);
+        $items = (new PosPayment())->paymentPosDetailstoPDF($paymentId);
 
         $pdf = PDF::loadView('exports.PDFs.payment', [
             'payment' => $payment,
             'customer' => $customer,
-            'paymentDetails' => $paymentPosDetails,
+            'paymentDetails' => $items,
             'taxRate' => '%12'
         ])
         ->setOptions([
@@ -90,7 +90,7 @@ trait PDFGeneratorServices
 
         $this->storePaymentsPDF($pdf, $fileName);
 
-        return $pdf->stream($fileName);
+        return $pdf->download();
     }
 
 
@@ -149,6 +149,5 @@ trait PDFGeneratorServices
 
         return $pdf->download();
     }
-
 
 }

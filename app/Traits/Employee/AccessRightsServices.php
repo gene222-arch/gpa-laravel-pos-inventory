@@ -94,7 +94,7 @@ trait AccessRightsServices
                         'name' => $roleName,
                         'guard_name' => 'api'
                     ])
-                    ->givePermissionTo(...$permissions);
+                    ->givePermissionTo([...$permissions, 'Manage Account', 'View Receipts']);
 
 
                 (new AccessRights())
@@ -153,11 +153,23 @@ trait AccessRightsServices
     }
 
 
+
     public function deleteMany(array $accessRightIds)
     {
-        $roleIds = AccessRights::whereIn('id', $accessRightIds)->pluck('role_id');
+        try {
+            DB::transaction(function () use ($accessRightIds)
+            {
+                $roleIds = AccessRights::whereIn('id', $accessRightIds)->pluck('role_id');
 
-        return (new Role())->whereIn('id', $roleIds)->delete();
+                (new Role())->whereIn('id', $roleIds)->delete();
+
+                AccessRights::whereIn('id', $accessRightIds)->delete();
+            });
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+
+        return true;
     }
 
 

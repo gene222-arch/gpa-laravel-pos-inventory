@@ -25,6 +25,7 @@ class CreateProductsTable extends Migration
             $table->char('sold_by', 13);
             $table->unsignedDouble('price', 10, 2);
             $table->unsignedDouble('cost', 10, 2);
+            $table->boolean('is_for_sale')->default(false);
             $table->timestamps();
 
             $table->unique(['sku', 'barcode']);

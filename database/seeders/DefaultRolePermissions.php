@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class DefaultRolePermissions extends Seeder
 {
@@ -13,6 +15,7 @@ class DefaultRolePermissions extends Seeder
      */
     public function run()
     {
-        //
+        $permissions = Permission::all();
+        Role::first()->givePermissionTo($permissions);
     }
 }

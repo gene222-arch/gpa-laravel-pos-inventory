@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class DefaultRoleSeeder extends Seeder
 {
@@ -14,31 +15,13 @@ class DefaultRoleSeeder extends Seeder
      */
     public function run()
     {
-
+        $this->createSuperAdminRole();
     }
 
-    public function createAdminRole()
+    public function createSuperAdminRole()
     {
-        DB::table('roles')->insert([
-            'name' => 'admin',
-            'guard_name' => 'api',
-        ]);
-    }
-
-
-    public function createManagerRole()
-    {
-        DB::table('roles')->insert([
-            'name' => 'manager',
-            'guard_name' => 'api',
-        ]);
-    }
-
-
-    public function createCashierRole()
-    {
-        DB::table('roles')->insert([
-            'name' => 'cashier',
+        Role::create([
+            'name' => 'Super Admin',
             'guard_name' => 'api',
         ]);
     }

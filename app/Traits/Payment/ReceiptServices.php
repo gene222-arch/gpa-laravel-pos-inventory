@@ -4,6 +4,7 @@ namespace App\Traits\Payment;
 
 use App\Models\PosPayment;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 trait ReceiptServices
 {
@@ -25,6 +26,9 @@ trait ReceiptServices
             })
             ->groupBy('sales.id')
             ->orderByDesc('sales.created_at')
+            ->when(Auth::user()->can('View All Receipts') === false, function ($q) {
+                return $q->limit(5);
+            })
             ->get()
             ->toArray();
     }

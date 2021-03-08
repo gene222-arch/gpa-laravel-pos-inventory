@@ -15,6 +15,7 @@ class CreateSalesReturnsTable extends Migration
     {
         Schema::create('sales_returns', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id');
             $table->foreignId('pos_id');
             $table->timestamps();
 

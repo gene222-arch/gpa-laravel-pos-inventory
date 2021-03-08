@@ -7,7 +7,7 @@ use App\Http\Requests\Receipt\FilterResourcesRequest;
 use App\Http\Requests\Receipt\ShowRequest;
 use App\Traits\ApiResponser;
 use App\Traits\Payment\ReceiptServices;
-use Illuminate\Http\Request;
+
 
 class ReceiptsController extends Controller
 {
@@ -15,7 +15,7 @@ class ReceiptsController extends Controller
 
     public function __construct()
     {
-        $this->middleware(['auth:api', 'permission:View All Receipts']);
+        $this->middleware(['auth:api', 'permission:View All Receipts|View Receipts']);
     }
 
     /**

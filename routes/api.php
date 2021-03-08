@@ -32,6 +32,7 @@ use App\Http\Controllers\Api\ExportControllers\ExportPaymentsController;
 use App\Http\Controllers\Api\ExportControllers\ExportProductsController;
 use App\Http\Controllers\Api\ExportControllers\ExportBadOrdersController;
 use App\Http\Controllers\Api\ExportControllers\ExportCustomersController;
+use App\Http\Controllers\Api\ExportControllers\ExportSalesController;
 use App\Http\Controllers\Api\Receipt\ReceiptsController;
 use App\Http\Controllers\Api\RolesPermission\PermissionsController;
 use App\Http\Controllers\Api\RolesPermission\RolesController;
@@ -60,9 +61,22 @@ Route::group(['middleware' => 'api'], function ()
 
     Route::group(['middleware' => 'auth:api'], function ()
     {
-        Route::get('/auth-user', [AuthController::class, 'showAuthenticatedUser']);
         Route::post('/logout', [ LoginController::class, 'logout' ]);
     });
+});
+
+
+/**
+ * Auth
+ */
+
+Route::prefix('account')->group(function () 
+{
+    Route::get('/auth-user', [AuthController::class, 'showAuthenticatedUser']);
+    Route::put('/check-password', [AuthController::class, 'checkPassword']);
+    Route::put('/password', [AuthController::class, 'updatePassword']);
+    Route::put('/name', [AuthController::class, 'updateName']);
+    Route::put('/email', [AuthController::class, 'updateEmail']);
 });
 
 
@@ -341,6 +355,16 @@ Route::group(['prefix' => 'reports'], function ()
 
 
 Route::group(['middleware' => []], function () {
+
+
+   /**
+     * PDF Print
+     */
+    Route::group(['prefix' => 'pdf-print'], function ()
+    {
+        Route::get('/sales-receipt/{sale}', [ExportSalesController::class, 'print']);
+    });
+
    /**
      * PDF Export
      */

@@ -15,6 +15,7 @@ class CreateBadOrdersTable extends Migration
     {
         Schema::create('bad_orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id');
             $table->foreignId('purchase_order_id');
             $table->char('status', 20)->default('Pending');
             $table->timestamps();

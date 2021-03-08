@@ -88,8 +88,9 @@ class RegisterController extends Controller
             'Successful Registration',
             201,
             [
-                'canViewDashboard' => auth()->user()->can('View Dashboard'),
-                'permissions' => auth()->user()->permissions->map->name
+                'user' => Auth::user(),
+                'canViewDashboard' => Auth::user()->can('View Dashboard'),
+                'permissions' => Auth::user()->permissions->map->name
             ]
         );
     }
