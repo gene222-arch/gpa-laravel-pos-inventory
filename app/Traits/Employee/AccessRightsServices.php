@@ -34,11 +34,10 @@ trait AccessRightsServices
                     THEN
                         'POS'
                 END as access,
-                COUNT(model_has_roles.model_id) as employees
+                COUNT(access_rights.role_id) as employees
             ")
             ->join('roles', 'roles.id', '=', 'access_rights.role_id')
-            ->join('model_has_roles', 'model_has_roles.role_id', '=', 'access_rights.role_id')
-            ->groupBy('model_has_roles.role_id')
+            ->groupBy('access_rights.role_id')
             ->get()
             ->toArray();
     }
@@ -93,8 +92,12 @@ trait AccessRightsServices
                     ->create([
                         'name' => $roleName,
                         'guard_name' => 'api'
-                    ])
-                    ->givePermissionTo([...$permissions, 'Manage Account', 'View Receipts']);
+                    ]);
+
+                if ($permissions)
+                {
+                    $role->givePermissionTo([...$permissions, 'Manage Account', 'View Receipts']);
+                }
 
 
                 (new AccessRights())
@@ -143,7 +146,11 @@ trait AccessRightsServices
                 ]);
                     
                 $role->permissions()->detach();
-                $role->givePermissionTo(...$permissions);
+            
+                if ($permissions)
+                {
+                    $role->givePermissionTo([...$permissions, 'Manage Account', 'View Receipts']);
+                }
             });
         } catch (\Throwable $th) {
             return $th->getMessage();

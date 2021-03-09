@@ -20,9 +20,11 @@ class DefaultRoleSeeder extends Seeder
 
     public function createSuperAdminRole()
     {
-        Role::create([
-            'name' => 'Super Admin',
-            'guard_name' => 'api',
-        ]);
+        DB::table('roles')
+            ->insert([
+                'name' => 'Super Admin',
+                'guard_name' => 'api',
+                'created_at' => now()
+            ]);
     }
 }

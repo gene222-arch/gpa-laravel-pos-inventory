@@ -52,7 +52,13 @@ trait EmployeeServices
         try {
             DB::transaction(function () use ($employeeId, $name, $email, $phone, $role)
             {
-                $user = new User();
+                $user = User::where('email', '=', $email)->first();
+
+                if ($user)
+                {
+                    $user->roles()->detach();
+                    $user->assignRole($role);
+                }
 
                 tap(Employee::where('id', '=', $employeeId))
                     ->update([
@@ -63,8 +69,6 @@ trait EmployeeServices
                     ])
                     ->first();
 
-                $user->where('email', '=', $email)
-                    ->syncRoles([$role]);
             });
         } catch (\Throwable $th) {
             return $th->getMessage();

@@ -32,8 +32,8 @@ trait CustomerServices
                         SUM(pos_details.total)
                 END as total_spent
             ')
-            ->where('customers.name', '!=', 'walk-in')
-            ->groupByRaw('pos.customer_id')
+            ->where('customers.id', '!=', 1)
+            ->groupBy('customers.id')
             ->orderByDesc('customers.created_at')
             ->get()
             ->toArray();

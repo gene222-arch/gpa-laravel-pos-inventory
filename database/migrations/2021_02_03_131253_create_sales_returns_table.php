@@ -65,7 +65,7 @@ class CreateSalesReturnsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sales_returns');
         Schema::dropIfExists('sales_return_details');
+        Schema::dropIfExists('sales_returns');
     }
 }

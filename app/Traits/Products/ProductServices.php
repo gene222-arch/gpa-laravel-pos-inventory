@@ -18,7 +18,7 @@ trait ProductServices
     {
         return DB::table('products')
             ->join('stocks', 'stocks.product_id', '=', 'products.id')
-            ->join('suppliers', 'suppliers.id', '=', 'stocks.supplier_id')
+            ->leftJoin('suppliers', 'suppliers.id', '=', 'stocks.supplier_id')
             ->join('categories', 'categories.id', '=', 'products.category')
             ->selectRaw('
                 suppliers.name as supplier,
@@ -40,7 +40,7 @@ trait ProductServices
                 products.price,
                 products.sold_by,
                 products.cost,
-                (products.price - products.cost) * .100 as margin
+                ((products.price - products.cost) / products.price) * 100 as margin
             '
             )
             ->orderByDesc('products.created_at')

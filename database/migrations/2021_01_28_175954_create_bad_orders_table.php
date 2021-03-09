@@ -51,12 +51,12 @@ class CreateBadOrdersTable extends Migration
             $table->foreign('purchase_order_details_id')
                 ->references('id')
                 ->on('purchase_order_details')
-                ->onDelete('NULL');
+                ->nullOnDelete();
 
             $table->foreign('product_id')
                 ->references('id')
                 ->on('products')
-                ->onDelete('NULL');
+                ->nullOnDelete();
 
         });
     }
@@ -68,7 +68,7 @@ class CreateBadOrdersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('bad_orders');
         Schema::dropIfExists('bad_order_details');
+        Schema::dropIfExists('bad_orders');
     }
 }

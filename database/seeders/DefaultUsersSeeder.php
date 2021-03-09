@@ -23,11 +23,12 @@ class DefaultUsersSeeder extends Seeder
 
     public function createAdminAccount()
     {
-        User::create([
-            'name' => 'admin',
-            'email' => 'admin@admin.com',
-            'password' => Hash::make('admin'),
-        ])
-        ->assignRole('Super Admin');
+        DB::table('users')
+            ->insert([
+                'name' => 'admin',
+                'email' => 'admin@admin.com',
+                'password' => Hash::make('admin'),
+                'created_at' => now()
+            ]);
     }
 }

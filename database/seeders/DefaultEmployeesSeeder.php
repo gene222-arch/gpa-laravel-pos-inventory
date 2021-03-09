@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\AccessRights;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class DefaultAccessRightSeeder extends Seeder
+class DefaultEmployeesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -15,11 +14,12 @@ class DefaultAccessRightSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('access_rights')
+        DB::table('employees')
             ->insert([
-                'role_id' => 1,
-                'back_office' => true,
-                'pos' => true,
+                'name' => 'Administrator',
+                'email' => 'genephillip222@gmail.com',
+                'phone' => 154898456984,
+                'role' => 'Super Admin',
                 'created_at' => now()
             ]);
     }

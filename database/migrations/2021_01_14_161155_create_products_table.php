@@ -21,7 +21,7 @@ class CreateProductsTable extends Migration
             $table->char('barcode', 13);
             $table->string('name')->unique();
             $table->string('image')->nullable()->default( $defaultImg);
-            $table->string('category_id')->nullable();
+            $table->string('category');
             $table->char('sold_by', 13);
             $table->unsignedDouble('price', 10, 2);
             $table->unsignedDouble('cost', 10, 2);
@@ -29,11 +29,6 @@ class CreateProductsTable extends Migration
             $table->timestamps();
 
             $table->unique(['sku', 'barcode']);
-
-            $table->foreign('category_id')
-                ->references('id')
-                ->on('categories')
-                ->onDelete('null');
         });
     }
 
