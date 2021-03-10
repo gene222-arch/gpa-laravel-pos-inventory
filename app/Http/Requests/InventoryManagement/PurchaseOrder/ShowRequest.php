@@ -15,7 +15,7 @@ class ShowRequest extends BaseRequest
     {
         return [
             'purchase_order_id' => ['required', 'integer', 'exists:purchase_order,id'],
-            'do_filter' => ['nullable', 'boolean'],
+            'do_filter' => ['nullable'],
             'table_to_filter' => ['nullable', 'string'],
             'filter_by' => ['nullable', 'string'],
             'operator' => ['nullable', 'string'],

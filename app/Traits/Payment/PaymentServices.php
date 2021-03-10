@@ -342,7 +342,7 @@ trait PaymentServices
         $this->createSales(
             $customerId,
             $customerPos->id,
-            'cash',
+            'credit',
             $customerOrderDetails 
         );
 

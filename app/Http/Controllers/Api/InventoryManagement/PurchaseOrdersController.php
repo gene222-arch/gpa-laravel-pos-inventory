@@ -288,17 +288,18 @@ class PurchaseOrdersController extends Controller
     public function markAllPurchasedOrderAsReceived(MarkAllReceivedRequest $request)
     {
         $allPurchaseOrderIsReceived = $this->purchaseOrder
-            ->markAllAsReceived($request->purchase_order_id,
-            $request->product_ids
-        );
+            ->markAllAsReceived(
+                $request->supplier_id,
+                $request->purchase_order_id,
+                $request->items_received_quantities);
 
         return  (!$allPurchaseOrderIsReceived)
             ? $this->serverError()
             : $this->success(
-            [],
-            'Purchase order received',
-            201
-        );
+                [],
+                'Purchase order marked all as received',
+                201
+            );
     }
 
 

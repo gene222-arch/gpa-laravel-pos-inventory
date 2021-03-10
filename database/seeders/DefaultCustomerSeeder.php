@@ -17,13 +17,13 @@ class DefaultCustomerSeeder extends Seeder
         DB::table('customers')
             ->insert([
                 'name' => 'Walk in',
-                'email' => '',
-                'phone' => '',
-                'address' => '',
-                'city' => '',
-                'province' => '',
-                'postal_code' => '',
-                'country' => '',
+                'email' => 'genephillip222@gmail.com',
+                'phone' => 'NULL',
+                'address' => 'NULL',
+                'city' => 'NULL',
+                'province' => 'NULL',
+                'postal_code' => 'NULL',
+                'country' => 'NULL',
                 'created_at' => now(),
             ]);
     }

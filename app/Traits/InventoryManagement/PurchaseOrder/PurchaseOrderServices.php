@@ -269,7 +269,7 @@ trait PurchaseOrderServices
                 stocks.in_stock as in_stock,
                 received_stock_details.received_quantity,
                 purchase_order_details.purchase_cost,
-                purchase_order_details.amount,
+                FORMAT((purchase_order_details.purchase_cost * received_stock_details.received_quantity), 2) as amount,
                 stocks.incoming as incoming,
                 DATE_FORMAT(received_stocks.created_at, "%M, %d, %Y") as received_at
             ')
@@ -533,25 +533,37 @@ trait PurchaseOrderServices
      *
      * @param integer $purchaseOrderId
      * @param array $productIds
-     * @return boolean
+     * @return mixed
      */
-    public function markAllAsReceived(int $purchaseOrderId, array $productIds): bool
+    public function markAllAsReceived(int $supplierId, int $purchaseOrderId, array $purchaseOrderDetails): mixed
     {
         try {
-            DB::transaction(function () use($purchaseOrderId, $productIds)
+            DB::transaction(function () use($supplierId, $purchaseOrderId, $purchaseOrderDetails)
             {
+                $productIds = array_filter($purchaseOrderDetails, function ($po) {
+                    return $po['product_id'];
+                });
+
                 # Update stocks before updating purchase order details qty fields
                 (new Stock())->receiveAllProductStocksOf(
                     $purchaseOrderId,
                     $productIds
                 );
 
+                # insert new `received_stocks`
+                $stockReceived = (new ReceivedStock())->receiveStocks($purchaseOrderId,
+                    $supplierId
+                );
+
+                # attach `stock_received_details`
+                $stockReceived->receiveStockDetails()->attach($purchaseOrderDetails);
+    
+
                 PurchaseOrder::find($purchaseOrderId)->status = 'Closed';
 
                 # Update purchase order details
                 DB::table('purchase_order_details')
                     ->where('purchase_order_id', '=', $purchaseOrderId)
-                    ->whereIn('product_id', $productIds)
                     ->updateTs([
                         'received_quantity' => DB::raw('ordered_quantity'),
                         'remaining_ordered_quantity' => 0
@@ -563,7 +575,7 @@ trait PurchaseOrderServices
             });
 
         } catch (\Throwable $th) {
-            return false;
+            return $th->getMessage();
         }
 
         return true;

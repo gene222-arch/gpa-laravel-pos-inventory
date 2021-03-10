@@ -28,30 +28,23 @@ trait ReportsSummaryServices
                 MONTH(pos.created_at) as month_num,
                 products.name AS product_description,
                 SUM(pos_details.quantity) AS items_sold,
-                FORMAT(SUM(pos_details.sub_total + pos_details.tax), 2) AS sales,
-                FORMAT(SUM(pos_details.quantity * products.cost), 2) AS cost_of_goods_sold,
-                FORMAT(
-                    (SUM(pos_details.sub_total + pos_details.tax) -
-                    SUM(pos_details.quantity * products.cost)
-                ), 2) AS gross_profit,
-                FORMAT(SUM(pos_details.total), 2) -
+                SUM(pos_details.sub_total + pos_details.tax) AS sales,
+                SUM(pos_details.quantity * products.cost) AS cost_of_goods_sold,
+                (SUM(pos_details.sub_total + pos_details.tax) - SUM(pos_details.quantity * products.cost)) AS gross_profit,
+                SUM(pos_details.total) - 
                 CASE
-                    WHEN pos.id = sales_returns.pos_id AND pos_details.product_id = sales_return_details.product_id
-                    THEN
-                        (
-                            SELECT
-                                FORMAT(SUM(sales_return_details.total), 2)
-                            FROM
-                                sales_return_details
-                            WHERE
-                                sales_return_details.sales_return_id = sales_returns.id
-                        )
-                    ELSE 0
-                END AS net_sales
+                    WHEN 
+                        SUM(sales_return_details.total) IS NULL 
+                    THEN 
+                        0
+                    ELSE 
+                        SUM(sales_return_details.total)
+                END as net_sales 
             ')
             ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
-            ->leftJoin('sales_returns', 'sales_returns.pos_id', '=', 'pos.id')
-            ->leftJoin('sales_return_details', 'sales_return_details.sales_return_id', '=', 'sales_returns.id')
+            ->leftJoin(
+                'sales_return_details', 
+                'sales_return_details.pos_details_id', '=', 'pos_details.id')
             ->join('products', 'products.id', '=', 'pos_details.product_id')
             ->join('categories', 'categories.id', '=', 'products.category')
             ->when($startDate, function ($q, $startDate) {
@@ -61,7 +54,7 @@ trait ReportsSummaryServices
                 return $q->whereDate('pos_details.created_at', '<=', $endDate);
             })
             ->whereNotIn('pos.status', ['Cancelled', 'Pending'])
-            ->groupBy('id')
+            ->groupBy('products.id')
             ->orderByDesc('net_sales');
 
             $monthlySales_ = $monthlySales->get()->toArray();
