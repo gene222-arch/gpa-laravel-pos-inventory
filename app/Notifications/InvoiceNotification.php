@@ -16,17 +16,19 @@ class InvoiceNotification extends Notification implements ShouldQueue
     public int $invoiceId;
     public string $dueDate;
     public string $fileName;
+    public string $customerName;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct(int $invoiceId, string $dueDate, string $fileName)
+    public function __construct(int $invoiceId, string $dueDate, string $fileName, string $customerName)
     {
         $this->invoiceId = $invoiceId;
         $this->dueDate = Carbon::createFromTimeStamp(strtotime($dueDate))->diffForHumans();
         $this->fileName = $fileName;
+        $this->customerName = $customerName;
     }
 
     /**
@@ -48,9 +50,11 @@ class InvoiceNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
+        $customer = $notifiable->name ?? $this->customerName;
+        
         return (new MailMessage)
                     ->subject('Invoice Receipt')
-                    ->greeting("Hi $notifiable->name,")
+                    ->greeting("Hi $customer,")
                     ->line("")
                     ->line('I hope you’re well! Please see attached invoice id ' . $this->invoiceId . ' below.')
                     ->line('Due on ' . $this->dueDate . '. Don’t hesitate to reach out if you have')

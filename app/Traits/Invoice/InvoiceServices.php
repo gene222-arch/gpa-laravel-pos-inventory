@@ -2,6 +2,7 @@
 
 namespace App\Traits\Invoice;
 
+use App\Jobs\QueueCustomInvoiceNotification;
 use App\Jobs\QueueInvoiceNotification;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -84,46 +85,58 @@ trait InvoiceServices
 
 
     /**
-     * Undocumented function
-     *
-     * @param Customer $customer
-     * @param array $invoiceDetails
-     * @param integer $numberOfDays
-     * @param [type] $customerEmail
-     * @return mixed
+     * 
      */
     public function generateSalesInvoice(
         Customer $customer,
         array $invoiceDetails,
         $numberOfDays = 30,
-        $customerEmail = null): mixed
+        string $customerEmail = null,
+        string $customerName = null): mixed
     {
         try {
-            DB::transaction(function () use($customer, $invoiceDetails, $numberOfDays, $customerEmail)
+            DB::transaction(function () use($customer, $invoiceDetails, $numberOfDays, $customerEmail, $customerName)
             {
+        
+                dd($customerEmail);
                 $invoice = Invoice::create([
                     'cashier' => auth()->user()->name,
                     'customer_id' => $customer->id,
                     'payment_date' => $this->prepareInvoicePaymentDate($numberOfDays)
                 ]);
 
-                $invoice->invoiceDetails()->attach($invoiceDetails);
 
+                $invoice->invoiceDetails()->attach($invoiceDetails);
+               
                 if ($invoice)
                 {
                     $fileName = 'invoice-' . now()->toDateString() . '-' . time() . '-' . $invoice->id . '.pdf';
 
                     $this->generateInvoicePDF($invoice->id, $fileName);
 
-                    dispatch(new QueueInvoiceNotification(
-                        $customer,
-                        $invoice->id,
-                        $invoice->payment_date,
-                        $fileName
-                    ))
-                    ->delay(now()->addSecond(10));
+                    if (!($customerName && $customerEmail))
+                    {
+                        dispatch(new QueueInvoiceNotification(
+                            $customer,
+                            $invoice->id,
+                            $invoice->payment_date,
+                            $fileName
+                        ))
+                        ->delay(now()->addSecond(10));
+                    }
+                    else 
+                    {
+                        dispatch(new QueueCustomInvoiceNotification(
+                            $customerName,
+                            $customerEmail,
+                            $invoice->id,
+                            $invoice->payment_date,
+                            $fileName
+                        ))
+                        ->delay(now()->addSecond(10));
+                    }
                 }
-
+                
             });
         } catch (\Throwable $th) {
             return $th->getMessage();

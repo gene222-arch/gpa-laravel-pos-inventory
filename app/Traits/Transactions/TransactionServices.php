@@ -16,19 +16,13 @@ trait TransactionServices
                 pos.id,
                 DATE_FORMAT(pos.created_at, '%M %d, %Y') as ordered_at,
                 customers.name as customer,
-                CASE
-                    WHEN
-                        customers.address = 'NULL'
-                    THEN
-                        ''
-                    ELSE
-                        CONCAT(customers.address, ', ', customers.city, ' ', customers.province, ', ', customers.postal_code, ', ', customers.country)
-                END as customer_address,
+                pos.status as payment_type,
                 SUM(pos_details.quantity) as number_of_items
             ")
             ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
             ->join('customers', 'customers.id', '=', 'pos.customer_id')
-            ->groupBy('customers.id')
+            ->whereNotIn('pos.status', ['Cancelled', 'Pending'])
+            ->groupBy('pos.id')
             ->get()
             ->toArray();
     }
@@ -114,7 +108,7 @@ trait TransactionServices
             ")
             ->join('received_stock_details', 'received_stock_details.received_stock_id', '=', 'received_stocks.id')
             ->join('suppliers', 'suppliers.id', '=', 'received_stocks.supplier_id')
-            ->groupBy('received_stocks.id')
+            ->groupBy('received_stock_details.id')
             ->get()
             ->toArray();
     }

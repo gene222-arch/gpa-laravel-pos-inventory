@@ -241,9 +241,11 @@ class PosControllerTest extends TestCase
     public function user_can_process_customer_payment()
     {
         $data = [
-            'customer_id' => 3,
+            'customer_id' => 1,
             'payment_method' => 'invoice',
-            'should_mail' => false
+            'should_mail' => true,
+            'customer_email' => 'genephillip222@gmail.com',
+            'customer_name' => 'Gene'
         ];
 
         $response = $this->post('api/pos/process-payment', $data, $this->apiHeaders());

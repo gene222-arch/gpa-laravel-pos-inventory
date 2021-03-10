@@ -186,6 +186,7 @@ class PosController extends Controller
      */
     public function processPayment(ProcessPaymentRequest $request)
     {
+      
         $result = $this->pos->processPayment(
             $request->customer_id,
             $request->payment_method,

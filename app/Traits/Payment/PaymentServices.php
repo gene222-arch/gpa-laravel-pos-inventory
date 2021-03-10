@@ -122,7 +122,7 @@ trait PaymentServices
         bool $shouldMail = false,
         int $numberOfDays = null,
         string $customerEmail = null,
-        $customerName = null)
+        string $customerName = null)
     {
         try {
             DB::transaction(function () use(
@@ -134,7 +134,7 @@ trait PaymentServices
                 $customerEmail,
                 $customerName)
             {
-
+                
                 $cash = $cash ?? 0.00;
                 $customerEmail = $customerEmail ?? '';
                 $customerName = $customerName ?? '';
@@ -183,7 +183,8 @@ trait PaymentServices
                             $customerId,
                             $customerOrderDetails,
                             $numberOfDays,
-                            $customerEmail
+                            $customerEmail,
+                            $customerName
                         );
 
                         $customerPos->status = 'Invoice';
@@ -370,8 +371,14 @@ trait PaymentServices
      * @param string $customerEmail
      * @return void
      */
-    private function payWithInvoice(int $customerId, $customerOrderDetails, $numberOfDays = null, string $customerEmail = null): void
+    private function payWithInvoice(
+        int $customerId, 
+        $customerOrderDetails, 
+        $numberOfDays = null, 
+        string $customerEmail = null,
+        string $customerName = null): void
     {
+    
         $numberOfDays = $numberOfDays ?? 30;
         $invoiceDetails = [];
 
@@ -403,7 +410,8 @@ trait PaymentServices
             $customer,
             $invoiceDetails,
             $numberOfDays,
-            $customerEmail
+            $customerEmail,
+            $customerName
         );
     }
 
