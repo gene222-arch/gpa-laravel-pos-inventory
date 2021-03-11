@@ -15,7 +15,7 @@ class QueueInvoiceNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public Customer $customer;
+    public ?Customer $customer;
     public int $invoiceId;
     public string $paymentDate;
     public string $fileName;

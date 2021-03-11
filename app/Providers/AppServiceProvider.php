@@ -25,14 +25,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if(env('APP_DEBUG'))
-        {
-            DB::listen(function($query) {
-                File::append(
-                    storage_path('/logs/query.log'),
-                    $query->sql . ' [' . implode(', ', $query->bindings) . ']' . PHP_EOL
-               );
-            });
-        }
+
     }
 }

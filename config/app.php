@@ -14,11 +14,20 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+
+    /**
+     * Company info
+     */
     'company_name' => env('APP_NAME'),
     'company_address' => '134 Daisy St.',
     'company_contact' => '09264774547',
     'company_email' => 'posin@gmail.com',
     'company_website' => 'www.posin.com',
+
+    /**
+     * POS App
+     */
+    'currency' => 'P',
 
     /*
     |--------------------------------------------------------------------------
@@ -189,6 +198,8 @@ return [
         Maatwebsite\Excel\ExcelServiceProvider::class,
 
         Barryvdh\Snappy\ServiceProvider::class,
+
+        App\Providers\GoogleDriveServiceProvider::class,
 
     ],
 

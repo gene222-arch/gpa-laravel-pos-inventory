@@ -16,14 +16,14 @@ class InvoiceNotification extends Notification implements ShouldQueue
     public int $invoiceId;
     public string $dueDate;
     public string $fileName;
-    public string $customerName;
+    public ?string $customerName = null;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct(int $invoiceId, string $dueDate, string $fileName, string $customerName)
+    public function __construct(int $invoiceId, string $dueDate, string $fileName, string $customerName = null)
     {
         $this->invoiceId = $invoiceId;
         $this->dueDate = Carbon::createFromTimeStamp(strtotime($dueDate))->diffForHumans();
@@ -60,7 +60,7 @@ class InvoiceNotification extends Notification implements ShouldQueue
                     ->line('Due on ' . $this->dueDate . '. Don’t hesitate to reach out if you have')
                     ->line('any questions.')
                     ->attach(storage_path('app/pdf/invoices/' . $this->fileName), [
-                        'as' => $notifiable->name . '-invoice.pdf',
+                        'as' => $customer . '-invoice.pdf',
                         'mime' => 'text/pdf'
                     ])
                     ->line('Thank you for your patronage.!');

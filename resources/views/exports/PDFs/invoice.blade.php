@@ -135,6 +135,7 @@
         <thead>
             <tr>
                 <th><strong>Product Description</strong></th>
+                <th><strong>Price</strong></th>
                 <th><strong>Quantity</strong></th>
                 <th><strong>Tax</strong></th>
                 <th><strong>Sub total</strong></th>
@@ -144,9 +145,10 @@
             @foreach ($invoiceDetails as $invoiceDetail)
                 <tr>
                     <td>{{ $invoiceDetail->product_description }}</td>
+                    <td>{{ Config::get('app.currency') . $invoiceDetail->price }}</td>
                     <td>{{ $invoiceDetail->quantity }}</td>
-                    <td>{{ 'P'. $invoiceDetail->tax }}</td>
-                    <td>{{ 'P'. $invoiceDetail->sub_total }}</td>
+                    <td>{{ Config::get('app.currency') . $invoiceDetail->tax }}</td>
+                    <td>{{ Config::get('app.currency') . $invoiceDetail->sub_total }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -160,13 +162,13 @@
                 <td>
                     <strong>Subtotal</strong>
                 </td>
-                <td align="right">{{ 'P' . $invoiceSalesTax['subTotal'] }}</td>
+                <td align="right">{{ Config::get('app.currency') . $invoiceSalesTax['subTotal'] }}</td>
             </tr>
             <tr>
                 <td>
                     <strong>Discount</strong>
                 </td>
-                <td align="right">{{ 'P' . $invoiceSalesTax['discount'] }}</td>
+                <td align="right">{{ Config::get('app.currency') . $invoiceSalesTax['discount'] }}</td>
             </tr>
             <tr>
                 <td>
@@ -178,14 +180,14 @@
                 <td>
                     <strong>Tax</strong>
                 </td>
-                <td align="right">{{ 'P' . $invoiceSalesTax['tax'] }}</td>
+                <td align="right">{{ Config::get('app.currency') . $invoiceSalesTax['tax'] }}</td>
             </tr>
         </tbody>
     </table>
     <hr>
     <div class="invoice-total">
         <p><strong>Invoice total</strong></p>
-        <h3 class="total-price">{{ '$' . $invoiceSalesTax['total'] }}</h3>
+        <h3 class="total-price">{{ Config::get('app.currency') . $invoiceSalesTax['total'] }}</h3>
     </div>
 
     <div class="terms">

@@ -23,6 +23,7 @@ trait PDFGeneratorServices
         $invoice = Invoice::find($invoiceId);
         $customer = Customer::find($invoice->customer_id);
         $invoiceDetails = (new Invoice())->invoiceDetailstoPDF($invoiceId);
+        
         $subTotal = 0;
         $tax = 0;
         $discount = 0;

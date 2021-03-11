@@ -31,6 +31,7 @@ trait InvoiceServices
                     ->join('products', 'products.id', '=', 'invoice_details.product_id')
                     ->selectRaw('
                         products.name as product_description,
+                        invoice_details.price as price,
                         invoice_details.quantity as quantity,
                         invoice_details.sub_total as sub_total,
                         invoice_details.discount as discount,
@@ -97,8 +98,7 @@ trait InvoiceServices
         try {
             DB::transaction(function () use($customer, $invoiceDetails, $numberOfDays, $customerEmail, $customerName)
             {
-        
-                dd($customerEmail);
+    
                 $invoice = Invoice::create([
                     'cashier' => auth()->user()->name,
                     'customer_id' => $customer->id,
