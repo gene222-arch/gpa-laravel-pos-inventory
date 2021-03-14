@@ -34,6 +34,7 @@ trait BadOrderServices
                 DATE_FORMAT(purchase_order.purchase_order_date, "%M %d, %Y") as purchase_order_date
             ')
             ->groupBy('id')
+            ->orderByDesc('bad_orders.created_at')
             ->get()
             ->toArray();
 

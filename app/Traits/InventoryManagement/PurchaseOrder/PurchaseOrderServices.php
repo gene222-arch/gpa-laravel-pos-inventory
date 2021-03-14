@@ -84,6 +84,9 @@ trait PurchaseOrderServices
                 SUM(purchase_order_details.received_quantity) as received_quantity
             ')
             ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
+            ->leftJoin('bad_order_details', 'bad_order_details.purchase_order_details_id', '=', 'purchase_order_details.id')
+            ->whereRaw('bad_order_details.purchase_order_details_id IS NULL')
+            ->whereRaw('bad_order_details.product_id IS NULL')
             ->where('received_quantity', '>', 0)
             ->groupBy('id')
             ->orderBy('purchase_order.created_at', 'desc')
