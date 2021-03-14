@@ -2,7 +2,6 @@
 
 namespace App\Traits\Payment;
 
-use App\Models\PosPayment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -36,6 +35,8 @@ trait ReceiptServices
 
     public function getSalesDetails (int $receiptId)
     {
+        DB::statement('SET sql_mode="" ');
+
         $salesInfo = DB::table('sales')
             ->join('sales_details', 'sales_details.sales_id', '=', 'sales.id')
             ->join('customers', 'customers.id', '=', 'sales.customer_id')
@@ -44,8 +45,14 @@ trait ReceiptServices
                 sales.id as id,
                 customers.name as customer,
                 users.name as cashier,
-                DATE_FORMAT(sales.created_at, "%M %d, %Y") as paid_at
+                DATE_FORMAT(sales.created_at, "%M %d, %Y") as paid_at,
+                FORMAT(SUM(sales_details.sub_total), 2) as sub_total,
+                FORMAT(SUM(sales_details.discount), 2) as total_discount,
+                FORMAT(SUM(sales_details.tax), 2) total_tax,
+                FORMAT(SUM(sales_details.total), 2) as total
             ')
+            ->where('sales.id', '=', $receiptId)
+            ->groupBy('id')
             ->first();
 
         $salesDetails = DB::table('sales_details')
@@ -55,6 +62,7 @@ trait ReceiptServices
                 products.name as product_description,
                 sales_details.quantity as quantity,
                 sales_details.price as price,
+                sales_details.discount as discount,
                 sales_details.sub_total as amount
             ')
             ->where('sales_details.sales_id', '=', $receiptId)
