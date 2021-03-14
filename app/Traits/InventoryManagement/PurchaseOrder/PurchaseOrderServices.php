@@ -28,7 +28,7 @@ trait PurchaseOrderServices
                 DATE_FORMAT(purchase_order.expected_delivery_date, '%M %d, %Y') as expected_on,
                 purchase_order.total_ordered_quantity total_ordered_quantity
             ")
-            ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
+            ->leftJoin('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
             ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
             ->when(($doFilter === true && $operator === '!='), function($q) use ($filterBy, $filters) {
                 return $q->whereNotIn('purchase_order.' . $filterBy, $filters);
@@ -128,8 +128,7 @@ trait PurchaseOrderServices
                 suppliers.name as supplier,
                 suppliers.id as supplier_id,
                 DATE_FORMAT(purchase_order.purchase_order_date, "%Y-%m-%d") as purchase_order_date,
-                DATE_FORMAT(purchase_order.purchase_order_date, "%Y-%m-%d") as purchase_order_date,
-                purchase_order.expected_delivery_date as expected_delivery_date,
+                DATE_FORMAT(purchase_order.expected_delivery_date, "%Y-%m-%d") as expected_delivery_date,
                 purchase_order.total_received_quantity,
                 purchase_order.total_ordered_quantity,
                 purchase_order.total_remaining_ordered_quantity
@@ -657,14 +656,14 @@ trait PurchaseOrderServices
        try {
            DB::transaction(function () use($purchaseOrderId, $productIds)
            {
+                (new Stock())->updateIncomingStocksOf($productIds, false);
+
                 DB::table('purchase_order_details')
                     ->where('purchase_order_id', '=', $purchaseOrderId)
                     ->whereIn('product_id', $productIds)
                     ->delete();
 
                 $this->updatePurchaseOrder($purchaseOrderId);
-
-                (new Stock())->updateIncomingStocksOf($productIds);
            });
        } catch (\Throwable $th) {
            return $th->getMessage();

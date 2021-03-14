@@ -16,7 +16,7 @@ class CreateStocksTable extends Migration
         Schema::create('stocks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->unique();
-            $table->foreignId('supplier_id')->default(0);
+            $table->foreignId('supplier_id')->index()->default(0);
             $table->unsignedInteger('in_stock')->default(0);
             $table->unsignedInteger('bad_order_stock')->default(0);
             $table->unsignedInteger('stock_in')->default(0);

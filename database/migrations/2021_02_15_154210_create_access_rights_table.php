@@ -15,7 +15,7 @@ class CreateAccessRightsTable extends Migration
     {
         Schema::create('access_rights', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('role_id');
+            $table->foreignId('role_id')->index();
             $table->boolean('back_office');
             $table->boolean('pos');
             $table->timestamps();

@@ -16,7 +16,7 @@ class CreateInvoicesTable extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
             $table->string('cashier');
-            $table->foreignId('customer_id');
+            $table->foreignId('customer_id')->index();
             $table->char('status', 25)->default('Payment in process');
             $table->timestamp('payment_date')->nullable();
             $table->timestamp('paid_at')->nullable();
@@ -30,8 +30,8 @@ class CreateInvoicesTable extends Migration
 
         Schema::create('invoice_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('invoice_id');
-            $table->foreignId('product_id');
+            $table->foreignId('invoice_id')->index();
+            $table->foreignId('product_id')->index();
             $table->unsignedInteger('quantity')->default(1);
             $table->unsignedDouble('price', 20, 2)->default(0.00);
             $table->char('unit_of_measurement', 20)->default('each');

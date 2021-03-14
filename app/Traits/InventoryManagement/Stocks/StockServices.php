@@ -237,10 +237,10 @@ trait StockServices
      * @param array $productId
      * @return mixed
      */
-    public function updateIncomingStocksOf(array $productIds): mixed
+    public function updateIncomingStocksOf(array $productIds, bool $shouldAdd = true): mixed
     {
         try {
-            DB::transaction(function () use($productIds)
+            DB::transaction(function () use($productIds, $shouldAdd)
             {
                 $incomingStocks = DB::table('purchase_order_details')
                     ->whereIn('product_id', $productIds)
@@ -257,9 +257,18 @@ trait StockServices
 
                 $uniqueBy = 'product_id';
 
-                $update = [
-                    'incoming' => DB::raw('stocks.incoming + values(incoming)')
-                ];
+                if (!$shouldAdd)
+                {
+                    $update = [
+                        'incoming' => DB::raw('stocks.incoming - values(incoming)')
+                    ];
+                }
+                else 
+                {
+                    $update = [
+                        'incoming' => DB::raw('stocks.incoming + values(incoming)')
+                    ];
+                }
 
                 #update stocks
                 DB::table('stocks')->upsert($data, $uniqueBy, $update);

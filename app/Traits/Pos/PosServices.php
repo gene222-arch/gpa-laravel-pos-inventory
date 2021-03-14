@@ -82,24 +82,6 @@ trait PosServices
      * Undocumented function
      *
      * @param integer $customerId
-     * @return float
-     */
-    public function getCustomerAmountToPay(int $customerId): float
-    {
-        return \number_format($this->findCustomerPosDetails($customerId)
-                    ->map
-                    ->pivot
-                    ->map
-                    ->total
-                    ->sum()
-        , 2);
-    }
-
-
-    /**
-     * Undocumented function
-     *
-     * @param integer $customerId
      * @return array
      */
     public function getCustomerCartDetails(int $customerId): array
@@ -111,18 +93,18 @@ trait PosServices
             return [];
         }
 
-        $posDetails = $customer->latestPosDetails;
+        $posDetails = $customer->latestPosDetails->map->pivot->map;
 
-        $tax = \number_format($posDetails->map->pivot->map->tax->sum(), 2);
-        $subTotal = \number_format($posDetails->map->pivot->map->sub_total->sum(), 2);
-        $discount = \number_format($posDetails->map->pivot->map->discount->sum(), 2);
-        $total = \number_format($posDetails->map->pivot->map->total->sum(), 2);
+        $tax = \number_format($posDetails->tax->sum(), 2);
+        $subTotal = \number_format($posDetails->sub_total->sum(), 2);
+        $discount = \number_format($posDetails->discount->sum(), 2);
+        $total = \number_format($posDetails->total->sum(), 2);
 
         $orderDetails = [];
 
         if ($posDetails)
         {
-            foreach ($posDetails as $posDetail)
+            foreach ($customer->latestPosDetails as $posDetail)
             {
                 $orderDetails[] = [
                     'id' => $posDetail->id,
@@ -144,8 +126,6 @@ trait PosServices
                 'total' => $total
             ];
         }
-
-        return [];
     }
 
 
@@ -170,7 +150,7 @@ trait PosServices
                     throw new \Exception("Product is out of stock.");
                 }
 
-                $subTotal = ($product->price * 1);
+                $subTotal = $product->price;
                 $tax = $subTotal * .12;
                 $total = ($subTotal + $tax);
 
@@ -238,144 +218,6 @@ trait PosServices
 
 
     /**
-     * Increment by 1 `pos_details`.quantity field
-     *
-     *
-     * @param integer $customerId
-     * @param integer $productId
-     * @return mixed
-     */
-    public function incrementItemQuantity(int $customerId, int $productId): mixed
-    {
-        try {
-            DB::transaction(function () use($customerId, $productId)
-            {
-                # select product `stocks`
-                $productStock = (new Stock())->getRemainingStockOf($productId);
-
-                # select order qty
-                $currentOrderQty = $this->findPosProduct($customerId, $productId)->pivot->quantity;
-
-                if ($currentOrderQty === $productStock)
-                {
-                    throw new \Exception("Out of Stock");
-                }
-
-                # update `pos_details`
-                $result = \boolval($this->findCustomerPos($customerId)
-                    ->posDetails()
-                    ->updateExistingPivot($productId, [
-                        'quantity' => DB::raw('quantity + 1'),
-                        'sub_total' => DB::raw('price * quantity'),
-                        'tax' => DB::raw('sub_total * 0.12' ),
-                        'total' => DB::raw('sub_total + tax'),
-                        'updated_at' => now()
-                    ]));
-
-                if (!$result)
-                {
-                    throw new \Exception("Customer has yet to order");
-                }
-
-            });
-        } catch (\Throwable $th) {
-            return $th->getMessage();
-        }
-
-        return true;
-    }
-
-
-    /**
-     * Undocumented function
-     *
-     * @param integer $customerId
-     * @param integer $productId
-     * @return mixed
-     */
-    public function decrementItemQuantity(int $customerId, int $productId): mixed
-    {
-        try {
-            $pos = $this->findCustomerPos($customerId);
-
-            if (!$pos)
-            {
-                throw new \Exception("Customer has yet to order");
-            }
-
-            # update `pos_details`
-            $isDecreased = \boolval($pos->posDetails()
-                                        ->wherePivot('quantity', '>', 1)
-                                        ->updateExistingPivot($productId, [
-                                            'quantity' => DB::raw('quantity - 1'),
-                                            'sub_total' => DB::raw('price * quantity'),
-                                            'tax' => DB::raw('sub_total * 0.12' ),
-                                            'total' => DB::raw('sub_total + tax'),
-                                            'updated_at' => now()
-                                        ])
-            );
-
-            # update `stocks`
-            if (!$isDecreased)
-            {
-                throw new \Exception("Product not found within customer's order");
-            }
-        } catch (\Throwable $th) {
-            return $th->getMessage();
-        }
-
-        return true;
-    }
-
-
-    /**
-     * Undocumented function
-     *
-     * @param integer $customerId
-     * @param integer $productId
-     * @param integer $discountId
-     * @return mixed
-     */
-    public function assignDiscountTo(int $customerId, int $productId, int $discountId): mixed
-    {
-        try {
-
-            DB::transaction(function () use($customerId, $productId, $discountId)
-            {
-                # select customer
-                $customerPos = $this->findCustomerPos($customerId);
-
-                if (!$customerPos)
-                {
-                    throw new \Exception("Customer has yet to order");
-                }
-
-                # select discount
-                $discount = ((new Discount())->getDiscount($discountId)->percentage / 100);
-
-                # update customer `pos_details` discount
-                $result = \boolval($customerPos->posDetails()
-                    ->updateExistingPivot( $productId, [
-                        'discount' => DB::raw('sub_total * ' . $discount),
-                        'total' => DB::raw('total - discount')
-                    ]));
-
-                if (!$result)
-                {
-                    throw new \Exception("Product was not within customer's order, discount failed.");
-                }
-
-            });
-
-        } catch (\Throwable $th) {
-            return $th->getMessage();
-        }
-
-        return true;
-    }
-
-
-    /**
      * Undocumented function
      *
      * @param integer $productId
@@ -416,50 +258,6 @@ trait PosServices
         return true;
     }
 
-
-
-    /**
-     * Undocumented function
-     *
-     * @param integer $customerId
-     * @param integer $productId
-     * @param integer $discountId
-     * @return mixed
-     */
-    public function removeDiscountTo(int $customerId, int $productId): mixed
-    {
-        try {
-
-            DB::transaction(function () use($customerId, $productId)
-            {
-                # select customer
-                $customerPos = $this->findCustomerPos($customerId);
-
-                if (!$customerPos)
-                {
-                    throw new \Exception("Customer has yet to order");
-                }
-
-                # update customer `pos_details` discount
-                $result = \boolval($customerPos->posDetails()
-                    ->updateExistingPivot( $productId, [
-                        'discount_id' => NULL,
-                        'total' => DB::raw('total + discount'),
-                        'discount' => 0.00,
-                    ]));
-
-                if (!$result)
-                {
-                    throw new \Exception("Product was not within customer's order, discount removal failed.");
-                }
-            });
-
-        } catch (\Throwable $th) {
-            return $th->getMessage();
-        }
-
-        return true;
-    }
 
 
     /**

@@ -22,7 +22,7 @@ class StocksImport implements ToModel, WithHeadingRow, WithUpserts, WithValidati
     public function rules(): array
     {
         return [
-            'id' => ['required', 'integer'],
+            '*.id' => ['required', 'integer'],
             '*.supplier' => ['required', 'string', 'exists:suppliers,name'],
             '*.in_stock' => ['required', 'integer', 'min:0'],
             '*.stock_in' => ['required', 'integer', 'min:0'],
@@ -48,6 +48,18 @@ class StocksImport implements ToModel, WithHeadingRow, WithUpserts, WithValidati
             '*.default_purchase_costs' => 'default purchase costs',
         ];
     }
+
+
+    /**
+     * @return array
+     */
+    public function customValidationMessages()
+    {
+        return [
+            '*.supplier.exists' => 'The :attribute does not exist.',
+        ];
+    }
+
 
     public function uniqueBy()
     {

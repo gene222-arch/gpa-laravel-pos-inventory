@@ -15,10 +15,10 @@ class UpdateRequest extends BaseRequest
     {
         return [
             'supplier_id' => ['required', 'integer', 'exists:suppliers,id'],
-            'name' => ['required', 'string'],
+            'name' => ['required', 'string', 'unique:suppliers,name,' . $this->id],
             'contact' => ['required', 'string', 'min:10', 'max:15', 'unique:suppliers,contact,' . $this->id],
             'email' => ['required', 'email', 'string', 'unique:suppliers,email,' . $this->id],
-            'phone' => ['required', 'string', 'min:10', 'max:15'],
+            'phone' => ['required', 'string', 'min:10', 'max:15', 'unique:suppliers,phone,' . $this->id],
             'website' => ['nullable', 'url', 'string'],
             'main_address' => ['required', 'string'],
             'optional_address' => ['nullable', 'string'],

@@ -15,10 +15,10 @@ class StoreRequest extends BaseRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string'],
+            'name' => ['required', 'string', 'unique:suppliers,name'],
             'contact' => ['required', 'string', 'min:10', 'max:15', 'unique:suppliers,contact'],
             'email' => ['required', 'email', 'string', 'unique:suppliers,email'],
-            'phone' => ['required', 'string', 'min:10', 'max:15'],
+            'phone' => ['required', 'string', 'min:10', 'max:15', 'unique:suppliers,phone'],
             'website' => ['nullable', 'url', 'string'],
             'main_address' => ['required', 'string'],
             'optional_address' => ['nullable', 'string'],

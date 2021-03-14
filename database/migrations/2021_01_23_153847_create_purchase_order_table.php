@@ -16,7 +16,7 @@ class CreatePurchaseOrderTable extends Migration
         Schema::create('purchase_order', function (Blueprint $table) {
             $table->id();
             $table->string('ordered_by');
-            $table->foreignId('supplier_id');
+            $table->foreignId('supplier_id')->index();
             $table->string('status')->default('Pending');
             $table->unsignedInteger('total_received_quantity')->default(0);
             $table->unsignedInteger('total_ordered_quantity')->default(0);

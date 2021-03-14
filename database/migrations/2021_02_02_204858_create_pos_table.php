@@ -16,14 +16,9 @@ class CreatePosTable extends Migration
         Schema::create('pos', function (Blueprint $table) {
             $table->id();
             $table->string('cashier');
-            $table->foreignId('customer_id')->nullable();
+            $table->foreignId('customer_id')->index();
             $table->char('status', 20)->default('Pending');
             $table->timestamps();
-
-            $table->foreign('customer_id')
-                    ->references('id')
-                    ->on('customers')
-                    ->nullOnDelete();
         });
 
         Schema::create('pos_details', function (Blueprint $table) {

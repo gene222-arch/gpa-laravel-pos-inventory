@@ -15,18 +15,18 @@ class CreateSalesTable extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cashier_id');
-            $table->foreignId('customer_id');
-            $table->foreignId('pos_id');
+            $table->foreignId('cashier_id')->index();
+            $table->foreignId('customer_id')->index();
+            $table->foreignId('pos_id')->index();
             $table->string('payment_type');
             $table->timestamps();
         });
 
         Schema::create('sales_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sales_id');
-            $table->foreignId('pos_details_id');
-            $table->foreignId('product_id');
+            $table->foreignId('sales_id')->index();
+            $table->foreignId('pos_details_id')->index();
+            $table->foreignId('product_id')->index();
             $table->unsignedInteger('quantity')->default(1);
             $table->unsignedDouble('price', 20, 2)->default(0.00);
             $table->char('unit_of_measurement', 20)->default('each');

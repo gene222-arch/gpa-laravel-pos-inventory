@@ -15,8 +15,8 @@ class CreateReceivedStocksTable extends Migration
     {
         Schema::create('received_stocks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('purchase_order_id');
-            $table->foreignId('supplier_id');
+            $table->foreignId('purchase_order_id')->index();
+            $table->foreignId('supplier_id')->index();
             $table->timestamps();
 
             $table->foreign('purchase_order_id')
@@ -32,8 +32,8 @@ class CreateReceivedStocksTable extends Migration
 
         Schema::create('received_stock_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('received_stock_id');
-            $table->foreignId('purchase_order_details_id');
+            $table->foreignId('received_stock_id')->index();
+            $table->foreignId('purchase_order_details_id')->index();
             $table->foreignId('product_id')->nullable();
             $table->unsignedInteger('received_quantity');
             $table->timestamps();

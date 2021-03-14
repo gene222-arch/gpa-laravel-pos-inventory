@@ -15,8 +15,8 @@ class CreateSalesReturnsTable extends Migration
     {
         Schema::create('sales_returns', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id');
-            $table->foreignId('pos_id');
+            $table->foreignId('user_id')->index();
+            $table->foreignId('pos_id')->index();
             $table->timestamps();
 
             $table->foreign('pos_id')
@@ -27,7 +27,7 @@ class CreateSalesReturnsTable extends Migration
 
         Schema::create('sales_return_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sales_return_id');
+            $table->foreignId('sales_return_id')->index();
             $table->foreignId('pos_details_id');
             $table->foreignId('product_id');
             $table->string('defect');

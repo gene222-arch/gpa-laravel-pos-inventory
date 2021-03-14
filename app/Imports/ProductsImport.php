@@ -22,9 +22,9 @@ class ProductsImport implements ToModel, WithHeadingRow, WithUpserts, WithValida
     public function rules(): array
     {
         return [
-            'id' => ['required', 'integer'],
-            '*.sku' => ['required', 'alpha_num', 'min:1', 'max:13', 'unique:products,sku,' . $this->id],
-            '*.barcode' => ['required', 'alpha_num', 'min:1', 'max:13', 'unique:products,barcode,' . $this->id],
+            '*.id' => ['required', 'integer'],
+            '*.sku' => ['required', 'alpha_num', 'min:1', 'max:13', 'unique:products,sku'],
+            '*.barcode' => ['required', 'alpha_num', 'min:1', 'max:13', 'unique:products,barcode'],
             '*.product_description' => ['required', 'string', 'unique:products,name'],
             '*.category' => ['required', 'exists:categories,name'],
             '*.sold_by' => ['required', 'in:each,weight/volume'],
@@ -40,9 +40,20 @@ class ProductsImport implements ToModel, WithHeadingRow, WithUpserts, WithValida
     public function customValidationAttributes()
     {
         return [
-            'id' => 'product id',
+            '*.id' => 'product id',
             '*.product_description' => 'product description',
             '*.sold_by' => 'sold by',
+        ];
+    }
+
+
+    /**
+     * @return array
+     */
+    public function customValidationMessages()
+    {
+        return [
+            '*.category.exists' => 'The :attribute does not exist.',
         ];
     }
 

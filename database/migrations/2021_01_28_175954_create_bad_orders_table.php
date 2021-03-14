@@ -15,8 +15,8 @@ class CreateBadOrdersTable extends Migration
     {
         Schema::create('bad_orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id');
-            $table->foreignId('purchase_order_id');
+            $table->foreignId('user_id')->index();
+            $table->foreignId('purchase_order_id')->index();
             $table->char('status', 20)->default('Pending');
             $table->timestamps();
 
@@ -28,7 +28,7 @@ class CreateBadOrdersTable extends Migration
 
         Schema::create('bad_order_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('bad_order_id');
+            $table->foreignId('bad_order_id')->index();
             $table->foreignId('purchase_order_details_id')->nullable();
             $table->foreignId('product_id')->nullable();
             $table->string('defect');
