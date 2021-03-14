@@ -39,8 +39,8 @@ trait ReceiptServices
 
         $salesInfo = DB::table('sales')
             ->join('sales_details', 'sales_details.sales_id', '=', 'sales.id')
-            ->join('customers', 'customers.id', '=', 'sales.customer_id')
-            ->join('users', 'users.id', '=', 'sales.cashier_id')
+            ->leftJoin('customers', 'customers.id', '=', 'sales.customer_id')
+            ->leftJoin('users', 'users.id', '=', 'sales.cashier_id')
             ->selectRaw('
                 sales.id as id,
                 customers.name as customer,

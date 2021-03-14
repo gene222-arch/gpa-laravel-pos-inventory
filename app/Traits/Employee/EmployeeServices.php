@@ -80,7 +80,13 @@ trait EmployeeServices
 
     public function deleteEmployees(array $employeeIds)
     {
-        return Employee::whereIn('id', $employeeIds)->delete();
+        $employees = Employee::whereIn('id', $employeeIds);
+
+        $employeeEmails = $employees->get()->map->email->toArray();
+
+        User::whereIn('email', $employeeEmails)->delete();
+
+        return $employees->delete();
     }
 
 }
