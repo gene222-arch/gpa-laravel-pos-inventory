@@ -108,21 +108,15 @@ trait ReportsSummaryServices
                     SUM(pos_details.sub_total + pos_details.tax) -
                     SUM(pos_details.quantity * products.cost), 
                 2) as gross_profit,
-                FORMAT(SUM(pos_details.total) -
+                FORMAT(SUM(pos_details.total) - 
                 CASE
                     WHEN 
-                        pos.id = sales_returns.pos_id AND pos_details.product_id = sales_return_details.product_id
-                    THEN
-                        (
-                            SELECT
-                                SUM(sales_return_details.total)
-                            FROM
-                                sales_return_details
-                            WHERE
-                                sales_return_details.sales_return_id = sales_returns.id
-                        )
-                    ELSE 0
-                END, 2) as net_sales
+                        SUM(sales_return_details.total) IS NULL 
+                    THEN 
+                        0
+                    ELSE 
+                        SUM(sales_return_details.total)
+                END, 2) as net_sales 
             ')
             ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
             ->leftJoin('sales_returns', 'sales_returns.pos_id', '=', 'pos.id')
@@ -162,6 +156,8 @@ trait ReportsSummaryServices
                 pos.id as id,
                 pos.status as payment_type,
                 FORMAT(SUM(pos_details.sub_total + pos_details.tax), 2) as gross_sales, 
+                FORMAT(
+                    SUM(pos_details.discount) - 
                 CASE
                     WHEN 
                         SUM(sales_return_details.discount) IS NULL 
@@ -169,24 +165,16 @@ trait ReportsSummaryServices
                         0
                     ELSE 
                         FORMAT(SUM(sales_return_details.discount), 2)
-                END as sales_return,
-                FORMAT(SUM(pos_details.discount) - 
-                CASE
-                    WHEN 
-                        SUM(sales_return_details.discount) IS NULL 
-                    THEN 
-                        0
-                    ELSE 
-                        SUM(sales_return_details.discount)
                 END, 2) as discounts,
+                FORMAT(
                 CASE
                     WHEN 
                         SUM(sales_return_details.total) IS NULL 
                     THEN 
                         0
                     ELSE 
-                        FORMAT(SUM(sales_return_details.total), 2)
-                END as sales_return,
+                        SUM(sales_return_details.total)
+                END, 2) as sales_return,
                 FORMAT(SUM(pos_details.total) - 
                 CASE
                     WHEN 
@@ -198,8 +186,7 @@ trait ReportsSummaryServices
                 END, 2) as net_sales 
             ')
             ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
-            ->leftJoin('sales_returns', 'sales_returns.pos_id', '=', 'pos.id')
-            ->leftJoin('sales_return_details', 'sales_return_details.sales_return_id', '=', 'sales_returns.id')
+            ->leftJoin('sales_return_details', 'sales_return_details.pos_details_id', '=', 'pos_details.id')
             ->when($startDate, function($q, $startDate) {
                 return $q->whereDate('pos_details.created_at', '>=', $startDate);
             })
@@ -233,7 +220,8 @@ trait ReportsSummaryServices
                 users.id as id,
                 pos.cashier as cashier,
                 FORMAT(SUM(pos_details.sub_total + pos_details.tax), 2) as gross_sales, 
-                FORMAT(SUM(pos_details.discount) - 
+                FORMAT(
+                SUM(pos_details.discount) -
                 CASE
                     WHEN 
                         SUM(sales_return_details.discount) IS NULL 
@@ -262,14 +250,14 @@ trait ReportsSummaryServices
             ')
             ->join('users', 'users.name', '=', 'pos.cashier')
             ->join('pos_details', 'pos_details.pos_id', '=', 'pos.id')
-            ->leftJoin('sales_returns', 'sales_returns.pos_id', '=', 'pos.id')
-            ->leftJoin('sales_return_details', 'sales_return_details.sales_return_id', '=', 'sales_returns.id')
+            ->leftJoin('sales_return_details', 'sales_return_details.pos_details_id', '=', 'pos_details.id')
             ->when($startDate, function($q, $startDate) {
                 return $q->whereDate('pos_details.created_at', '>=', $startDate);
             })
             ->when($endDate, function ($q, $endDate) {
                 return $q->whereDate('pos_details.created_at', '<=', $endDate);
             })
+            ->whereNotNull('users.id')
             ->whereNotIn('pos.status', ['Cancelled', 'Pending'])
             ->groupBy('pos.cashier')
             ->orderByDesc('net_sales')
