@@ -78,6 +78,8 @@ trait PurchaseOrderHelpers
                                 'remaining_ordered_quantity'
                             ]);
 
+        $data = [];
+        
         foreach ($qtyFields as $qtyField)
         {
             $data[] = [

@@ -61,8 +61,8 @@ trait SalesReturnServices
                 products.name as product_description,
                 sales_return_details.defect as defect,
                 sales_return_details.quantity as quantity,
-                sales_return_details.price as price,
-                sales_return_details.total as total
+                FORMAT(sales_return_details.price, 2) as price,
+                FORMAT(sales_return_details.total, 2) as total
             ')
             ->join('products', 'products.id', '=', 'sales_return_details.product_id')
             ->where('sales_return_details.sales_return_id', '=', $salesReturnId)
@@ -95,7 +95,7 @@ trait SalesReturnServices
                 $salesReturn->posSalesReturnDetails()->attach($salesReturnDetails);
 
                 #update stocks
-                (new Stock())->updateBadOrderQtyOf($salesReturnDetails);
+                (new Stock())->stocksReturn($salesReturnDetails);
             });
         } catch (\Throwable $th) {
             return $th->getMessage();

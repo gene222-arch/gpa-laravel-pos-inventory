@@ -24,9 +24,9 @@ trait PurchaseOrderServices
                 DATE_FORMAT(purchase_order.purchase_order_date, '%M %d, %Y') as purchase_order_date,
                 purchase_order.status as status,
                 suppliers.name as supplier,
-                purchase_order.total_received_quantity as received,
+                SUM(purchase_order_details.received_quantity) as received,
                 DATE_FORMAT(purchase_order.expected_delivery_date, '%M %d, %Y') as expected_on,
-                purchase_order.total_ordered_quantity total_ordered_quantity
+                SUM(purchase_order_details.ordered_quantity) as  total_ordered_quantity
             ")
             ->leftJoin('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
             ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
@@ -123,6 +123,8 @@ trait PurchaseOrderServices
 
     public function getPurchaseOrder(int $purchaseOrderId)
     {
+        DB::statement('SET sql_mode="" ');
+
         $result = DB::table('purchase_order')
             ->selectRaw('
                 purchase_order.id,
@@ -132,12 +134,14 @@ trait PurchaseOrderServices
                 suppliers.id as supplier_id,
                 DATE_FORMAT(purchase_order.purchase_order_date, "%Y-%m-%d") as purchase_order_date,
                 DATE_FORMAT(purchase_order.expected_delivery_date, "%Y-%m-%d") as expected_delivery_date,
-                purchase_order.total_received_quantity,
-                purchase_order.total_ordered_quantity,
-                purchase_order.total_remaining_ordered_quantity
+                SUM(purchase_order_details.received_quantity) as total_received_quantity,
+                SUM(purchase_order_details.ordered_quantity) as total_ordered_quantity,
+                SUM(purchase_order_details.remaining_ordered_quantity) as total_remaining_ordered_quantity
             ')
+            ->join('purchase_order_details', 'purchase_order_details.purchase_order_id', '=', 'purchase_order.id')
             ->join('suppliers', 'suppliers.id', '=', 'purchase_order.supplier_id')
             ->where('purchase_order.id', '=', $purchaseOrderId)
+            ->groupBy('purchase_order.id')
             ->first();
 
         return $result ? $result : [];
@@ -176,6 +180,7 @@ trait PurchaseOrderServices
                 stocks.in_stock as in_stock,
                 purchase_order_details.cancelled_quantity as cancelled_quantity,
                 purchase_order_details.ordered_quantity as ordered_quantity,
+                purchase_order_details.remaining_ordered_quantity as remaining_ordered_quantity,
                 purchase_order_details.purchase_cost as purchase_cost,
                 stocks.incoming as incoming,
                 purchase_order_details.amount
@@ -396,9 +401,9 @@ trait PurchaseOrderServices
         try {
             DB::transaction(function () use($purchaseOrderId, $supplierId, $purchaseOrderDetails, $purchaseOrderDate, $expectedDeliveryDate)
             {
-                $totalOrderedQuantity = prepareMultiArraySum('ordered_quantity',
-                $purchaseOrderDetails
-                );
+                $totalOrderedQuantity = prepareMultiArraySum('ordered_quantity', $purchaseOrderDetails);
+
+                $productIds = array_map(fn($ar) => $ar['product_id'], $purchaseOrderDetails);
 
                 $poData = [
                     'supplier_id' => $supplierId,
@@ -413,6 +418,9 @@ trait PurchaseOrderServices
                     ->update($poData);
 
                 # Insert new data in `purchase_order_details` table
+
+                # Remove previous stocks
+                (new Stock())->updateIncomingStocksOf($productIds, false);
 
                 $data = [];
 
@@ -440,9 +448,7 @@ trait PurchaseOrderServices
                             'amount'
                     ]);
 
-                $productIds = array_map(fn($ar) => $ar['product_id'], $purchaseOrderDetails);
-
-                # Update `stocks` table ['incoming'] field
+                # Update new stocks
                 (new Stock())->updateIncomingStocksOf($productIds);
             });
         } catch (\Throwable $th) {

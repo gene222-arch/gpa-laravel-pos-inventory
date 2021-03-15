@@ -18,7 +18,7 @@ class LossDamageRequest extends BaseRequest
             'stockAdjustmentDetails' => ['required', 'array', 'min:1'],
             'stockAdjustmentDetails.*.stock_id' => ['required', 'integer', 'distinct', 'exists:stocks,id'],
             'stockAdjustmentDetails.*.removed_stock' => ['required', 'integer', 'min:1'],
-            'stockAdjustmentDetails.*.stock_after' => ['required', 'integer', 'min:1'],
+            'stockAdjustmentDetails.*.stock_after' => ['required', 'integer', 'min:0'],
             'stockAdjustmentDetails' => ['required', 'array', 'min:1']
         ];
     }

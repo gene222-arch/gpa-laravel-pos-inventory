@@ -17,7 +17,7 @@ class InventoryCountRequest extends BaseRequest
             'reason' => ['required', 'string', 'in:Inventory count'],
             'stockAdjustmentDetails' => ['required', 'array', 'min:1'],
             'stockAdjustmentDetails.*.stock_id' => ['required', 'integer', 'distinct', 'exists:stocks,id'],
-            'stockAdjustmentDetails.*.counted_stock' => ['required', 'integer', 'min:1'],
+            'stockAdjustmentDetails.*.counted_stock' => ['required', 'integer', 'min:0'],
             'stockAdjustmentDetails' => ['required', 'array', 'min:1']
         ];
     }

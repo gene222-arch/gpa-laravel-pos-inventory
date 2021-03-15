@@ -13,7 +13,7 @@ class CreateProductsTable extends Migration
      */
     public function up()
     {
-        $defaultImg = 'http://127.0.0.1:8000/storage/images/Products/product_default_img_1614450024.svg';
+        $defaultImg = 'http://127.0.0.1:8000/storage/images/Products/product_default_img.svg';
 
         Schema::create('products', function (Blueprint $table) use($defaultImg) {
             $table->id();

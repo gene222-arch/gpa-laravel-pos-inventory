@@ -280,6 +280,8 @@ trait DashboardServices
                     COUNT(id)
                 FROM 
                     customers
+                WHERE
+                    customers.id != 1 
             ) as total_no_of_customers
 
         ')

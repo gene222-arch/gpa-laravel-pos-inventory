@@ -121,6 +121,38 @@ trait StockServices
     }
 
 
+       /**
+     * Update record of ['stock_in'] from stocks table
+     * after purchase of order
+     *
+     * @param array $stockDetails
+     * @return boolean
+     */
+    public function stocksReturn(array $stockDetails): bool
+    {
+        $data = [];
+
+        foreach ($stockDetails as $stockDetail)
+        {
+            $data[] = [
+                'product_id' => $stockDetail['product_id'],
+                'in_stock' => $stockDetail['quantity']
+            ];
+        }
+
+        $uniqueBy = ['product_id'];
+
+        $update = [
+            'in_stock' => DB::raw('stocks.in_stock + values(in_stock)')
+        ];
+
+        return DB::table('stocks')
+                    ->upsert($data,
+                        $uniqueBy,
+                        $update);
+    }
+
+
     /**
      * Undocumented function
      *

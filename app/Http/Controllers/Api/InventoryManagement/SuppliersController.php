@@ -31,7 +31,7 @@ class SuppliersController extends Controller
      */
     public function index()
     {
-        $result = $this->supplier->all();
+        $result = $this->supplier->latest()->get();
         
         return !$result
             ? $this->success([], 'No Content', 204)
